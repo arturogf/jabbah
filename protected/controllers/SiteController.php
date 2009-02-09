@@ -58,7 +58,39 @@ class SiteController extends CController
 	
 	public function actionprofile()
 	{
+	//$reg=RegisterForm::model()->findByPk(4);
+	$reg=RegisterForm::model()->findByAttributes(array('username'=>yii::app()->user->name));
 	$profile = new ProfileForm;
+
+	// if the related profile is still empty
+	if ($reg->registration==NULL)
+	{
+		// populate the profile with basic user information
+		$profile->reg_id = $reg->id;
+		$profile->email = $reg->email;
+		$profile->firstname = $reg->firstname;
+		$profile->lastname = $reg->lastname;
+		$profile->username = $reg->username;
+		$profile->password = $reg->password;
+		$profile->password2 = $reg->password2;
+		$profile->update_date = new CDbExpression('NOW()');
+	}
+	else {
+		$dataprof=ProfileForm::model()->findByAttributes(array('reg_id'=>$reg->id));
+
+		$profile->age = $dataprof->age;
+		// hay un problema con los updates, crea perfiles diferentes...
+		$profile->id = $dataprof->id;
+		
+		$profile->reg_id = $reg->id;
+		$profile->email = $reg->email;
+		$profile->firstname = $reg->firstname;
+		$profile->lastname = $reg->lastname;
+		$profile->username = $reg->username;
+		$profile->password = $reg->password;
+		$profile->password2 = $reg->password2;
+		$profile->update_date = new CDbExpression('NOW()');
+	}
 		// collect user input data
 		if(isset($_POST['ProfileForm']))
 		{
@@ -69,6 +101,8 @@ class SiteController extends CController
 				$this->redirect(Yii::app()->user->returnUrl);
 			}
 		}
+	
+	
 		// renders the view file 'protected/views/site/profile.php'
 		// using the default layout 'protected/views/layouts/main.php'		
 		

@@ -6,9 +6,18 @@
  */
 class ProfileForm extends CActiveRecord {
 	
+	public $username;
+	public $password;
+	public $password2;
+	public $email;
+	public $firstname;
+	public $lastname;
 	public $reg_id;
 	public $sex;
+	public $age;
 	public $website;
+	public $create_date;
+	public $update_date;
 	
 	public static function model($className=__CLASS__)
     {
@@ -32,5 +41,4 @@ class ProfileForm extends CActiveRecord {
 	}
 	
 }
-
 ?>

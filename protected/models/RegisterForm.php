@@ -53,6 +53,9 @@ class RegisterForm extends CActiveRecord {
     	// Insert the related row in ProfileForm
 		$profile = new ProfileForm();
 		$profile->reg_id = $this->id;
+		// check that time() returns the server date, not the client date
+		$profile->create_date=time();
+		$profile->update_date=$profile->create_date;
 		$profile->save();
     }
 	

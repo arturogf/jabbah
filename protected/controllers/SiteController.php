@@ -60,11 +60,12 @@ class SiteController extends CController
 	{
 	//$reg=RegisterForm::model()->findByPk(4);
 	$reg=RegisterForm::model()->findByAttributes(array('username'=>yii::app()->user->name));
-	$profile = new ProfileForm;
+
 
 	// if the related profile is still empty
 	if ($reg->registration==NULL)
 	{
+		$profile = new ProfileForm;
 		// populate the profile with basic user information
 		$profile->reg_id = $reg->id;
 		$profile->email = $reg->email;
@@ -76,11 +77,7 @@ class SiteController extends CController
 		$profile->update_date = new CDbExpression('NOW()');
 	}
 	else {
-		$dataprof=ProfileForm::model()->findByAttributes(array('reg_id'=>$reg->id));
-
-		$profile->age = $dataprof->age;
-		// hay un problema con los updates, crea perfiles diferentes...
-		$profile->id = $dataprof->id;
+		$profile=ProfileForm::model()->findByAttributes(array('reg_id'=>$reg->id));
 		
 		$profile->reg_id = $reg->id;
 		$profile->email = $reg->email;

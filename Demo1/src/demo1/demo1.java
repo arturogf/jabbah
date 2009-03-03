@@ -171,10 +171,10 @@ public class demo1
        
 
         // position vertices nicely within JGraph component
-        //positionVertexAt(v1, 130, 40);
-        //positionVertexAt(v2, 60, 200);
-        //positionVertexAt(v3, 310, 230);
-        //positionVertexAt(v4, 380, 70);
+        positionVertexAt("S", 130, 40);
+        positionVertexAt("A1", 60, 200);
+        positionVertexAt("A2", 310, 230);
+        positionVertexAt("E", 680, 600);
 
         // that's all there is to it!...
     }

@@ -1,0 +1,55 @@
+1. Introduction
+---------------
+
+JGraph Layout Pro is the next generation of layout engine designed
+for optimal performance with the modern JGraph core. JGraph Layout Pro has
+a flexible and simple design, enabling you to use circular, tree,
+force-directed and hierachical layouts with ease in your JGraph application.
+Layout Pro comes with an example application that demonstrating features such
+as auto-layout, collapsing/expanding of grouped cells, graph morphing and
+selective layouting of sub-graphs.
+
+2. Documentation
+----------------
+
+An html application note is at doc/html.
+
+3. Requirements
+---------------
+
+JGraph for Java 1.4 requires a Java 1.4 or later compatible
+virtual machine for your operating system.
+Java 1.5.x is known to work correctly.
+
+Compiling JGraph Layout Pro requires Apache Ant, a platform
+independent build tool that uses Java for its command
+implementation.
+
+The most recent version of Java can be obtained from 
+http://java.sun.com/j2se/</ulink>. To install Java for Linux see
+http://java.sun.com/j2se/1.4.2/install-linux.html and
+http://home.bredband.no/gaulyk/java/tutorial/javaredhat.html.
+To install Java on Windows see
+http://java.sun.com/j2se/1.4.2/install-windows.html
+
+To obtain Ant go to http://ant.apache.org and select
+Binary Distributions of the left hand side navigation. Select the
+nearest mirror then download the compressed file appropriate for your
+platform (.zip for Windows and .tar.gz for UNIX). Then decompress the
+file into your selected directory path for the Ant binaries.
+
+4. Installation
+---------------
+
+JGraph Layout Pro comes as a self-extracting java file. If the
+.jar file association for .jar files is setup correctly, open the file
+in a window manager should start the installation. Otherwise, on the
+command line type:
+
+java -jar jgraphlayout-1.3.0.0-src.jar
+
+and the installation process will begin. You will be required to agree to
+the license under which the software is provided and to then select
+where to install the package.
+
+

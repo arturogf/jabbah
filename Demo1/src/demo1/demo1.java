@@ -81,6 +81,7 @@ import java.util.Map;
  * @author Barak Naveh
  * @since Aug 3, 2003
  */
+
 public class demo1
     extends JApplet
 {
@@ -128,12 +129,12 @@ public class demo1
     public void init()
     {
         // create a JGraphT graph
-        ListenableGraph<String, DefaultEdge> g =
-            new ListenableDirectedMultigraph<String, DefaultEdge>(
-                DefaultEdge.class);
+        ListenableDirectedWeightedGraph<String, MyWeightedEdge> g =
+            new ListenableDirectedWeightedGraph<String, MyWeightedEdge>(
+                MyWeightedEdge.class);
         /**/
         // create a visualization using JGraph, via an adapter
-        jgAdapter = new JGraphModelAdapter<String, DefaultEdge>(g);
+        jgAdapter = new JGraphModelAdapter<String, MyWeightedEdge>(g);
         
         g.addVertex("S");
         g.addVertex("A1");

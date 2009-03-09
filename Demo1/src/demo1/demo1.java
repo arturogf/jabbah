@@ -55,6 +55,25 @@ import org.jgrapht.graph.*;
 // resolve ambiguity
 import org.jgrapht.graph.DefaultEdge;
 
+import com.jgraph.layout.*;
+
+import com.jgraph.layout.tree.JGraphAbstractTreeLayout;
+import com.jgraph.layout.tree.JGraphTreeLayout;
+import com.jgraph.layout.tree.JGraphCompactTreeLayout;
+import com.jgraph.layout.tree.OrganizationalChart;
+
+import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
+import com.jgraph.layout.organic.JGraphOrganicLayout;
+import com.jgraph.layout.organic.JGraphSelfOrganizingOrganicLayout;
+import com.jgraph.layout.organic.JGraphFastOrganicLayout;
+import com.jgraph.layout.tree.JGraphRadialTreeLayout;
+import com.jgraph.layout.graph.JGraphSimpleLayout;
+import com.jgraph.layout.simple.SimpleGridLayout;
+
+
+
+
+import java.util.Map;
 
 /**
  * A demo applet that shows how to use JGraph to visualize JGraphT graphs.
@@ -67,9 +86,9 @@ public class demo1
 {
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final long serialVersionUID = 3256444702936019250L;
+    //private static final long serialVersionUID = 3256444702936019250L;
     private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
-    private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
+    private static final Dimension DEFAULT_SIZE = new Dimension(1200, 1200);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -87,14 +106,20 @@ public class demo1
     public static void main(String [] args)
     {
         demo1 applet = new demo1();
-        applet.init();
 
-        JFrame frame = new JFrame();
+        System.setProperty("sun.java2d.d3d", "false");
+
+
+        JFrame frame = new JFrame(JGraphLayout.VERSION);
         frame.getContentPane().add(applet);
         frame.setTitle("JGraphT Adapter to JGraph Demo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
+
+        frame.setSize(800, 600);
+        applet.init();
         frame.setVisible(true);
+
+
     }
 
     /**
@@ -106,75 +131,83 @@ public class demo1
         ListenableGraph<String, DefaultEdge> g =
             new ListenableDirectedMultigraph<String, DefaultEdge>(
                 DefaultEdge.class);
-
+        /**/
         // create a visualization using JGraph, via an adapter
         jgAdapter = new JGraphModelAdapter<String, DefaultEdge>(g);
-
-        JGraph jgraph = new JGraph(jgAdapter);
-
-        adjustDisplaySettings(jgraph);
-        getContentPane().add(jgraph);
-        resize(DEFAULT_SIZE);
-
-    
-
-        // add some sample data (graph manipulated via JGraphT)
-        /*g<String, DefaultEdge> g =
-            new Defaultg<String, DefaultEdge>
-            (DefaultEdge.class);*/
+        
         g.addVertex("S");
         g.addVertex("A1");
-        g.addVertex("AND_A2_A3");
+        g.addVertex("AND23");
         g.addVertex("A2");
         g.addVertex("A3");
         g.addVertex("A4");
-        g.addVertex("OR_A5_A6");
+        g.addVertex("OR56");
         g.addVertex("A5");
         g.addVertex("A6");
-        g.addVertex("MOR_A5_A6");
+        g.addVertex("MOR56");
         g.addVertex("A7");
         g.addVertex("A8");
-        g.addVertex("AND_A9_A10");
+        g.addVertex("AND910");
         g.addVertex("A9");
         g.addVertex("A10");
-        g.addVertex("MAND_A9_A10");
+        g.addVertex("MAND910");
         g.addVertex("A11");
-        g.addVertex("MAND_A2_A3");
+        g.addVertex("MAND23");
         g.addVertex("A12");
         g.addVertex("A13");
         g.addVertex("E");
 
         g.addEdge("S", "A1");
-        g.addEdge("A1", "AND_A2_A3");
-        g.addEdge("AND_A2_A3","A2");
-        g.addEdge("AND_A2_A3","A3");
-        g.addEdge("A3", "MAND_A2_A3");
+        g.addEdge("A1", "AND23");
+        g.addEdge("AND23","A2");
+        g.addEdge("AND23","A3");
+        g.addEdge("A3", "MAND23");
         g.addEdge("A2", "A4");
-        g.addEdge("A4", "OR_A5_A6");
-        g.addEdge("OR_A5_A6", "A5");
-        g.addEdge("OR_A5_A6", "A6");
-        g.addEdge("A5", "MOR_A5_A6");
-        g.addEdge("A6", "MOR_A5_A6");
-        g.addEdge("MOR_A5_A6","A7");
+        g.addEdge("A4", "OR56");
+        g.addEdge("OR56", "A5");
+        g.addEdge("OR56", "A6");
+        g.addEdge("A5", "MOR56");
+        g.addEdge("A6", "MOR56");
+        g.addEdge("MOR56","A7");
         g.addEdge("A7", "A8");
-        g.addEdge("A8", "AND_A9_A10");
-        g.addEdge("AND_A9_A10", "A9");
-        g.addEdge("AND_A9_A10", "A10");
-        g.addEdge("A9","MAND_A9_A10");
-        g.addEdge("A10","MAND_A9_A10");
-        g.addEdge("MAND_A9_A10", "A11");
-        g.addEdge("A11", "MAND_A2_A3");
-        g.addEdge("A13", "MAND_A2_A3");
-        g.addEdge("MAND_A2_A3", "A12");
+        g.addEdge("A8", "AND910");
+        g.addEdge("AND910", "A9");
+        g.addEdge("AND910", "A10");
+        g.addEdge("A9","MAND910");
+        g.addEdge("A10","MAND910");
+        g.addEdge("MAND910", "A11");
+        g.addEdge("A11", "MAND23");
+        g.addEdge("MAND23", "A12");
         g.addEdge("A12", "A13");
         g.addEdge("A13", "E");
+
+
+        JGraph jgraph = new JGraph(jgAdapter);
+
        
+        JGraphFacade facade = new JGraphFacade(jgraph); // Pass the facade the JGraph instance
+        JGraphTreeLayout layout = new JGraphTreeLayout(); // Create an instance of the appropriate layout
+
+        //layout.setOrientation(SwingConstants.WEST);
+
+        layout.run(facade); // Run the layout on the facade. Note that layouts do not implement the Runnable interface, to avoid confusion
+        Map nested = facade.createNestedMap(true, true); // Obtain a map of the esulting attribute changes from the facade
+        jgraph.getGraphLayoutCache().edit(nested); // Apply the results to
+        //the actual graph
+        //The method to obtain
+        /**/
+        adjustDisplaySettings(jgraph);
+        getContentPane().add(jgraph);
+        getContentPane().add(new JScrollPane(jgraph));
+        resize(DEFAULT_SIZE);
+
+
 
         // position vertices nicely within JGraph component
-        positionVertexAt("S", 130, 40);
+        /*positionVertexAt("S", 130, 40);
         positionVertexAt("A1", 60, 200);
         positionVertexAt("A2", 310, 230);
-        positionVertexAt("E", 680, 600);
+        positionVertexAt("E", 680, 600);*/
 
         // that's all there is to it!...
     }

@@ -181,7 +181,7 @@ public class demo1
         g.addEdge("MAND23", "A12");
         g.addEdge("A12", "A13");
         g.addEdge("A13", "E");
-
+        
 
         JGraph jgraph = new JGraph(jgAdapter);
 

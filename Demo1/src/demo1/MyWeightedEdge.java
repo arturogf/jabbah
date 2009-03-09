@@ -48,7 +48,7 @@ public class MyWeightedEdge extends DefaultEdge {
     /* override method setWeight */
     public void setWeight(double weight)
     {
-
+        this.weight = weight;
     }
 
     public String toString()

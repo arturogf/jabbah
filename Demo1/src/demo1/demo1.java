@@ -70,17 +70,7 @@ import com.jgraph.layout.tree.JGraphRadialTreeLayout;
 import com.jgraph.layout.graph.JGraphSimpleLayout;
 import com.jgraph.layout.simple.SimpleGridLayout;
 
-
-
-
 import java.util.Map;
-
-/**
- * A demo applet that shows how to use JGraph to visualize JGraphT graphs.
- *
- * @author Barak Naveh
- * @since Aug 3, 2003
- */
 
 public class demo1
     extends JApplet
@@ -96,6 +86,8 @@ public class demo1
     //
     private JGraphModelAdapter jgAdapter;
     private JGraphModelAdapter jgAdapter2;
+    private ListenableDirectedWeightedGraph<String, MyWeightedEdge> g_left;
+    private ListenableDirectedWeightedGraph<String, MyWeightedEdge> g_right;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -124,16 +116,10 @@ public class demo1
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void init()
+    // a method to build our example graph
+    private void buildMyGraph (ListenableDirectedWeightedGraph<String, MyWeightedEdge> g)
     {
-        // create a JGraphT graph
-        ListenableDirectedWeightedGraph<String, MyWeightedEdge> g =
-            new ListenableDirectedWeightedGraph<String, MyWeightedEdge>(
-                MyWeightedEdge.class);
-      
+
         g.addVertex("S");
         g.addVertex("A1");
         g.addVertex("AND23");
@@ -180,55 +166,65 @@ public class demo1
         g.addEdge("A12", "A13");
         g.addEdge("A13", "E");
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void init()
+    {
+        // create a JGraphT directed weighted graph, using a custom class MyWeightedEdge
+        g_left = new ListenableDirectedWeightedGraph<String, MyWeightedEdge>(
+                MyWeightedEdge.class);
+
+        // build or proof of concept graph
+        this.buildMyGraph(g_left);
+
         
-        // create visualization using JGraph, via an adapter
-        jgAdapter = new JGraphModelAdapter<String, MyWeightedEdge>(g);
-        jgAdapter2 = new JGraphModelAdapter<String, MyWeightedEdge>( (ListenableDirectedWeightedGraph<String, MyWeightedEdge>) g.clone());
-        
-        /* Creamos el jgraph izquierda y su layout asociado sobre el adapter que hemos usado para cada grafo*/
+        /* Create the left side jgraph and respective layout and JGraphModelAdapter */
+        jgAdapter = new JGraphModelAdapter<String, MyWeightedEdge>(g_left);
+
         JGraph jgraph = new JGraph(jgAdapter);      
-        JGraphFacade facade = new JGraphFacade(jgraph); // Pass the facade the JGraph instance
-        JGraphTreeLayout layout = new JGraphTreeLayout(); // Create an instance of the appropriate layout
+        JGraphFacade facade = new JGraphFacade(jgraph);
+        JGraphTreeLayout layout = new JGraphTreeLayout(); 
         //layout.setOrientation(SwingConstants.WEST);
-        layout.run(facade); // Run the layout on the facade. Note that layouts do not implement the Runnable interface, to avoid confusion
-        Map nested = facade.createNestedMap(true, true); // Obtain a map of the esulting attribute changes from the facade
+        layout.run(facade); 
+        Map nested = facade.createNestedMap(true, true); 
         jgraph.getGraphLayoutCache().edit(nested); 
         
-         /* Creamos el jgraph derecha y su layout asociado sobre el adapter que hemos usado para cada grafo*/
-        JGraph jgraph2 = new JGraph(jgAdapter2);      
-        JGraphFacade facade2 = new JGraphFacade(jgraph2); // Pass the facade the JGraph instance
-        JGraphCompactTreeLayout layout2 = new JGraphCompactTreeLayout(); // Create an instance of the appropriate layout
+        /* Create the left side jgraph and respective layout and JGraphModelAdapter,
+        using a clone of g */
+
+        // this must be changed in the future, just to show...
+        g_right =  (ListenableDirectedWeightedGraph<String, MyWeightedEdge>) g_left.clone();
+        
+        jgAdapter2 = new JGraphModelAdapter<String, MyWeightedEdge>(g_right);
+
+        JGraph jgraph2 = new JGraph(jgAdapter2);
+        JGraphFacade facade2 = new JGraphFacade(jgraph2); 
+        JGraphCompactTreeLayout layout2 = new JGraphCompactTreeLayout(); 
         //layout.setOrientation(SwingConstants.WEST);
-        layout2.run(facade2); // Run the layout on the facade. Note that layouts do not implement the Runnable interface, to avoid confusion
-        Map nested2 = facade2.createNestedMap(true, true); // Obtain a map of the esulting attribute changes from the facade
-        jgraph2.getGraphLayoutCache().edit(nested2); // Apply the results to
+        layout2.run(facade2); 
+        Map nested2 = facade2.createNestedMap(true, true); 
+        jgraph2.getGraphLayoutCache().edit(nested2); 
         
         
+        // adjust the settings for the graph
         adjustDisplaySettings(jgraph);
         adjustDisplaySettings(jgraph2);
-        /*JPanel jPanel1 = new JPanel();
-        JPanel jPanel2 = new JPanel();
-        
-        jPanel2.add(jgraph);*/
-        getContentPane().setLayout(new GridLayout(1,2));
-        //getContentPane().add(jPanel1);
-       // getContentPane().add(jPanel2);
 
-        getContentPane() . add(jgraph);
-        getContentPane() .add(jgraph2);
+        // set a 2 columns layout
+        getContentPane().setLayout(new GridLayout(1,2));
+  
+        // add the respective graphs (we must refresh the right side with each step 
+        getContentPane().add(jgraph);
+        getContentPane().add(jgraph2);
+
+        //getContentPane().add(new Button("Do a new step"));
+
         getContentPane().add(new JScrollPane(jgraph));
         getContentPane().add(new JScrollPane(jgraph2));
         resize(DEFAULT_SIZE);
-
-
-
-        // position vertices nicely within JGraph component
-        /*positionVertexAt("S", 130, 40);
-        positionVertexAt("A1", 60, 200);
-        positionVertexAt("A2", 310, 230);
-        positionVertexAt("E", 680, 600);*/
-
-        // that's all there is to it!...
     }
 
     private void adjustDisplaySettings(JGraph jg)

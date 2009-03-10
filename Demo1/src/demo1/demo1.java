@@ -95,6 +95,7 @@ public class demo1
 
     //
     private JGraphModelAdapter jgAdapter;
+    private JGraphModelAdapter jgAdapter2;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -132,10 +133,7 @@ public class demo1
         ListenableDirectedWeightedGraph<String, MyWeightedEdge> g =
             new ListenableDirectedWeightedGraph<String, MyWeightedEdge>(
                 MyWeightedEdge.class);
-        /**/
-        // create a visualization using JGraph, via an adapter
-        jgAdapter = new JGraphModelAdapter<String, MyWeightedEdge>(g);
-        
+      
         g.addVertex("S");
         g.addVertex("A1");
         g.addVertex("AND23");
@@ -181,25 +179,45 @@ public class demo1
         g.addEdge("MAND23", "A12");
         g.addEdge("A12", "A13");
         g.addEdge("A13", "E");
+
         
-
-        JGraph jgraph = new JGraph(jgAdapter);
-
-       
+        // create visualization using JGraph, via an adapter
+        jgAdapter = new JGraphModelAdapter<String, MyWeightedEdge>(g);
+        jgAdapter2 = new JGraphModelAdapter<String, MyWeightedEdge>( (ListenableDirectedWeightedGraph<String, MyWeightedEdge>) g.clone());
+        
+        /* Creamos el jgraph izquierda y su layout asociado sobre el adapter que hemos usado para cada grafo*/
+        JGraph jgraph = new JGraph(jgAdapter);      
         JGraphFacade facade = new JGraphFacade(jgraph); // Pass the facade the JGraph instance
         JGraphTreeLayout layout = new JGraphTreeLayout(); // Create an instance of the appropriate layout
-
         //layout.setOrientation(SwingConstants.WEST);
-
         layout.run(facade); // Run the layout on the facade. Note that layouts do not implement the Runnable interface, to avoid confusion
         Map nested = facade.createNestedMap(true, true); // Obtain a map of the esulting attribute changes from the facade
-        jgraph.getGraphLayoutCache().edit(nested); // Apply the results to
-        //the actual graph
-        //The method to obtain
-        /**/
+        jgraph.getGraphLayoutCache().edit(nested); 
+        
+         /* Creamos el jgraph derecha y su layout asociado sobre el adapter que hemos usado para cada grafo*/
+        JGraph jgraph2 = new JGraph(jgAdapter2);      
+        JGraphFacade facade2 = new JGraphFacade(jgraph2); // Pass the facade the JGraph instance
+        JGraphCompactTreeLayout layout2 = new JGraphCompactTreeLayout(); // Create an instance of the appropriate layout
+        //layout.setOrientation(SwingConstants.WEST);
+        layout2.run(facade2); // Run the layout on the facade. Note that layouts do not implement the Runnable interface, to avoid confusion
+        Map nested2 = facade2.createNestedMap(true, true); // Obtain a map of the esulting attribute changes from the facade
+        jgraph2.getGraphLayoutCache().edit(nested2); // Apply the results to
+        
+        
         adjustDisplaySettings(jgraph);
-        getContentPane().add(jgraph);
+        adjustDisplaySettings(jgraph2);
+        /*JPanel jPanel1 = new JPanel();
+        JPanel jPanel2 = new JPanel();
+        
+        jPanel2.add(jgraph);*/
+        getContentPane().setLayout(new GridLayout(1,2));
+        //getContentPane().add(jPanel1);
+       // getContentPane().add(jPanel2);
+
+        getContentPane() . add(jgraph);
+        getContentPane() .add(jgraph2);
         getContentPane().add(new JScrollPane(jgraph));
+        getContentPane().add(new JScrollPane(jgraph2));
         resize(DEFAULT_SIZE);
 
 

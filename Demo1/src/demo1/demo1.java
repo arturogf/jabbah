@@ -142,29 +142,29 @@ public class demo1
         g.addVertex("A13");
         g.addVertex("E");
 
-        g.addEdge("S", "A1");
-        g.addEdge("A1", "AND23");
-        g.addEdge("AND23","A2");
-        g.addEdge("AND23","A3");
-        g.addEdge("A3", "MAND23");
-        g.addEdge("A2", "A4");
-        g.addEdge("A4", "OR56");
-        g.addEdge("OR56", "A5");
-        g.addEdge("OR56", "A6");
-        g.addEdge("A5", "MOR56");
-        g.addEdge("A6", "MOR56");
-        g.addEdge("MOR56","A7");
-        g.addEdge("A7", "A8");
-        g.addEdge("A8", "AND910");
-        g.addEdge("AND910", "A9");
-        g.addEdge("AND910", "A10");
-        g.addEdge("A9","MAND910");
-        g.addEdge("A10","MAND910");
-        g.addEdge("MAND910", "A11");
-        g.addEdge("A11", "MAND23");
-        g.addEdge("MAND23", "A12");
-        g.addEdge("A12", "A13");
-        g.addEdge("A13", "E");
+        g.addEdge("S", "A1", new MyWeightedEdge("S","A1","E1"));
+        g.addEdge("A1", "AND23", new MyWeightedEdge("A1","AND23","E2"));
+        g.addEdge("AND23","A2", new MyWeightedEdge("AND23","A2","E3"));
+        g.addEdge("AND23","A3",new MyWeightedEdge("AND23","A3","E4"));
+        g.addEdge("A3", "MAND23",new MyWeightedEdge("A3","MAND23","E5"));
+        g.addEdge("A2", "A4",new MyWeightedEdge("A2","A4","E6"));
+        g.addEdge("A4", "OR56",new MyWeightedEdge("A4","OR56","E7"));
+        g.addEdge("OR56", "A5",new MyWeightedEdge("OR56","A5","E8"));
+        g.addEdge("OR56", "A6",new MyWeightedEdge("OR56","A6","E9"));
+        g.addEdge("A5", "MOR56",new MyWeightedEdge("A5","MOR56","E10"));
+        g.addEdge("A6", "MOR56",new MyWeightedEdge("A6","MOR56","E11"));
+        g.addEdge("MOR56","A7",new MyWeightedEdge("MOR56","A7","E12"));
+        g.addEdge("A7", "A8",new MyWeightedEdge("A7","A8","E13"));
+        g.addEdge("A8", "AND910",new MyWeightedEdge("A8","AND910","E14"));
+        g.addEdge("AND910", "A9",new MyWeightedEdge("AND910","A9","E15"));
+        g.addEdge("AND910", "A10",new MyWeightedEdge("AND910","A10","E16"));
+        g.addEdge("A9","MAND910",new MyWeightedEdge("A9","MAND910","E17"));
+        g.addEdge("A10","MAND910",new MyWeightedEdge("A10","MAND910","E18"));
+        g.addEdge("MAND910", "A11",new MyWeightedEdge("MAND910","A11","E19"));
+        g.addEdge("A11", "MAND23",new MyWeightedEdge("A11","MAND23","E20"));
+        g.addEdge("MAND23", "A12",new MyWeightedEdge("MAND23","A12","E21"));
+        g.addEdge("A12", "A13",new MyWeightedEdge("A12","A13","E22"));
+        g.addEdge("A13", "E",new MyWeightedEdge("A13","E","E23"));
 
     }
 
@@ -197,6 +197,10 @@ public class demo1
 
         // this must be changed in the future, just to show...
         g_right =  (ListenableDirectedWeightedGraph<String, MyWeightedEdge>) g_left.clone();
+
+        
+        // call the ECA Rules Block Detection Algorithm
+        BlockDetection block = new BlockDetection(g_right);
         
         jgAdapter2 = new JGraphModelAdapter<String, MyWeightedEdge>(g_right);
 
@@ -207,8 +211,7 @@ public class demo1
         layout2.run(facade2); 
         Map nested2 = facade2.createNestedMap(true, true); 
         jgraph2.getGraphLayoutCache().edit(nested2); 
-        
-        
+                
         // adjust the settings for the graph
         adjustDisplaySettings(jgraph);
         adjustDisplaySettings(jgraph2);
@@ -217,8 +220,8 @@ public class demo1
         getContentPane().setLayout(new GridLayout(1,2));
   
         // add the respective graphs (we must refresh the right side with each step 
-        getContentPane().add(jgraph);
-        getContentPane().add(jgraph2);
+        //getContentPane().add(jgraph);
+        //getContentPane().add(jgraph2);
 
         //getContentPane().add(new Button("Do a new step"));
 
@@ -232,6 +235,7 @@ public class demo1
         jg.setPreferredSize(DEFAULT_SIZE);
 
         Color c = DEFAULT_BG_COLOR;
+        
         String colorStr = null;
 
         try {

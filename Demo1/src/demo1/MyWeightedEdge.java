@@ -35,14 +35,28 @@ import com.jgraph.layout.tree.JGraphRadialTreeLayout;
 import com.jgraph.layout.graph.JGraphSimpleLayout;
 import com.jgraph.layout.simple.SimpleGridLayout;
 
+import org.jgrapht.*;
+import org.jgrapht.graph.*;
+
 
 /**
  *
  * @author arturogf
  */
-public class MyWeightedEdge extends DefaultEdge {
+public class MyWeightedEdge<V> extends DefaultEdge {
 
-    double weight = WeightedGraph.DEFAULT_EDGE_WEIGHT;
+    double weight = 0.0;
+
+    private V source;
+    private V target;
+    private String label;
+
+    public MyWeightedEdge (V v1, V v2, String label)
+    {
+        this.source = v1;
+        this.target = v2;
+        this.label = label;
+    }
 
 
     /* override method setWeight */
@@ -51,9 +65,21 @@ public class MyWeightedEdge extends DefaultEdge {
         this.weight = weight;
     }
 
+    public Object getSource()
+    {
+        return this.source;
+    }
+
+    public Object getTarget()
+    {
+        return this.target;
+    }
+
     public String toString()
     {
-        return Double.toString(this.weight);
+        String w = this.label.concat(" ").concat(Double.toString(this.weight));
+    
+        return w;
     }
 
 }

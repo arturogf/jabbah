@@ -92,7 +92,7 @@ public class demo1
 
         JFrame frame = new JFrame(JGraphLayout.VERSION);
         frame.getContentPane().add(applet);
-        frame.setTitle("JGraphT Adapter to JGraph Demo");
+        frame.setTitle("ECA Rules Algorithm");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setSize(800, 600);
@@ -130,6 +130,7 @@ public class demo1
 
         MyWeightedVertex G3 = new MyWeightedVertex("G3"); // AND A9-A10
         MyWeightedVertex FG3 = new MyWeightedVertex("FIN G3"); // FIN OR A9-A10
+
 
         // add start, end and activities
         g.addVertex(S);
@@ -194,7 +195,6 @@ public class demo1
         // build or proof of concept graph
         this.buildMyGraph(g_left);
 
-        
         /* Create the left side jgraph and respective layout and JGraphModelAdapter */
         jgAdapter = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_left);
 
@@ -210,8 +210,11 @@ public class demo1
         using a clone of g */
 
         // this must be changed in the future, just to show...
-        g_right =  (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
+        g_right = new ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>(
+                MyWeightedEdge.class);
+        //g_right = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
 
+        this.buildMyGraph(g_right);
         
         // call the ECA Rules Block Detection Algorithm
         BlockDetection block = new BlockDetection(g_right);
@@ -285,6 +288,23 @@ public class demo1
         cellAttr.put(cell, attr);
         jgAdapter.edit(cellAttr, null, null, null);
     }
+
+     @SuppressWarnings("unchecked") 
+    private void setGatewayAttr(Object vertex)
+    {
+        DefaultGraphCell cell = jgAdapter.getVertexCell(vertex);
+        AttributeMap attr = cell.getAttributes();
+
+        Color c = GraphConstants.getForeground(attr);
+
+        GraphConstants.setForeground(attr, Color.GRAY);
+
+        // TODO: Clean up generics once JGraph goes generic
+        AttributeMap cellAttr = new AttributeMap();
+        cellAttr.put(cell, attr);
+        jgAdapter.edit(cellAttr, null, null, null);
+    }
+
 
     //~ Inner Classes ----------------------------------------------------------
 

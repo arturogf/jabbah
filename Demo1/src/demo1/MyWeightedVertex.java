@@ -48,6 +48,7 @@ public class MyWeightedVertex {
 
     String label;
     Double weight = 0.0;
+    boolean marked;
     
     public MyWeightedVertex (String l, double w)
     {

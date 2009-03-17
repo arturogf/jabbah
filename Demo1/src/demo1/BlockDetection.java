@@ -16,6 +16,9 @@ import org.jgrapht.Graphs;
 
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
+
+import java.util.Iterator;
 
 
 /**
@@ -34,18 +37,55 @@ public class BlockDetection {
 
     private void branchWater()
     {
-        for (MyWeightedEdge edge : G.edgeSet()) {
-            if (edge.getSource() == "S")
-                System.out.printf("%s is an enemy of %s\n", edge.getSource(), edge.getTarget());
+        boolean a2q = true;
+        
+        Vector queue = new Vector();
+        Vector w_list = new Vector();
+
+        Iterator i = this.N.iterator();
+
+        MyWeightedVertex S = (MyWeightedVertex) i.next();
+        S.setWeight(1.0);
+
+        queue.addElement(S);
+        w_list.addElement(1.0);
+
+        while (!queue.isEmpty())
+        {
+            MyWeightedVertex v = (MyWeightedVertex) queue.firstElement();
+            queue.removeElementAt(0);
+            v.marked = true;
+
+            for (MyWeightedVertex j : Graphs.successorListOf(G, v))
+            {
+                j.setWeight(j.weight+(v.weight/ Graphs.successorListOf(G, v).size()));
+
+                a2q = true;
+                // check that all predecesors are marked
+                for (MyWeightedVertex p : Graphs.predecessorListOf(G, j))
+                {
+                    if (!p.marked)
+                        a2q = false;
+                }
+
+                if (a2q)
+                    queue.addElement((MyWeightedVertex) j);
+            }
         }
+
+
+        /*for (MyWeightedEdge edge : G.vertexSet()) {
+            if (vertex.getSource() == "S")
+                System.out.printf("%s is an enemy of %s\n", edge.getSource(), edge.getTarget());
+        }*/
     } 
 
 
     public BlockDetection(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
         this.G = (ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge>) g;
-        this.N = G.vertexSet();
-        this.A = G.edgeSet();
+        this.N = g.vertexSet();
+        this.A = g.edgeSet();
 
         this.branchWater();
 

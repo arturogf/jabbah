@@ -53,22 +53,8 @@ import org.jgrapht.ext.*;
 import org.jgrapht.graph.*;
 
 // resolve ambiguity
-import org.jgrapht.graph.DefaultEdge;
-
 import com.jgraph.layout.*;
-
-import com.jgraph.layout.tree.JGraphAbstractTreeLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
-import com.jgraph.layout.tree.JGraphCompactTreeLayout;
-import com.jgraph.layout.tree.OrganizationalChart;
-
-import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
-import com.jgraph.layout.organic.JGraphOrganicLayout;
-import com.jgraph.layout.organic.JGraphSelfOrganizingOrganicLayout;
-import com.jgraph.layout.organic.JGraphFastOrganicLayout;
-import com.jgraph.layout.tree.JGraphRadialTreeLayout;
-import com.jgraph.layout.graph.JGraphSimpleLayout;
-import com.jgraph.layout.simple.SimpleGridLayout;
 
 import java.util.Map;
 
@@ -86,8 +72,8 @@ public class demo1
     //
     private JGraphModelAdapter jgAdapter;
     private JGraphModelAdapter jgAdapter2;
-    private ListenableDirectedWeightedGraph<String, MyWeightedEdge> g_left;
-    private ListenableDirectedWeightedGraph<String, MyWeightedEdge> g_right;
+    private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_left;
+    private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_right;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -117,55 +103,83 @@ public class demo1
     }
 
     // a method to build our example graph
-    private void buildMyGraph (ListenableDirectedWeightedGraph<String, MyWeightedEdge> g)
+    private void buildMyGraph (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
 
-        g.addVertex("S");
-        g.addVertex("A1");
-        g.addVertex("AND23");
-        g.addVertex("A2");
-        g.addVertex("A3");
-        g.addVertex("A4");
-        g.addVertex("OR56");
-        g.addVertex("A5");
-        g.addVertex("A6");
-        g.addVertex("MOR56");
-        g.addVertex("A7");
-        g.addVertex("A8");
-        g.addVertex("AND910");
-        g.addVertex("A9");
-        g.addVertex("A10");
-        g.addVertex("MAND910");
-        g.addVertex("A11");
-        g.addVertex("MAND23");
-        g.addVertex("A12");
-        g.addVertex("A13");
-        g.addVertex("E");
+        MyWeightedVertex S = new MyWeightedVertex("S");
+        MyWeightedVertex A1 = new MyWeightedVertex("A1");
+        MyWeightedVertex A2 = new MyWeightedVertex("A2");
+        MyWeightedVertex A3 = new MyWeightedVertex("A3");
+        MyWeightedVertex A4 = new MyWeightedVertex("A4");
+        MyWeightedVertex A5 = new MyWeightedVertex("A5");
+        MyWeightedVertex A6 = new MyWeightedVertex("A6");
+        MyWeightedVertex A7 = new MyWeightedVertex("A7");
+        MyWeightedVertex A8 = new MyWeightedVertex("A8");
+        MyWeightedVertex A9 = new MyWeightedVertex("A9");
+        MyWeightedVertex A10 = new MyWeightedVertex("A10");
+        MyWeightedVertex A11 = new MyWeightedVertex("A11");
+        MyWeightedVertex A12 = new MyWeightedVertex("A12");
+        MyWeightedVertex A13 = new MyWeightedVertex("A13");
+        MyWeightedVertex E = new MyWeightedVertex("E");
 
-        g.addEdge("S", "A1", new MyWeightedEdge("S","A1","E1"));
-        g.addEdge("A1", "AND23", new MyWeightedEdge("A1","AND23","E2"));
-        g.addEdge("AND23","A2", new MyWeightedEdge("AND23","A2","E3"));
-        g.addEdge("AND23","A3",new MyWeightedEdge("AND23","A3","E4"));
-        g.addEdge("A3", "MAND23",new MyWeightedEdge("A3","MAND23","E5"));
-        g.addEdge("A2", "A4",new MyWeightedEdge("A2","A4","E6"));
-        g.addEdge("A4", "OR56",new MyWeightedEdge("A4","OR56","E7"));
-        g.addEdge("OR56", "A5",new MyWeightedEdge("OR56","A5","E8"));
-        g.addEdge("OR56", "A6",new MyWeightedEdge("OR56","A6","E9"));
-        g.addEdge("A5", "MOR56",new MyWeightedEdge("A5","MOR56","E10"));
-        g.addEdge("A6", "MOR56",new MyWeightedEdge("A6","MOR56","E11"));
-        g.addEdge("MOR56","A7",new MyWeightedEdge("MOR56","A7","E12"));
-        g.addEdge("A7", "A8",new MyWeightedEdge("A7","A8","E13"));
-        g.addEdge("A8", "AND910",new MyWeightedEdge("A8","AND910","E14"));
-        g.addEdge("AND910", "A9",new MyWeightedEdge("AND910","A9","E15"));
-        g.addEdge("AND910", "A10",new MyWeightedEdge("AND910","A10","E16"));
-        g.addEdge("A9","MAND910",new MyWeightedEdge("A9","MAND910","E17"));
-        g.addEdge("A10","MAND910",new MyWeightedEdge("A10","MAND910","E18"));
-        g.addEdge("MAND910", "A11",new MyWeightedEdge("MAND910","A11","E19"));
-        g.addEdge("A11", "MAND23",new MyWeightedEdge("A11","MAND23","E20"));
-        g.addEdge("MAND23", "A12",new MyWeightedEdge("MAND23","A12","E21"));
-        g.addEdge("A12", "A13",new MyWeightedEdge("A12","A13","E22"));
-        g.addEdge("A13", "E",new MyWeightedEdge("A13","E","E23"));
+        MyWeightedVertex G1 = new MyWeightedVertex("G1"); // AND A2-A3
+        MyWeightedVertex FG1 = new MyWeightedVertex("FIN G1"); // FIN AND A2-A3
 
+        MyWeightedVertex G2 = new MyWeightedVertex("G2"); // OR A5-A6
+        MyWeightedVertex FG2 = new MyWeightedVertex("FIN G2"); // FIN OR A5-A6
+
+        MyWeightedVertex G3 = new MyWeightedVertex("G3"); // AND A9-A10
+        MyWeightedVertex FG3 = new MyWeightedVertex("FIN G3"); // FIN OR A9-A10
+
+        // add start, end and activities
+        g.addVertex(S);
+        g.addVertex(A1);
+        g.addVertex(A2);
+        g.addVertex(A3);
+        g.addVertex(A4);
+        g.addVertex(A5);
+        g.addVertex(A6);
+        g.addVertex(A7);
+        g.addVertex(A8);
+        g.addVertex(A9);
+        g.addVertex(A10);
+        g.addVertex(A11);
+        g.addVertex(A12);
+        g.addVertex(A13);
+        g.addVertex(E);
+
+        // add gateways vertices
+        g.addVertex(G1);
+        g.addVertex(FG1);
+        g.addVertex(G2);
+        g.addVertex(FG2);
+        g.addVertex(G3);
+        g.addVertex(FG3);
+
+        // add edges 
+        g.addEdge(S,A1, new MyWeightedEdge(S,A1,"E1"));
+        g.addEdge(A1,G1, new MyWeightedEdge(A1,G1,"E2"));
+        g.addEdge(G1,A2, new MyWeightedEdge(G1,A2,"E3"));
+        g.addEdge(G1,A3, new MyWeightedEdge(G1,A3,"E4"));
+        g.addEdge(A3,FG1, new MyWeightedEdge(A3,FG1,"E5"));
+        g.addEdge(A2,A4, new MyWeightedEdge(A2,A4,"E6"));
+        g.addEdge(A4,G2, new MyWeightedEdge(A4,G2,"E7"));
+        g.addEdge(G2,A5, new MyWeightedEdge(G2,A5,"E8"));
+        g.addEdge(G2,A6, new MyWeightedEdge(G2,A6,"E9"));
+        g.addEdge(A5,FG2, new MyWeightedEdge(A5,FG2,"E10"));
+        g.addEdge(A6,FG2, new MyWeightedEdge(A6,FG2,"E11"));
+        g.addEdge(FG2,A7, new MyWeightedEdge(FG2,A7,"E12"));
+        g.addEdge(A7,A8, new MyWeightedEdge(A7,A8,"E13"));
+        g.addEdge(A8,G3, new MyWeightedEdge(A8,G3,"E14"));
+        g.addEdge(G3,A9, new MyWeightedEdge(G3,A9,"E15"));
+        g.addEdge(G3,A10, new MyWeightedEdge(G3,A10,"E16"));
+        g.addEdge(A9,FG3, new MyWeightedEdge(A9,FG3,"E17"));
+        g.addEdge(A10,FG3, new MyWeightedEdge(A10,FG3,"E18"));
+        g.addEdge(FG3,A11, new MyWeightedEdge(FG3,A11,"E19"));
+        g.addEdge(A11,FG1, new MyWeightedEdge(A11,FG1,"E20"));
+        g.addEdge(FG1,A12, new MyWeightedEdge(FG1,A12,"E21"));
+        g.addEdge(A12,A13, new MyWeightedEdge(A12,A13,"E22"));
+        g.addEdge(A13,E, new MyWeightedEdge(A13,E,"E23"));
     }
 
     /**
@@ -174,7 +188,7 @@ public class demo1
     public void init()
     {
         // create a JGraphT directed weighted graph, using a custom class MyWeightedEdge
-        g_left = new ListenableDirectedWeightedGraph<String, MyWeightedEdge>(
+        g_left = new ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>(
                 MyWeightedEdge.class);
 
         // build or proof of concept graph
@@ -182,7 +196,7 @@ public class demo1
 
         
         /* Create the left side jgraph and respective layout and JGraphModelAdapter */
-        jgAdapter = new JGraphModelAdapter<String, MyWeightedEdge>(g_left);
+        jgAdapter = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_left);
 
         JGraph jgraph = new JGraph(jgAdapter);      
         JGraphFacade facade = new JGraphFacade(jgraph);
@@ -196,17 +210,17 @@ public class demo1
         using a clone of g */
 
         // this must be changed in the future, just to show...
-        g_right =  (ListenableDirectedWeightedGraph<String, MyWeightedEdge>) g_left.clone();
+        g_right =  (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
 
         
         // call the ECA Rules Block Detection Algorithm
         BlockDetection block = new BlockDetection(g_right);
         
-        jgAdapter2 = new JGraphModelAdapter<String, MyWeightedEdge>(g_right);
+        jgAdapter2 = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_right);
 
         JGraph jgraph2 = new JGraph(jgAdapter2);
         JGraphFacade facade2 = new JGraphFacade(jgraph2); 
-        JGraphCompactTreeLayout layout2 = new JGraphCompactTreeLayout(); 
+        JGraphTreeLayout layout2 = new JGraphTreeLayout(); 
         //layout.setOrientation(SwingConstants.WEST);
         layout2.run(facade2); 
         Map nested2 = facade2.createNestedMap(true, true); 

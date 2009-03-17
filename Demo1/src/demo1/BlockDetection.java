@@ -5,7 +5,6 @@
 
 package demo1;
 
-
 import org.jgraph.*;
 import org.jgraph.graph.*;
 
@@ -28,22 +27,25 @@ import java.util.Set;
  */
 public class BlockDetection {
 
-    ListenableDirectedWeightedGraph <String, MyWeightedEdge> G;
+    ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge> G;
     Set N; // obtained with vertexSet()
     Set A; // obtained with edgeSet()
     Object S;
 
     private void branchWater()
     {
-
+        for (MyWeightedEdge edge : G.edgeSet()) {
+            if (edge.getSource() == "S")
+                System.out.printf("%s is an enemy of %s\n", edge.getSource(), edge.getTarget());
+        }
     } 
 
 
-    public BlockDetection(ListenableDirectedWeightedGraph<String, MyWeightedEdge> g)
+    public BlockDetection(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
-        this.G = (ListenableDirectedWeightedGraph <String, MyWeightedEdge>) g;
-        this.N = g.vertexSet();
-        this.A = g.edgeSet();
+        this.G = (ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge>) g;
+        this.N = G.vertexSet();
+        this.A = G.edgeSet();
 
         this.branchWater();
 
@@ -55,7 +57,7 @@ public class BlockDetection {
         for (int i=0; i< n.length ; i++)
         {
             System.out.println(n[i]);
-            Set s = g.outgoingEdgesOf(n[i].toString());
+            //Set s = g.outgoingEdgesOf(n[i].toString());
         }
 
          Object[] a = this.A.toArray();

@@ -31,9 +31,57 @@ import java.util.Iterator;
 public class BlockDetection {
 
     ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge> G;
+    ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge> out;
+
     Set N; // obtained with vertexSet()
     Set A; // obtained with edgeSet()
 
+    // constructor 
+    public BlockDetection(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
+    {
+
+        Vector serial, parallel = new Vector();
+
+        this.G = (ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge>) g;
+        this.N = g.vertexSet();
+        this.A = g.edgeSet();
+
+        this.branchWater();
+
+
+        parallel = this.ParallelBlockDetection();
+
+        if (parallel != null)
+        {
+            Iterator i = parallel.iterator();
+
+            while (i.hasNext())
+            {
+                System.out.println(i.next().toString());
+            }
+        }
+        else
+            System.out.println("PB nulllllll");
+
+
+
+        serial = this.SerialBlockDetection();
+
+        if (serial != null)
+        {
+            Iterator i = serial.iterator();
+
+            while (i.hasNext())
+            {
+                System.out.println(i.next().toString());
+            }
+        }
+        else
+            System.out.println("nulllllll");
+    }
+
+    // mark the nodes with weights, as if there was a pipe with 1.0 of water
+    // that goes from start node to end node
     private void branchWater()
     {
         boolean a2q = true;
@@ -93,10 +141,12 @@ public class BlockDetection {
         return min;
     }
 
-
+    // this function detects a serialblock in G, supposing that the min-w
+    // is found and this block size is > 1 node.
     private Vector SerialBlockDetection()
     {
         boolean LOOP = true;
+        boolean finish = false;
         Double min_weight = this.minWeight();
 
         Vector queue = new Vector();
@@ -105,7 +155,6 @@ public class BlockDetection {
         Iterator i = this.N.iterator();
 
         MyWeightedVertex S = (MyWeightedVertex) i.next();
-        S.setWeight(1.0);
 
         queue.addElement(S);
 
@@ -126,68 +175,86 @@ public class BlockDetection {
                  (G.outDegreeOf(v)== 1))
             {
                 LOOP = false;
-                SB.add(v);
+                SB.addElement(v);
+
+                while (!finish)
+                {
+                    for (MyWeightedVertex j : Graphs.successorListOf(G, v))
+                    {
+                        if (j.weight == v.weight)
+                            SB.addElement((MyWeightedVertex) j);
+                        else
+                            finish = true;
+                    }
+                }
+
+
+                //SB = this.SerialFrom(v);
             }
-            else    // Add the successors of v
-            {
+            else    // Add the successors of v to queue
                 for (MyWeightedVertex j : Graphs.successorListOf(G, v))
                     queue.addElement((MyWeightedVertex) j);
-            }
         }
 
-        return SB;
+        if (SB.size() > 1)
+            return SB;
+        else
+            return null;
     }
 
-
-    public BlockDetection(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
+    // this function detects a serialblock in G, supposing that the min-w
+    // is found and this block size is > 1 node.
+    private Vector ParallelBlockDetection()
     {
+        boolean LOOP = true;
+        boolean finish = false;
+        Double min_weight = this.minWeight();
 
-        Vector serial = new Vector();
+        Vector queue = new Vector();
+        Vector PB = new Vector();
 
-        this.G = (ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge>) g;
-        this.N = g.vertexSet();
-        this.A = g.edgeSet();
+        Iterator i = this.N.iterator();
 
-        this.branchWater();
+        MyWeightedVertex S = (MyWeightedVertex) i.next();
 
-        serial = this.SerialBlockDetection();
+        queue.addElement(S);
 
-        if (serial != null)
+        while (LOOP)
         {
-            Iterator i = serial.iterator();
-
-            while (i.hasNext())
+            if (queue.isEmpty())
             {
-                System.out.println(i.next().toString());
+                return null;
             }
+
+            MyWeightedVertex v = (MyWeightedVertex) queue.firstElement();
+            queue.removeElementAt(0);
+
+            // once we recognize the node with min weight, and in-out degrees of 1
+            // we have to do the same operation and build the SerialBlock Detected
+            if (v.weight == min_weight)
+            {
+                LOOP = false;
+             
+                    MyWeightedVertex pre = Graphs.predecessorListOf(G, v).get(0);
+                    for (MyWeightedVertex j : Graphs.successorListOf(G, pre))
+                            PB.addElement((MyWeightedVertex) j);    
+            }
+            else    // Add the successors of v to queue
+                for (MyWeightedVertex j : Graphs.successorListOf(G, v))
+                    queue.addElement((MyWeightedVertex) j);
+        }
+
+        if (PB.size() > 1)
+        {
+            MyWeightedVertex j = (MyWeightedVertex) PB.get(0);
+            PB.add(0,Graphs.predecessorListOf(G, j).get(0));
+            PB.addElement(Graphs.successorListOf(G, j).get(0));
+            return PB;
         }
         else
-                System.out.println("nulllllll");
-
-
-
-
-        /*Object[] n = this.N.toArray();
-        
-        System.out.println("Nodos:");
-
-        for (int i=0; i< n.length ; i++)
-        {
-            System.out.println(n[i]);
-            //Set s = g.outgoingEdgesOf(n[i].toString());
-        }
-
-         Object[] a = this.A.toArray();
-
-        System.out.println("Aristas:");
-
-        for (int i=0; i< a.length ; i++)
-        {
-            System.out.println(a[i]);
-        }
-        */
-
-        
+            return null;
     }
 
+
+    
 }

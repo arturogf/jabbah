@@ -37,6 +37,7 @@ import com.jgraph.layout.tree.JGraphRadialTreeLayout;
 import com.jgraph.layout.graph.JGraphSimpleLayout;
 import com.jgraph.layout.simple.SimpleGridLayout;
 
+import java.util.Vector;
 import org.jgrapht.*;
 import org.jgrapht.graph.*;
 
@@ -49,7 +50,9 @@ public class MyWeightedVertex {
     String label;
     Double weight = 0.0;
     boolean marked;
-    
+    int type = 0; // 0 - normal, 1 - SB, 2 - PB
+    Vector block = null;
+
     public MyWeightedVertex (String l, double w)
     {
         this.label = l;
@@ -74,6 +77,11 @@ public class MyWeightedVertex {
     public String toString()
     {
         return this.label.concat(" ").concat(this.weight.toString());
+    }
+
+    public void setBlock(Vector v)
+    {
+        this.block = v;
     }
 
 }

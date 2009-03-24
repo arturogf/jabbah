@@ -2,16 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package demo1;
 
 import java.util.ArrayList;
-import org.jgraph.*;
-import org.jgraph.graph.*;
 
-
-import org.jgrapht.*;
-import org.jgrapht.ext.*;
 import org.jgrapht.graph.*;
 import org.jgrapht.Graphs;
 
@@ -21,35 +15,41 @@ import java.util.Vector;
 
 import java.util.Iterator;
 
-
 /**
+ * Computes the ECA Rules block detection algorithm.
+ * It is composed of the four steps, implemented as private methods of
+ * the class, that are executed respectively in the class constructor.
  *
- * @author arturogf
- * This class computes the ECA Rules algorithm.
- * It is composed of the five steps, implemented as private methods of
- * the class
+ * @author arturogf@ugr.es
  */
-public class BlockDetection {
+public class BlockDetection
+{
 
-    ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge> G;
-    ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge> out;
+    ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G;
+    Set N; // Set of vertices
+    private static int pb_index = 1; // index for parallel blocks nodes
+    private static int sb_index = 1;    // index for serial blocks nodes
 
-    Set N; // obtained with vertexSet()
-
-    // constructor 
+    /**
+     * Execute the ECA Rules Block Detection algorithm over the graph
+     * passed as parameters, and change it to a hierarchical tree representation
+     *
+     * @param g  the graph to analize, given as a ListenableDirectedWeightedGraph.
+     */
     public BlockDetection(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
 
         Vector serial, parallel = new Vector();
 
-        int size;
 
-        this.G = (ListenableDirectedWeightedGraph <MyWeightedVertex, MyWeightedEdge>) g;
+        this.G = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g;
         this.N = G.vertexSet();
 
         this.branchWater();
 
-        while ((size = G.vertexSet().size()) != 1)
+        // consecutive serial and parallel block detection, searching for
+        // the most inner block until we have only one node (root) in G
+        while (G.vertexSet().size() != 1)
         {
             serial = this.SerialBlockDetection();
 
@@ -59,70 +59,141 @@ public class BlockDetection {
 
                 if (parallel == null)
                 {
-                    System.out.print("WARNING!!!: serial y parallel devolvieron null");
-                }
-                else
+                    System.out.print("WARNING!!!: serial and parallel block " +
+                            "detection were unsucessful!");
+                } else
                 {
-                    // si encontramos un bloque paralelo, lo sustituímos por un nodo PB
-                    MyWeightedVertex pb = new MyWeightedVertex("PB",0);
-                    G.addVertex(pb);
-                    pb.type = 2;
-                    pb.block = parallel;
-                    MyWeightedVertex first = (MyWeightedVertex) parallel.firstElement();
-                    MyWeightedVertex last = (MyWeightedVertex) parallel.lastElement();
-
-                    pb.setWeight(first.weight);
-
-                    for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))
-                    {
-                        G.addEdge(pre, pb, new MyWeightedEdge(pre,pb,""));
-                    }
-
-                    for (MyWeightedVertex suc : Graphs.successorListOf(G, last))
-                    {
-                        G.addEdge(pb, suc, new MyWeightedEdge(pb,suc,""));
-                    }
-
-                    G.removeAllVertices(parallel);
+                    this.replaceNodesWithPB(parallel);
                 }
-            }
-            else
+            } else
             {
-            // si encontramos un bloque serie, lo sustituímos por un nodo SB
-                    MyWeightedVertex sb = new MyWeightedVertex("sB",0);
-                    G.addVertex(sb);
-                    sb.type = 1;
-                    sb.block = serial;
-                    MyWeightedVertex first = (MyWeightedVertex) serial.firstElement();
-                    MyWeightedVertex last = (MyWeightedVertex) serial.lastElement();
-
-                    sb.setWeight(first.weight);
-
-                    for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))
-                    {
-                        G.addEdge(pre, sb, new MyWeightedEdge(pre,sb,""));
-                    }
-
-                    for (MyWeightedVertex suc : Graphs.successorListOf(G, last))
-                    {
-                        G.addEdge(sb, suc, new MyWeightedEdge(sb,suc,""));
-                    }
-
-                    G.removeAllVertices(serial);
-
-
+                this.replaceNodesWithSB(serial);
             }
         }
+
+        // at this point, G has size = 1, so we can rebuild the tree
+        // using the internal "block" Vector found at MyWeightedVertex class
+        MyWeightedVertex root_node = G.vertexSet().iterator().next();
+        this.rebuildTree(root_node);
+    }
+
+    /**
+     * Creates a new PB node (type = 2), hooks it with predecessor and succesors and
+     * removes the vertices found in Vector v
+     *
+     * @param v  a Vector containing the nodes to be replaced with a new PB node
+     */
+    private void replaceNodesWithPB(Vector v)
+    {
+        // if a parallel block was detected, substitute it with
+        // a new PB node
+        MyWeightedVertex pb = new MyWeightedVertex("PB" + this.pb_index, 0);
+        G.addVertex(pb);
+        pb.type = 2;
+        pb.block = v;
+        MyWeightedVertex first = (MyWeightedVertex) v.firstElement();
+        MyWeightedVertex last = (MyWeightedVertex) v.lastElement();
+
+        pb.setWeight(first.weight);
+
+        // hook the new node with previous predecessors and sucessors
+        for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))
+        {
+            G.addEdge(pre, pb, new MyWeightedEdge(pre, pb, ""));
+        }
+
+        for (MyWeightedVertex suc : Graphs.successorListOf(G, last))
+        {
+            G.addEdge(pb, suc, new MyWeightedEdge(pb, suc, ""));
+        }
+        // remove all vertices from G that are not in vector "parallel"
+        G.removeAllVertices(v);
+
+        this.pb_index = this.pb_index + 1;
+    }
+
+
+    /**
+     * Creates a new SB node (type = 1), hooks it with predecessor and succesors and
+     * removes the vertices found in Vector v
+     *
+     * @param v  a Vector containing the nodes to be replaced with a new SB node
+     */
+    private void replaceNodesWithSB(Vector v)
+    {
+        // if a serial block was detected, we substitute it by a new SB node
+        MyWeightedVertex sb = new MyWeightedVertex("SB" + this.sb_index, 0);
+        G.addVertex(sb);
+        sb.type = 1;
+        sb.block = v;
+        MyWeightedVertex first = (MyWeightedVertex) v.firstElement();
+        MyWeightedVertex last = (MyWeightedVertex) v.lastElement();
+
+        sb.setWeight(first.weight);
+
+        // hook the new node with previous predecessors and sucessors
+        for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))
+        {
+            G.addEdge(pre, sb, new MyWeightedEdge(pre, sb, ""));
+        }
+
+        for (MyWeightedVertex suc : Graphs.successorListOf(G, last))
+        {
+            G.addEdge(sb, suc, new MyWeightedEdge(sb, suc, ""));
+        }
+        // remove all vertices from G that are not in vector "serial"
+        G.removeAllVertices(v);
+
+        this.sb_index = this.sb_index + 1;
 
     }
 
 
-    // mark the nodes with weights, as if there was a pipe with 1.0 of water
-    // that goes from start node to end node
+    /**
+     * Rebuilds the graph as a tree of the blocks (serial, parallel) detected
+     * previously in BlockDetection.
+     *
+     * @param j  the root Vertex from which we rebuild the hierarchical tree
+     */
+    private void rebuildTree(MyWeightedVertex j)
+    {
+        // normal nodes are not explored
+        if (j.type == 0)
+        {
+            return;
+        }
+
+        // iterate the respective j block nodes
+        Iterator i = j.block.iterator();
+        while (i.hasNext())
+        {
+            MyWeightedVertex y = (MyWeightedVertex) i.next();
+
+            // gateways nodes are not shown
+            if (y.type != 3)
+            {
+                G.addVertex(y);
+                G.addEdge(j, y, new MyWeightedEdge(j, y, ""));
+                if (y.type != 0)
+                {
+                    this.rebuildTree(y);
+                }
+            }
+
+        }
+
+        return;
+    }
+
+    /**
+     * Mark the nodes with weights (0.0-1.0), as if there was a pipe with 1.0 
+     * of water that goes from start_node S to end_node E.
+     *
+     */
     private void branchWater()
     {
-        boolean a2q = true;
-        
+        boolean add_to_queue = true;
+
         Vector queue = new Vector();
         Vector w_list = new Vector();
 
@@ -142,44 +213,59 @@ public class BlockDetection {
 
             for (MyWeightedVertex j : Graphs.successorListOf(G, v))
             {
-                j.setWeight(j.weight + (v.weight/ Graphs.successorListOf(G, v).size()));
+                j.setWeight(j.weight + (v.weight / Graphs.successorListOf(G, v).size()));
 
-                a2q = true;
+                add_to_queue = true;
                 // check that all predecesors are marked
                 for (MyWeightedVertex p : Graphs.predecessorListOf(G, j))
                 {
                     if (!p.marked)
-                        a2q = false;
+                    {
+                        add_to_queue = false;
+                    }
                 }
 
-                if (a2q)
+                if (add_to_queue)
+                {
                     queue.addElement((MyWeightedVertex) j);
+                }
             }
         }
     }
-    // this function search for the min weight in N, the Vertex Set. It is
-    // used by the SerialBlockDetection and ParallelBlockDetection
 
+    /**
+     * Search the min weight in N, this graph Vertex Set. This min value will be
+     * used by the SerialBlockDetection and ParallelBlockDetection
+     *
+     * @return The minimum weight found in the graph Vertex Set
+     */
     private Double minWeight()
     {
         Double min = 1.0;
         Iterator i = this.N.iterator();
 
         MyWeightedVertex Node;
-        
+
         while (i.hasNext())
         {
-             Node = (MyWeightedVertex) i.next();
-             if (Node.weight < min)
+            Node = (MyWeightedVertex) i.next();
+            if (Node.weight < min)
+            {
                 min = Node.weight;
+            }
 
         }
-        
+
         return min;
     }
 
-    // this function detects a serialblock in G, supposing that the min-w
-    // is found and this block size is > 1 node.
+    /**
+     * Detects a serial block in G, supposing that the min-w is found and
+     * this block size is greater than 1 node.
+     *
+     * @return the vector containg the Vertex nodes that forms the Serial Block
+     *
+     */
     private Vector SerialBlockDetection()
     {
         MyWeightedVertex v;
@@ -187,10 +273,10 @@ public class BlockDetection {
         boolean LOOP = true;
         boolean finish = true;
         boolean continua = false;
-        
+
         Double min_weight = this.minWeight();
 
-        List<MyWeightedVertex> L;
+        List<MyWeightedVertex> successors;
 
         Vector queue = new Vector();
         Vector SB = new Vector();
@@ -207,15 +293,15 @@ public class BlockDetection {
             {
                 return null;
             }
-            
+
             v = (MyWeightedVertex) queue.firstElement();
             queue.removeElementAt(0);
 
-            // once we recognize the node with min weight, and in-out degrees of 1
-            // we have to do the same operation and build the SerialBlock Detected
-            if ( (v.weight.doubleValue() == min_weight.doubleValue()) &&
-                 (G.inDegreeOf(v) <= 1) &&
-                 (G.outDegreeOf(v)== 1))
+            // once we recognize the node with min weight, and in-out degrees are 1
+            // we have to do the same operation and build the SerialBlock detected
+            if ((v.weight.doubleValue() == min_weight.doubleValue()) &&
+                    (G.inDegreeOf(v) <= 1) &&
+                    (G.outDegreeOf(v) == 1))
             {
                 LOOP = false;
                 SB.addElement(v);
@@ -223,10 +309,10 @@ public class BlockDetection {
                 while (finish)
                 {
                     continua = false;
-                    L = new ArrayList<MyWeightedVertex>();
-                    L = Graphs.successorListOf(G, v);
+                    successors = new ArrayList<MyWeightedVertex>();
+                    successors = Graphs.successorListOf(G, v);
 
-                    for (MyWeightedVertex j : L)
+                    for (MyWeightedVertex j : successors)
                     {
                         if (j.weight.equals(v.weight))
                         {
@@ -234,35 +320,43 @@ public class BlockDetection {
                             continua = true;
                         }
                     }
-                    
+
                     if (continua == false)
                     {
                         finish = false;
-                    }
-                    else
+                    } else
+                    {
                         v = (MyWeightedVertex) SB.lastElement();
+                    }
                 }
-
-
-                //SB = this.SerialFrom(v);
-            }
-            else    // Add the successors of v to queue
+            } else // Add the successors of v to queue
+            {
                 for (MyWeightedVertex j : Graphs.successorListOf(G, v))
+                {
                     queue.addElement((MyWeightedVertex) j);
+                }
+            }
         }
 
         if (SB.size() > 1)
+        {
             return SB;
-        else
+        } else
+        {
             return null;
+        }
     }
 
-    // this function detects a serialblock in G, supposing that the min-w
-    // is found and this block size is > 1 node.
+    /**
+     * Detects a Parallel Block in G, supposing that the min-w is found
+     * and this block size is greater than 1 node.
+     *
+     * @return the vector containg the Vertex nodes that forms the Parallel Block
+     * 
+     */
     private Vector ParallelBlockDetection()
     {
         boolean LOOP = true;
-        boolean finish = false;
         Double min_weight = this.minWeight();
 
         Vector queue = new Vector();
@@ -289,27 +383,30 @@ public class BlockDetection {
             if (v.weight.doubleValue() == min_weight.doubleValue())
             {
                 LOOP = false;
-             
-                    MyWeightedVertex pre = Graphs.predecessorListOf(G, v).get(0);
-                    for (MyWeightedVertex j : Graphs.successorListOf(G, pre))
-                            PB.addElement((MyWeightedVertex) j);    
-            }
-            else    // Add the successors of v to queue
+
+                MyWeightedVertex pre = Graphs.predecessorListOf(G, v).get(0);
+                for (MyWeightedVertex j : Graphs.successorListOf(G, pre))
+                {
+                    PB.addElement((MyWeightedVertex) j);
+                }
+            } else // Add the successors of v to queue
+            {
                 for (MyWeightedVertex j : Graphs.successorListOf(G, v))
+                {
                     queue.addElement((MyWeightedVertex) j);
+                }
+            }
         }
 
         if (PB.size() > 1)
         {
             MyWeightedVertex j = (MyWeightedVertex) PB.get(0);
-            PB.add(0,Graphs.predecessorListOf(G, j).get(0));
+            PB.add(0, Graphs.predecessorListOf(G, j).get(0));
             PB.addElement(Graphs.successorListOf(G, j).get(0));
             return PB;
-        }
-        else
+        } else
+        {
             return null;
+        }
     }
-
-
-    
 }

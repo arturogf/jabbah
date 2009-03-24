@@ -54,12 +54,13 @@ import org.jgrapht.graph.*;
 
 // resolve ambiguity
 import com.jgraph.layout.*;
+import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
 
 import java.util.Map;
 
 public class demo1
-    extends JApplet
+        extends JApplet
 {
     //~ Static fields/initializers ---------------------------------------------
 
@@ -76,14 +77,13 @@ public class demo1
     private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_right;
 
     //~ Methods ----------------------------------------------------------------
-
     /**
      * An alternative starting point for this demo, to also allow running this
      * applet as an application.
      *
      * @param args ignored.
      */
-    public static void main(String [] args)
+    public static void main(String[] args)
     {
         demo1 applet = new demo1();
 
@@ -103,7 +103,7 @@ public class demo1
     }
 
     // a method to build our example graph
-    private void buildMyGraph (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
+    private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
 
         MyWeightedVertex S = new MyWeightedVertex("S");
@@ -123,14 +123,18 @@ public class demo1
         MyWeightedVertex E = new MyWeightedVertex("E");
 
         MyWeightedVertex G1 = new MyWeightedVertex("G1"); // AND A2-A3
+        G1.type = 3;
         MyWeightedVertex FG1 = new MyWeightedVertex("FIN G1"); // FIN AND A2-A3
-
+        FG1.type = 3;
         MyWeightedVertex G2 = new MyWeightedVertex("G2"); // OR A5-A6
+        G2.type = 3;
         MyWeightedVertex FG2 = new MyWeightedVertex("FIN G2"); // FIN OR A5-A6
+        FG2.type = 3;
 
         MyWeightedVertex G3 = new MyWeightedVertex("G3"); // AND A9-A10
+        G3.type = 3;
         MyWeightedVertex FG3 = new MyWeightedVertex("FIN G3"); // FIN OR A9-A10
-
+        FG3.type = 3;
 
         // add start, end and activities
         g.addVertex(S);
@@ -158,29 +162,29 @@ public class demo1
         g.addVertex(FG3);
 
         // add edges 
-        g.addEdge(S,A1, new MyWeightedEdge(S,A1,"E1"));
-        g.addEdge(A1,G1, new MyWeightedEdge(A1,G1,"E2"));
-        g.addEdge(G1,A2, new MyWeightedEdge(G1,A2,"E3"));
-        g.addEdge(G1,A3, new MyWeightedEdge(G1,A3,"E4"));
-        g.addEdge(A3,FG1, new MyWeightedEdge(A3,FG1,"E5"));
-        g.addEdge(A2,A4, new MyWeightedEdge(A2,A4,"E6"));
-        g.addEdge(A4,G2, new MyWeightedEdge(A4,G2,"E7"));
-        g.addEdge(G2,A5, new MyWeightedEdge(G2,A5,"E8"));
-        g.addEdge(G2,A6, new MyWeightedEdge(G2,A6,"E9"));
-        g.addEdge(A5,FG2, new MyWeightedEdge(A5,FG2,"E10"));
-        g.addEdge(A6,FG2, new MyWeightedEdge(A6,FG2,"E11"));
-        g.addEdge(FG2,A7, new MyWeightedEdge(FG2,A7,"E12"));
-        g.addEdge(A7,A8, new MyWeightedEdge(A7,A8,"E13"));
-        g.addEdge(A8,G3, new MyWeightedEdge(A8,G3,"E14"));
-        g.addEdge(G3,A9, new MyWeightedEdge(G3,A9,"E15"));
-        g.addEdge(G3,A10, new MyWeightedEdge(G3,A10,"E16"));
-        g.addEdge(A9,FG3, new MyWeightedEdge(A9,FG3,"E17"));
-        g.addEdge(A10,FG3, new MyWeightedEdge(A10,FG3,"E18"));
-        g.addEdge(FG3,A11, new MyWeightedEdge(FG3,A11,"E19"));
-        g.addEdge(A11,FG1, new MyWeightedEdge(A11,FG1,"E20"));
-        g.addEdge(FG1,A12, new MyWeightedEdge(FG1,A12,"E21"));
-        g.addEdge(A12,A13, new MyWeightedEdge(A12,A13,"E22"));
-        g.addEdge(A13,E, new MyWeightedEdge(A13,E,"E23"));
+        g.addEdge(S, A1, new MyWeightedEdge(S, A1, "E1"));
+        g.addEdge(A1, G1, new MyWeightedEdge(A1, G1, "E2"));
+        g.addEdge(G1, A2, new MyWeightedEdge(G1, A2, "E3"));
+        g.addEdge(G1, A3, new MyWeightedEdge(G1, A3, "E4"));
+        g.addEdge(A3, FG1, new MyWeightedEdge(A3, FG1, "E5"));
+        g.addEdge(A2, A4, new MyWeightedEdge(A2, A4, "E6"));
+        g.addEdge(A4, G2, new MyWeightedEdge(A4, G2, "E7"));
+        g.addEdge(G2, A5, new MyWeightedEdge(G2, A5, "E8"));
+        g.addEdge(G2, A6, new MyWeightedEdge(G2, A6, "E9"));
+        g.addEdge(A5, FG2, new MyWeightedEdge(A5, FG2, "E10"));
+        g.addEdge(A6, FG2, new MyWeightedEdge(A6, FG2, "E11"));
+        g.addEdge(FG2, A7, new MyWeightedEdge(FG2, A7, "E12"));
+        g.addEdge(A7, A8, new MyWeightedEdge(A7, A8, "E13"));
+        g.addEdge(A8, G3, new MyWeightedEdge(A8, G3, "E14"));
+        g.addEdge(G3, A9, new MyWeightedEdge(G3, A9, "E15"));
+        g.addEdge(G3, A10, new MyWeightedEdge(G3, A10, "E16"));
+        g.addEdge(A9, FG3, new MyWeightedEdge(A9, FG3, "E17"));
+        g.addEdge(A10, FG3, new MyWeightedEdge(A10, FG3, "E18"));
+        g.addEdge(FG3, A11, new MyWeightedEdge(FG3, A11, "E19"));
+        g.addEdge(A11, FG1, new MyWeightedEdge(A11, FG1, "E20"));
+        g.addEdge(FG1, A12, new MyWeightedEdge(FG1, A12, "E21"));
+        g.addEdge(A12, A13, new MyWeightedEdge(A12, A13, "E22"));
+        g.addEdge(A13, E, new MyWeightedEdge(A13, E, "E23"));
     }
 
     /**
@@ -188,6 +192,7 @@ public class demo1
      */
     public void init()
     {
+
         // create a JGraphT directed weighted graph, using a custom class MyWeightedEdge
         g_left = new ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>(
                 MyWeightedEdge.class);
@@ -198,14 +203,19 @@ public class demo1
         /* Create the left side jgraph and respective layout and JGraphModelAdapter */
         jgAdapter = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_left);
 
-        JGraph jgraph = new JGraph(jgAdapter);      
+        // esto crea para un nodo determinado una serie de atributos
+        DefaultGraphCell cell = jgAdapter.getVertexCell(g_left.vertexSet().iterator().next());
+        AttributeMap attr = cell.getAttributes();
+        GraphConstants.setBackground(attr, Color.GRAY);
+
+        JGraph jgraph = new JGraph(jgAdapter);
         JGraphFacade facade = new JGraphFacade(jgraph);
-        JGraphTreeLayout layout = new JGraphTreeLayout(); 
+        JGraphTreeLayout layout = new JGraphTreeLayout();
         //layout.setOrientation(SwingConstants.WEST);
-        layout.run(facade); 
-        Map nested = facade.createNestedMap(true, true); 
-        jgraph.getGraphLayoutCache().edit(nested); 
-        
+        layout.run(facade);
+        Map nested = facade.createNestedMap(true, true);
+        jgraph.getGraphLayoutCache().edit(nested);
+
         /* Create the left side jgraph and respective layout and JGraphModelAdapter,
         using a clone of g */
 
@@ -215,36 +225,38 @@ public class demo1
         //g_right = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
 
         this.buildMyGraph(g_right);
-        
+
         // call the ECA Rules Block Detection Algorithm
         BlockDetection block = new BlockDetection(g_right);
-        
+
         jgAdapter2 = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_right);
 
         JGraph jgraph2 = new JGraph(jgAdapter2);
-        JGraphFacade facade2 = new JGraphFacade(jgraph2); 
-        JGraphTreeLayout layout2 = new JGraphTreeLayout(); 
-        //layout.setOrientation(SwingConstants.WEST);
-        layout2.run(facade2); 
-        Map nested2 = facade2.createNestedMap(true, true); 
-        jgraph2.getGraphLayoutCache().edit(nested2); 
-                
+        JGraphFacade facade2 = new JGraphFacade(jgraph2);
+        JGraphHierarchicalLayout layout2 = new JGraphHierarchicalLayout();
+        layout2.setOrientation(SwingConstants.NORTH);
+        layout2.run(facade2);
+        Map nested2 = facade2.createNestedMap(true, true);
+        jgraph2.getGraphLayoutCache().edit(nested2);
+
         // adjust the settings for the graph
         adjustDisplaySettings(jgraph);
         adjustDisplaySettings(jgraph2);
 
         // set a 2 columns layout
-        getContentPane().setLayout(new GridLayout(1,2));
-  
+        getContentPane().setLayout(new GridLayout(1, 2));
+
         // add the respective graphs (we must refresh the right side with each step 
         //getContentPane().add(jgraph);
         //getContentPane().add(jgraph2);
 
         //getContentPane().add(new Button("Do a new step"));
+        JScrollPane left = new JScrollPane(jgraph);
+        JScrollPane right = new JScrollPane(jgraph2);
 
-        getContentPane().add(new JScrollPane(jgraph));
-        getContentPane().add(new JScrollPane(jgraph2));
-        resize(DEFAULT_SIZE);
+        getContentPane().add(left);
+        getContentPane().add(right);
+    //resize(DEFAULT_SIZE);
     }
 
     private void adjustDisplaySettings(JGraph jg)
@@ -252,15 +264,18 @@ public class demo1
         jg.setPreferredSize(DEFAULT_SIZE);
 
         Color c = DEFAULT_BG_COLOR;
-        
+
         String colorStr = null;
 
-        try {
+        try
+        {
             colorStr = getParameter("bgcolor");
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
         }
 
-        if (colorStr != null) {
+        if (colorStr != null)
+        {
             c = Color.decode(colorStr);
         }
 
@@ -275,7 +290,7 @@ public class demo1
         Rectangle2D bounds = GraphConstants.getBounds(attr);
 
         Rectangle2D newBounds =
-            new Rectangle2D.Double(
+                new Rectangle2D.Double(
                 x,
                 y,
                 bounds.getWidth(),
@@ -289,7 +304,7 @@ public class demo1
         jgAdapter.edit(cellAttr, null, null, null);
     }
 
-     @SuppressWarnings("unchecked") 
+    @SuppressWarnings("unchecked")
     private void setGatewayAttr(Object vertex)
     {
         DefaultGraphCell cell = jgAdapter.getVertexCell(vertex);
@@ -307,14 +322,14 @@ public class demo1
 
 
     //~ Inner Classes ----------------------------------------------------------
-
     /**
      * a listenable directed multigraph that allows loops and parallel edges.
      */
     private static class ListenableDirectedMultigraph<V, E>
-        extends DefaultListenableGraph<V, E>
-        implements DirectedGraph<V, E>
+            extends DefaultListenableGraph<V, E>
+            implements DirectedGraph<V, E>
     {
+
         private static final long serialVersionUID = 1L;
 
         ListenableDirectedMultigraph(Class<E> edgeClass)

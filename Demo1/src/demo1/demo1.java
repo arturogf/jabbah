@@ -123,18 +123,18 @@ public class demo1
         MyWeightedVertex E = new MyWeightedVertex("E");
 
         MyWeightedVertex G1 = new MyWeightedVertex("G1"); // AND A2-A3
-        G1.type = 3;
+        G1.type = NodeType.GATEWAY;
         MyWeightedVertex FG1 = new MyWeightedVertex("FIN G1"); // FIN AND A2-A3
-        FG1.type = 3;
+        FG1.type = NodeType.GATEWAY;
         MyWeightedVertex G2 = new MyWeightedVertex("G2"); // OR A5-A6
-        G2.type = 3;
+        G2.type = NodeType.GATEWAY;
         MyWeightedVertex FG2 = new MyWeightedVertex("FIN G2"); // FIN OR A5-A6
-        FG2.type = 3;
+        FG2.type = NodeType.GATEWAY;
 
         MyWeightedVertex G3 = new MyWeightedVertex("G3"); // AND A9-A10
-        G3.type = 3;
+        G3.type = NodeType.GATEWAY;
         MyWeightedVertex FG3 = new MyWeightedVertex("FIN G3"); // FIN OR A9-A10
-        FG3.type = 3;
+        FG3.type = NodeType.GATEWAY;
 
         // add start, end and activities
         g.addVertex(S);
@@ -245,11 +245,7 @@ public class demo1
 
         // set a 2 columns layout
         getContentPane().setLayout(new GridLayout(1, 2));
-
-        // add the respective graphs (we must refresh the right side with each step 
-        //getContentPane().add(jgraph);
-        //getContentPane().add(jgraph2);
-
+     
         //getContentPane().add(new Button("Do a new step"));
         JScrollPane left = new JScrollPane(jgraph);
         JScrollPane right = new JScrollPane(jgraph2);

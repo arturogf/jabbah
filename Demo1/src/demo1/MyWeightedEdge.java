@@ -1,12 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package demo1;
 
 import org.jgrapht.graph.*;
 
 /**
+ * Extends the DefaultEdge class, adding weights and custom label
  *
  * @author arturogf
  */
@@ -25,23 +22,37 @@ public class MyWeightedEdge<V> extends DefaultEdge
         this.label = label;
     }
 
-
-    /* override method setWeight */
+    /**
+     * Set the weight for the egde instance
+     *
+     * @param weight
+     */
     public void setWeight(double weight)
     {
         this.weight = weight;
     }
-
+    /**
+     * Returns the source of this directed edge
+     *
+     */
     public Object getSource()
     {
         return this.source;
     }
-
+    /**
+     * Returns the target of this directed edge
+     *
+     */
     public Object getTarget()
     {
         return this.target;
     }
 
+    /**
+     * Overrides the original toString method, that shows the label in the
+     * graphical representation of the edge.
+     *
+     */
     @Override
     public String toString()
     {

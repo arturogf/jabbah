@@ -4,15 +4,13 @@
  */
 package demo1;
 
-import java.util.ArrayList;
-
 import org.jgrapht.graph.*;
 import org.jgrapht.Graphs;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
-
 import java.util.Iterator;
 
 /**
@@ -20,7 +18,7 @@ import java.util.Iterator;
  * It is composed of the four steps, implemented as private methods of
  * the class, that are executed respectively in the class constructor.
  *
- * @author arturogf@ugr.es
+ * @author Arturo González Ferrer <arturogf@ugr.es>
  */
 public class BlockDetection
 {
@@ -89,8 +87,8 @@ public class BlockDetection
         // a new PB node
         MyWeightedVertex pb = new MyWeightedVertex("PB" + this.pb_index, 0);
         G.addVertex(pb);
-        pb.type = 2;
-        pb.block = v;
+        pb.type = NodeType.PARALLEL;
+        pb.setBlock(v);
         MyWeightedVertex first = (MyWeightedVertex) v.firstElement();
         MyWeightedVertex last = (MyWeightedVertex) v.lastElement();
 
@@ -114,7 +112,7 @@ public class BlockDetection
 
 
     /**
-     * Creates a new SB node (type = 1), hooks it with predecessor and succesors and
+     * Creates a new SB node (type = 1), hooks it with predecessors and succesors and
      * removes the vertices found in Vector v
      *
      * @param v  a Vector containing the nodes to be replaced with a new SB node
@@ -124,8 +122,8 @@ public class BlockDetection
         // if a serial block was detected, we substitute it by a new SB node
         MyWeightedVertex sb = new MyWeightedVertex("SB" + this.sb_index, 0);
         G.addVertex(sb);
-        sb.type = 1;
-        sb.block = v;
+        sb.type = NodeType.SERIAL;
+        sb.setBlock(v);
         MyWeightedVertex first = (MyWeightedVertex) v.firstElement();
         MyWeightedVertex last = (MyWeightedVertex) v.lastElement();
 
@@ -158,7 +156,7 @@ public class BlockDetection
     private void rebuildTree(MyWeightedVertex j)
     {
         // normal nodes are not explored
-        if (j.type == 0)
+        if (j.type == NodeType.DEFAULT)
         {
             return;
         }
@@ -170,11 +168,11 @@ public class BlockDetection
             MyWeightedVertex y = (MyWeightedVertex) i.next();
 
             // gateways nodes are not shown
-            if (y.type != 3)
+            if (y.type != NodeType.GATEWAY)
             {
                 G.addVertex(y);
                 G.addEdge(j, y, new MyWeightedEdge(j, y, ""));
-                if (y.type != 0)
+                if (y.type != NodeType.DEFAULT)
                 {
                     this.rebuildTree(y);
                 }

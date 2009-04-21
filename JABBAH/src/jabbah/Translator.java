@@ -34,6 +34,28 @@ public class Translator {
 
     }
 
+    String setConstants()
+    {
+        String result = "(:constants\n " +
+	"true false - boolean\n";
+        
+        for (MyWeightedVertex v : this.G.vertexSet())
+        {
+            if (v.type == NodeType.DEFAULT) 
+            {
+                result = result + v.label.toLowerCase() + " ";
+            }
+        
+        }
+        
+        result = result + "- activity\n";
+        
+        // TODO: add LANES and maybe gateways
+        
+        result = result+")\n";
+        
+        return result;
+    }
 
     public void PDDLTranslator()
     {
@@ -44,6 +66,7 @@ public class Translator {
             dfile = new FileWriter(this.d_filepath, true);
             dfile.write(PDDLBlocks.requirements);
             dfile.write(PDDLBlocks.types);
+            dfile.write(this.setConstants());
             dfile.close();
         } catch (IOException ex)
         {
@@ -79,5 +102,5 @@ class PDDLBlocks
     "gateway - object\n" +
 	"participant - object\n" +
 	"role - object\n" +
-	"lane - object)\n";
+	"lane - object)\n\n";
 }

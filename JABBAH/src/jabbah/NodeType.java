@@ -1,16 +1,15 @@
-
 package jabbah;
 
 /**
- * @author arturo
- * Define some constants that represents the type of node 
- * 
- * - DEFAULT is an activity
- * - GATEWAY is a Route activity
- * - SERIAL and PARALLEL are used in the block detection algorithm
- * 
+ *
+ * Define some constants that represents the type of node  
+ * @param DEFAULT is an activity
+ * @param GATEWAY is a Route activity
+ * @param SERIAL is used in the block detection algorithm
+ * @param PARALLEL is used in the block detection algorithm
+ *  
  */
-class NodeType
+public class NodeType
 {
     public static final int DEFAULT = 0;
     public static final int SERIAL = 1;

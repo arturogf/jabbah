@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package jabbah;
 
@@ -12,11 +8,11 @@ import java.util.logging.Logger;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
 /**
+ * 
  * Class responsible of translating the workflow patterns decomposition tree
  * (extracted from the execution of Block Detection algorithm) into the 
  * specified planning language domain and problem files (HTN-PDDL)
  *
- * @author arturogf
  */
 public class Translator {
 
@@ -25,8 +21,8 @@ public class Translator {
     String p_filepath;
     
     /**
-     * The corresponding constructor.
      * 
+     * The corresponding constructor. 
      * @param g the workflow patterns decomposition graph to translate
      * @param dfilepath the domain file path
      * @param pfilepath the problem file path
@@ -41,21 +37,23 @@ public class Translator {
 
     /**
      * 
+     * To set the domain name
      * @param dname the domain name we want to appear at the domain and problem
      * files
      * @return a string with the header for the domain file
      */
-    String setDomainName(String dname)
+    public String setDomainName(String dname)
     {
         return ("(define (domain " + dname + ")\n");
     }
     
     /**
+     * 
      * Build up the constants section in HTN-PDDL, mainly activities, lanes and
      * gateways
      * @return a string containing the constants section
      */
-    String setConstants()
+    public String setConstants()
     {
         String result = "(:constants\n " +
 	"true false - boolean\n";
@@ -82,12 +80,12 @@ public class Translator {
      * 
      * @param name the name for the durative action, usually the activity node label
      * @param duration the duration for the activity, extracted from the XPDL source
-     * (it should be attached as a extendedAttribute tag)
+     * (it should be expressed as a extendedAttribute tag)
      * @param lane the lane label to which the activity belongs
      * @return a string containing the durative action definition for the node
      * specified
      */
-    String buildDurativeAction(String name, Double duration, String lane)
+    public String buildDurativeAction(String name, Double duration, String lane)
     {
         String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
 	":parameters(?w - participant)" + "\n" +
@@ -100,13 +98,14 @@ public class Translator {
             
             
     /**
+     * 
      * Explore all the nodes of the graph, and build up durative actions for
      * every activity that is considered of NodeType DEFAULT (usually actions)
      * 
      * @return a string with all the durative action definitions for the domain
      */
      
-    String setDurativeActions()
+    public String setDurativeActions()
     {
         String result = "";
     
@@ -124,12 +123,13 @@ public class Translator {
         return result;    
     }
     /**
+     * 
      * Search for nodes of NodeType SERIAL to define the compound actions that
      * represents a serial block in HTN-PDDL.
      * 
      * @return the string corresponding to all serial blocks definitions
      */
-    String setSerialBlocks()
+    public String setSerialBlocks()
     {
         String result = "";
         
@@ -167,6 +167,7 @@ public class Translator {
     }
     
     /**
+     * 
      * the main method that build up the HTN-PDDL domain and problem files
      *
      */

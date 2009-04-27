@@ -6,10 +6,10 @@
 package jabbah;
 
 /**
- *
+ * Class with some common blocks of HTN-PDDL code
  * @author arturo
  */
-class PDDLBlocks
+public class PDDLBlocks
 {
     public static final String requirements = "\n(:requirements\n" +
   ":typing \n" +

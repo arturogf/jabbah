@@ -23,7 +23,14 @@ public class Translator {
     ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G;
     String d_filepath;
     String p_filepath;
-
+    
+    /**
+     * The corresponding constructor.
+     * 
+     * @param g the workflow patterns decomposition graph to translate
+     * @param dfilepath the domain file path
+     * @param pfilepath the problem file path
+     */
     public Translator(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
                         String dfilepath, String pfilepath)
     {
@@ -32,11 +39,22 @@ public class Translator {
         this.p_filepath = pfilepath;
     }
 
+    /**
+     * 
+     * @param dname the domain name we want to appear at the domain and problem
+     * files
+     * @return a string with the header for the domain file
+     */
     String setDomainName(String dname)
     {
         return ("(define (domain " + dname + ")\n");
     }
     
+    /**
+     * Build up the constants section in HTN-PDDL, mainly activities, lanes and
+     * gateways
+     * @return a string containing the constants section
+     */
     String setConstants()
     {
         String result = "(:constants\n " +
@@ -60,6 +78,15 @@ public class Translator {
         return result;
     }
     
+    /**
+     * 
+     * @param name the name for the durative action, usually the activity node label
+     * @param duration the duration for the activity, extracted from the XPDL source
+     * (it should be attached as a extendedAttribute tag)
+     * @param lane the lane label to which the activity belongs
+     * @return a string containing the durative action definition for the node
+     * specified
+     */
     String buildDurativeAction(String name, Double duration, String lane)
     {
         String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
@@ -72,7 +99,13 @@ public class Translator {
     }
             
             
-    
+    /**
+     * Explore all the nodes of the graph, and build up durative actions for
+     * every activity that is considered of NodeType DEFAULT (usually actions)
+     * 
+     * @return a string with all the durative action definitions for the domain
+     */
+     
     String setDurativeActions()
     {
         String result = "";
@@ -90,7 +123,12 @@ public class Translator {
         
         return result;    
     }
-    
+    /**
+     * Search for nodes of NodeType SERIAL to define the compound actions that
+     * represents a serial block in HTN-PDDL.
+     * 
+     * @return the string corresponding to all serial blocks definitions
+     */
     String setSerialBlocks()
     {
         String result = "";
@@ -128,9 +166,10 @@ public class Translator {
         return result;
     }
     
-    
-    
-
+    /**
+     * the main method that build up the HTN-PDDL domain and problem files
+     *
+     */
     public void PDDLTranslator()
     {
         FileWriter dfile, pfile;
@@ -161,30 +200,3 @@ public class Translator {
     }
 }
 
-class PDDLBlocks
-{
-    public static final String requirements = "\n(:requirements\n" +
-  ":typing \n" +
-  ":fluents \n" +
-  ":htn-expansion \n" +
-  ":durative-actions \n"+
-  ":negative-preconditions\n" +
-  ":universal-preconditions\n" +
-  ":disjuntive-preconditions\n" +
-  ":derived-predicates\n" +
-  ":metatags)\n\n";
-
-  public static final String types = "\n(:types\n" +
- 	"boolean - object\n" +
-	"activity - object\n" +
-    "gateway - object\n" +
-	"participant - object\n" +
-	"role - object\n" +
-	"lane - object)\n\n";
-
-
-public static final String predicates = "\n(:predicates\n" +
-	"(completed ?a - activity)\n"+
-	"(belongs_to_lane ?p - participant ?a - lane)" +	
-        ")\n\n";
-}

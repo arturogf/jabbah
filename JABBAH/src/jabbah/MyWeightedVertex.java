@@ -21,6 +21,7 @@ public class MyWeightedVertex
 {
     int type = NodeType.DEFAULT;
     String label;
+    String lane ="LANE_NAME";
     Double weight = 0.0;
     Double duration = 1.0;
     

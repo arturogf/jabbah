@@ -30,10 +30,13 @@ public class Translator {
         this.G = g;
         this.d_filepath = dfilepath;
         this.p_filepath = pfilepath;
-
-
     }
 
+    String setDomainName(String dname)
+    {
+        return ("(define (domain " + dname + ")\n");
+    }
+    
     String setConstants()
     {
         String result = "(:constants\n " +
@@ -56,6 +59,77 @@ public class Translator {
         
         return result;
     }
+    
+    String buildDurativeAction(String name, Double duration, String lane)
+    {
+        String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
+	":parameters(?w - participant)" + "\n" +
+	":duration (= ?duration " + duration.toString() + ")\n" +
+	":condition(belongs_to_lane ?w " + lane + ")\n" +
+	":effect (completed " + name.toLowerCase() +"))\n";
+        
+        return result;
+    }
+            
+            
+    
+    String setDurativeActions()
+    {
+        String result = "";
+    
+        for (MyWeightedVertex v : this.G.vertexSet())
+        {
+            if (v.type == NodeType.DEFAULT) 
+            {
+                result = result + this.buildDurativeAction(v.label,
+                                        v.duration,v.lane);
+            }
+        
+        }  
+        
+        
+        return result;    
+    }
+    
+    String setSerialBlocks()
+    {
+        String result = "";
+        
+        for (MyWeightedVertex v : this.G.vertexSet())
+        {
+            if (v.type == NodeType.SERIAL) 
+            {
+                result = result + "(:task Block" + v.label+"\n" +
+                         ":parameters ()\n" +
+                         "(:method bl" + v.label.toLowerCase()+"\n" +
+                         ":precondition ()\n" +
+                         ":tasks (";
+                
+                int num_worker = 1;
+                
+                for (MyWeightedEdge e : this.G.outgoingEdgesOf(v))
+                {
+                   MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
+                   if (j.type == NodeType.DEFAULT)
+                   {
+                        result = result + "(" + j.label + " ?w" + num_worker + ") ";
+                        num_worker = num_worker + 1;
+                   }
+                   else
+                   {
+                        result = result + "(Block" + j.label +") ";
+                   }
+                }
+                result = result + ")\n))\n\n";    
+            }
+           
+        }  
+        
+        return result;
+    }
+    
+    
+    
 
     public void PDDLTranslator()
     {
@@ -64,10 +138,14 @@ public class Translator {
         try
         {
             dfile = new FileWriter(this.d_filepath, true);
+            dfile.write(this.setDomainName("midominio"));
             dfile.write(PDDLBlocks.requirements);
             dfile.write(PDDLBlocks.types);
             dfile.write(this.setConstants());
-            dfile.close();
+            dfile.write(PDDLBlocks.predicates);
+            dfile.write(this.setDurativeActions());
+            dfile.write(this.setSerialBlocks());
+            dfile.close();    
         } catch (IOException ex)
         {
             Logger.getLogger(Translator.class.getName()).log(Level.SEVERE, null, ex);
@@ -103,4 +181,10 @@ class PDDLBlocks
 	"participant - object\n" +
 	"role - object\n" +
 	"lane - object)\n\n";
+
+
+public static final String predicates = "\n(:predicates\n" +
+	"(completed ?a - activity)\n"+
+	"(belongs_to_lane ?p - participant ?a - lane)" +	
+        ")\n\n";
 }

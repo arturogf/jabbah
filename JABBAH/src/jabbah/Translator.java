@@ -37,7 +37,7 @@ public class Translator {
 
     /**
      * 
-     * To set the domain name
+     * Method to set the domain name
      * @param dname the domain name we want to appear at the domain and problem
      * files
      * @return a string with the header for the domain file
@@ -166,6 +166,97 @@ public class Translator {
         return result;
     }
     
+    public MyWeightedVertex getRightNode(MyWeightedVertex node)
+    {
+    
+        int next = 0;
+        MyWeightedVertex right = null;
+          
+        // in this tree there is only one parent node for every node
+        for (MyWeightedEdge e : this.G.incomingEdgesOf(node))
+        {
+            MyWeightedVertex parent = (MyWeightedVertex) e.getSource();
+            
+            for (MyWeightedEdge c: this.G.outgoingEdgesOf(parent))
+            {
+                right = (MyWeightedVertex) c.getTarget();
+                
+                // if we found it at last iteration, return next
+                if (next == 1)
+                    return right;
+                
+                // if the target node is the same as passed as parameter, then
+                // the next one is the right brother in tree
+                if (right == node)
+                    next = 1;
+            }
+                
+        }
+        
+        return null;
+    
+    }
+    
+    /**
+     * 
+     * @return a string containing all the compound actions for split/merge
+     * blocks detected in the source XPDL, as HTN-PDDL code
+     */
+    public String setSimpleMerges()
+    {
+        String result = "";
+        int simple_merge = 0;
+        int num_worker = 1;
+
+        
+        for (MyWeightedVertex v : this.G.vertexSet())
+        {
+            
+            num_worker = 1;
+            
+            if (v.type == NodeType.PARALLEL) 
+            {
+                result = result + "(:task Block" + v.label+"\n" +
+                         ":parameters ()\n" +
+                         "(:method bl" + v.label.toLowerCase()+"\n" +
+                         ":precondition ()\n" +
+                         ":tasks (";
+                
+                result = result + "[";
+                                
+                for (MyWeightedEdge e : this.G.outgoingEdgesOf(v))
+                {
+                   MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
+                   if (j.type == NodeType.DEFAULT)
+                   {
+                        result = result + "(" + j.label + " ?w" + num_worker + ") ";
+                        num_worker = num_worker + 1;
+                   }
+                   else
+                   {
+                        result = result + "(Block" + j.label +") ";
+                   }
+                }
+                
+                result = result + "]";
+                
+                MyWeightedVertex right = this.getRightNode(v);
+                
+                if (right != null)
+                {
+                    result = result + "(" + right.label + " ?w" + num_worker + ")";
+                }
+                result = result + ")\n))\n\n";
+            
+ 
+                
+            }
+        }  
+        
+        return result;
+    
+    }
+    
     /**
      * 
      * the main method that build up the HTN-PDDL domain and problem files
@@ -185,6 +276,7 @@ public class Translator {
             dfile.write(PDDLBlocks.predicates);
             dfile.write(this.setDurativeActions());
             dfile.write(this.setSerialBlocks());
+            dfile.write(this.setSimpleMerges());
             dfile.close();    
         } catch (IOException ex)
         {

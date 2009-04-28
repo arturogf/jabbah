@@ -11,10 +11,11 @@ package jabbah;
  * @author Arturo
  */
 public class TransitionRestriction
-{
-    public static final int SPLIT_EXCLUSIVE = 0;
-    public static final int JOIN_EXCLUSIVE = 1;
-    public static final int SPLIT_PARALLEL = 2;
-    public static final int JOIN_INCLUSIVE = 3;
+{   
+    public static final int NONE = 0;
+    public static final int SPLIT_EXCLUSIVE = 1;
+    public static final int JOIN_EXCLUSIVE = 2;
+    public static final int SPLIT_PARALLEL = 3;
+    public static final int JOIN_INCLUSIVE = 4;
 }
 

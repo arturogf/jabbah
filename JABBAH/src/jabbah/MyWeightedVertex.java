@@ -20,6 +20,7 @@ import java.util.Vector;
 public class MyWeightedVertex
 {
     int type = NodeType.DEFAULT;
+    int restriction = TransitionRestriction.NONE;
     String label;
     String lane ="LANE_NAME";
     Double weight = 0.0;

@@ -1,5 +1,3 @@
-/* 
- */
 package jabbah;
 
 import java.awt.*;
@@ -67,7 +65,6 @@ public class jabbah
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
-
         MyWeightedVertex S = new MyWeightedVertex("S");
         MyWeightedVertex A1 = new MyWeightedVertex("A1");
         MyWeightedVertex A2 = new MyWeightedVertex("A2");
@@ -86,17 +83,23 @@ public class jabbah
 
         MyWeightedVertex G1 = new MyWeightedVertex("G1"); // AND A2-A3
         G1.type = NodeType.GATEWAY;
+        G1.restriction = TransitionRestriction.SPLIT_PARALLEL;
         MyWeightedVertex FG1 = new MyWeightedVertex("FIN G1"); // FIN AND A2-A3
         FG1.type = NodeType.GATEWAY;
+        FG1.restriction = TransitionRestriction.JOIN_INCLUSIVE;
         MyWeightedVertex G2 = new MyWeightedVertex("G2"); // OR A5-A6
         G2.type = NodeType.GATEWAY;
+        G2.restriction = TransitionRestriction.SPLIT_EXCLUSIVE;
         MyWeightedVertex FG2 = new MyWeightedVertex("FIN G2"); // FIN OR A5-A6
         FG2.type = NodeType.GATEWAY;
+        FG2.restriction = TransitionRestriction.JOIN_EXCLUSIVE;
 
         MyWeightedVertex G3 = new MyWeightedVertex("G3"); // AND A9-A10
         G3.type = NodeType.GATEWAY;
+        G3.restriction = TransitionRestriction.SPLIT_PARALLEL;
         MyWeightedVertex FG3 = new MyWeightedVertex("FIN G3"); // FIN OR A9-A10
         FG3.type = NodeType.GATEWAY;
+        FG3.restriction = TransitionRestriction.JOIN_INCLUSIVE;
 
         // add start, end and activities
         g.addVertex(S);
@@ -304,4 +307,4 @@ public class jabbah
     }
 }
 
-// End demo1.java
+// End jabbah.java

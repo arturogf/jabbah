@@ -17,6 +17,7 @@ import com.jgraph.layout.*;
 import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class jabbah
@@ -167,11 +168,14 @@ public class jabbah
 
         /* Create the left side jgraph and respective layout and JGraphModelAdapter */
         jgAdapter = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_left);
+        
+        this.putColor(jgAdapter, g_left);
+
 
         // esto crea para un nodo determinado una serie de atributos
-        DefaultGraphCell cell = jgAdapter.getVertexCell(g_left.vertexSet().iterator().next());
-        AttributeMap attr = cell.getAttributes();
-        GraphConstants.setBackground(attr, Color.GRAY);
+        //DefaultGraphCell cell = jgAdapter.getVertexCell(g_left.vertexSet().iterator().next());
+        //AttributeMap attr = cell.getAttributes();
+        //GraphConstants.setBackground(attr, Color.GRAY);
 
         JGraph jgraph = new JGraph(jgAdapter);
         JGraphFacade facade = new JGraphFacade(jgraph);
@@ -196,6 +200,8 @@ public class jabbah
 
         // set the layout for the result
         jgAdapter2 = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_right);
+        
+        this.putColor(jgAdapter2, g_right);
 
         JGraph jgraph2 = new JGraph(jgAdapter2);
         JGraphFacade facade2 = new JGraphFacade(jgraph2);
@@ -227,6 +233,48 @@ public class jabbah
 
     }
 
+    
+    private void putColor(JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge> adapter,
+                                   ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> graph)
+    {
+         DefaultGraphCell cell;
+         AttributeMap attr;
+    // esto crea para un nodo determinado una serie de atributos
+        Iterator iter = graph.vertexSet().iterator();
+
+        while (iter.hasNext())
+        {
+             MyWeightedVertex foo = ( MyWeightedVertex )  iter.next (  ) ;
+            cell = adapter.getVertexCell(foo);
+            attr = cell.getAttributes();                                  
+            if (foo.type == NodeType.GATEWAY)
+            {
+                GraphConstants.setBackground(attr, Color.ORANGE);
+
+                GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.BLACK));
+            }           
+             if (foo.type == NodeType.PARALLEL)
+            {
+                GraphConstants.setBackground(attr, Color.RED);
+
+                GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.BLACK));
+            }           
+             if (foo.type == NodeType.SERIAL)
+            {
+                GraphConstants.setBackground(attr, Color.BLUE);
+
+                GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.BLACK));
+              
+            }           
+             if (foo.type == NodeType.DEFAULT)
+            {
+                GraphConstants.setBackground(attr, Color.GRAY);
+            }           
+        }
+    }
+   
+
+    
     private void adjustDisplaySettings(JGraph jg)
     {
         jg.setPreferredSize(DEFAULT_SIZE);

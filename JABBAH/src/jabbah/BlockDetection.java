@@ -93,6 +93,8 @@ public class BlockDetection
         MyWeightedVertex last = (MyWeightedVertex) v.lastElement();
 
         pb.setWeight(first.weight);
+        pb.restriction = first.restriction;
+        pb.param = first.param;
 
         // hook the new node with previous predecessors and sucessors
         for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))

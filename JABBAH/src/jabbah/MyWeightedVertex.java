@@ -25,9 +25,15 @@ public class MyWeightedVertex
     String lane ="LANE_NAME";
     Double weight = 0.0;
     Double duration = 1.0;
-    
+
+    // in case it is a Gateway
+    Parameter param;
+
+    // needed for the BlockDetection class
     boolean marked;
     Vector block = null;
+
+
 
     /**
      * The constructor for a weighted vertex

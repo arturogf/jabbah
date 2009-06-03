@@ -53,7 +53,7 @@ public class jabbah
 
         JFrame frame = new JFrame(JGraphLayout.VERSION);
         frame.getContentPane().add(applet);
-        frame.setTitle("ECA Rules Algorithm");
+        frame.setTitle("JABBAH Framework");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setSize(800, 600);
@@ -91,6 +91,13 @@ public class jabbah
         MyWeightedVertex G2 = new MyWeightedVertex("G2"); // OR A5-A6
         G2.type = NodeType.GATEWAY;
         G2.restriction = TransitionRestriction.SPLIT_EXCLUSIVE;
+        // add the parameter optimize
+
+        G2.param = new Parameter();
+
+        G2.param.name = "optimize";
+        G2.param.type = "boolean";
+
         MyWeightedVertex FG2 = new MyWeightedVertex("FIN G2"); // FIN OR A5-A6
         FG2.type = NodeType.GATEWAY;
         FG2.restriction = TransitionRestriction.JOIN_EXCLUSIVE;
@@ -227,8 +234,8 @@ public class jabbah
 
          // create a translator instance and call the corresponding PDDL translation
         Translator T = new Translator(g_right,
-                                      "/home/arturo/ecarules/JABBAH/output/domain.pddl",
-                                      "/home/arturo/ecarules/JABBAH/output/problem.pddl");
+                                      "/Users/arturogf/ecarules/JABBAH/output/domain.pddl",
+                                      "/Users/arturogf/ecarules/JABBAH/output/problem.pddl");
         T.PDDLTranslator();
 
     }

@@ -55,9 +55,11 @@ public class Translator {
      */
     public String setConstants()
     {
-        String result = "(:constants\n " +
-	"true false - boolean\n";
-        
+        String result = "(:constants\n ";
+
+        result = result + "true false - boolean\n";
+
+        // add the ACTIVITIES as constants
         for (MyWeightedVertex v : this.G.vertexSet())
         {
             if (v.type == NodeType.DEFAULT) 
@@ -68,7 +70,10 @@ public class Translator {
         }
         
         result = result + "- activity\n";
-        
+
+        // TODO: add ALL PARAMETERS FOUND like 'optimize - parameter'
+        result = result + "optimize - parameter\n";
+
         // TODO: add LANES and maybe gateways
         
         result = result+")\n";
@@ -155,7 +160,13 @@ public class Translator {
                    }
                    else
                    {
-                        result = result + "(Block" + j.label +") ";
+                        result = result + "(Block" + j.label;
+                        //add the parameter
+                        if (j.type == NodeType.PARALLEL &&
+                                j.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
+                            result = result + " " + "optimize";
+                         result = result + ") ";
+
                    }
                 }
                 result = result + ")\n))\n\n";    
@@ -214,7 +225,8 @@ public class Translator {
             
             num_worker = 1;
             
-            if (v.type == NodeType.PARALLEL) 
+            if (v.type == NodeType.PARALLEL
+                    && v.restriction == TransitionRestriction.SPLIT_PARALLEL)
             {
                 result = result + "(:task Block" + v.label+"\n" +
                          ":parameters ()\n" +
@@ -234,12 +246,18 @@ public class Translator {
                    }
                    else
                    {
-                        result = result + "(Block" + j.label +") ";
+                        result = result + "(Block" + j.label;
+                        // if the node have a parameter associated
+                        if (j.param != null)
+                            result = result + " " + j.param.name;
+
+                        result = result + ") ";
+
                    }
                 }
                 
                 result = result + "]";
-                
+
                 MyWeightedVertex right = this.getRightNode(v);
                 
                 if (right != null)
@@ -247,10 +265,23 @@ public class Translator {
                     result = result + "(" + right.label + " ?w" + num_worker + ")";
                 }
                 result = result + ")\n))\n\n";
-            
- 
                 
             }
+            else
+                if (v.type == NodeType.PARALLEL &&
+                    v.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
+                {
+                    result = result + "(:task Block" + v.label + "\n";
+                    result = result + ":parameters (?x - parameter)\n";
+
+                    // we do BY NOW only the ones with boolean parameters (IF/ELSE)
+
+                    /*if (v.param.type.equals("boolean"))
+                    {
+                        result = result + "(:method A\n";
+                        result = result + ":precondition " + "()";
+                    }*/ 
+                }
         }  
         
         return result;
@@ -268,7 +299,7 @@ public class Translator {
 
         try
         {
-            dfile = new FileWriter(this.d_filepath, true);
+            dfile = new FileWriter(this.d_filepath, false);
             dfile.write(this.setDomainName("midominio"));
             dfile.write(PDDLBlocks.requirements);
             dfile.write(PDDLBlocks.types);

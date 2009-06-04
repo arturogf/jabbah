@@ -3,8 +3,13 @@ package jabbah;
 import java.awt.*;
 import java.awt.geom.*;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 import org.jgraph.*;
 import org.jgraph.graph.*;
 
@@ -19,6 +24,7 @@ import com.jgraph.layout.tree.JGraphTreeLayout;
 
 import java.util.Iterator;
 import java.util.Map;
+import org.xml.sax.SAXException;
 
 public class jabbah
         extends JApplet
@@ -66,6 +72,25 @@ public class jabbah
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
+
+        XpdlObjectMapping xom = new XpdlObjectMapping();
+        try
+        {
+            xom.parse("/Users/arturogf/ecarules/JABBAH/input/GA.xpdl.xml");
+        } catch (SAXException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (XPathExpressionException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         MyWeightedVertex S = new MyWeightedVertex("S");
         MyWeightedVertex A1 = new MyWeightedVertex("A1");
         MyWeightedVertex A2 = new MyWeightedVertex("A2");

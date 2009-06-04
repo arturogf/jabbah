@@ -11,4 +11,11 @@ package jabbah;
  */
 public class Lane {
 
+    String id;
+    String name;
+
+    public Lane()
+    {
+    }
+
 }

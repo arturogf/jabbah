@@ -22,6 +22,8 @@ import com.jgraph.layout.*;
 import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.Map;
 import org.xml.sax.SAXException;
@@ -52,12 +54,42 @@ public class jabbah
      */
     public static void main(String[] args)
     {
+
+        JMenuBar menuBar;
+        JMenu menu, submenu;
+        JMenuItem menuItem;
+
         jabbah applet = new jabbah();
 
         System.setProperty("sun.java2d.d3d", "false");
 
+        menuBar = new JMenuBar();
+        //Build the first menu.
+        menu = new JMenu("Archive");
+        menu.setMnemonic(KeyEvent.VK_A);
+        menu.getAccessibleContext().setAccessibleDescription(
+        "The only menu in this program that has menu items");
+        menuBar.add(menu);
+
+        //a group of JMenuItems
+        menuItem = new JMenuItem("Import XPDL file ", KeyEvent.VK_T);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.ALT_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
+                "Open the specified file");
+        menu.add(menuItem);
+
+        menuItem = new JMenuItem("Exit ", KeyEvent.VK_T);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_X, ActionEvent.ALT_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
+                "Exit the JABBAH application");
+        menu.add(menuItem);
 
         JFrame frame = new JFrame(JGraphLayout.VERSION);
+
+        frame.setJMenuBar(menuBar);
+        
         frame.getContentPane().add(applet);
         frame.setTitle("JABBAH Framework");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

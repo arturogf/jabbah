@@ -17,6 +17,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -52,58 +53,106 @@ public class XpdlObjectMapping {
         XPath xpath = xfactory.newXPath();
         xpath.setNamespaceContext(new XpdlNamespaceContext());
         this.parseLanes(doc, xpath);
+        this.parseActivities(doc, xpath);
+
 
     }
 
     private void parseLanes(org.w3c.dom.Document doc, XPath xpath)
     {
-        XPathExpression exp_lane_name = null;
+        XPathExpression exp_lane = null;
         try
         {
-            exp_lane_name = xpath.compile("//xpdl2:Lane/@Name");
-        } catch (XPathExpressionException ex)
-        {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        XPathExpression exp_lane_id = null;
-        try
-        {
-            exp_lane_id = xpath.compile("//xpdl2:Lane/@Id");
+            exp_lane = xpath.compile("//xpdl2:Lane");
         } catch (XPathExpressionException ex)
         {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        Object res_lane_id = null;
+        Object res_lane = null;
         try
         {
-            res_lane_id = exp_lane_id.evaluate(doc, XPathConstants.NODESET);
+            res_lane = exp_lane.evaluate(doc, XPathConstants.NODESET);
         } catch (XPathExpressionException ex)
         {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Object res_lane_name = null;
-        try
-        {
-            res_lane_name = exp_lane_name.evaluate(doc, XPathConstants.NODESET);
-        } catch (XPathExpressionException ex)
-        {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        NodeList nodes = (NodeList) res_lane;
 
-        NodeList nodes_id = (NodeList) res_lane_id;
-        NodeList nodes_name = (NodeList) res_lane_name;
+        Lanes = new Lane[nodes.getLength()];
 
-        Lanes = new Lane[nodes_id.getLength()];
-
-        for (int i = 0; i < nodes_id.getLength(); i++) {
+        // in this loop, the "Lanes" array is populated, using xpath parsing on the context node
+        for (int i = 0; i < nodes.getLength(); i++) {
             Lanes[i] = new Lane();
-            Lanes[i].id = nodes_id.item(i).getNodeValue();
-            Lanes[i].name = nodes_name.item(i).getNodeValue();
+           
+            String exp_lane_name = "@Name";
+            String exp_lane_id = "@Id";
+
+            Node l_name, l_id;
+            try
+            {
+                l_name = (Node) xpath.evaluate(exp_lane_name, nodes.item(i), XPathConstants.NODE);
+                Lanes[i].name = l_name.getNodeValue();
+
+                l_id = (Node) xpath.evaluate(exp_lane_id, nodes.item(i), XPathConstants.NODE);
+                Lanes[i].id = l_id.getNodeValue();
+
+            } catch (XPathExpressionException ex)
+            {
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
 
+    }
 
+  private void parseActivities(org.w3c.dom.Document doc, XPath xpath)
+    {
+        XPathExpression exp_activity = null;
+        try
+        {
+            exp_activity = xpath.compile("//xpdl2:Activity");
+        } catch (XPathExpressionException ex)
+        {
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
+        Object res_act = null;
+        try
+        {
+            res_act = exp_activity.evaluate(doc, XPathConstants.NODESET);
+        } catch (XPathExpressionException ex)
+        {
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        NodeList nodes = (NodeList) res_act;
+
+        Activities = new Activity[nodes.getLength()];
+
+        // in this loop, the "Activities" array is populated, using xpath parsing on the context node
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Activities[i] = new Activity();
+
+            String exp_act_name = "@Name";
+            String exp_act_id = "@Id";
+
+            Node a_name, a_id;
+            try
+            {
+                a_name = (Node) xpath.evaluate(exp_act_name, nodes.item(i), XPathConstants.NODE);
+                Activities[i].name = a_name.getNodeValue();
+
+                a_id = (Node) xpath.evaluate(exp_act_id, nodes.item(i), XPathConstants.NODE);
+                Activities[i].id = a_id.getNodeValue();
+
+            } catch (XPathExpressionException ex)
+            {
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
 
     }
 

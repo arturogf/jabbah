@@ -11,4 +11,11 @@ package jabbah;
  */
 public class Activity {
 
+    String id;
+    String name;
+
+    public Activity()
+    {
+    }
+
 }

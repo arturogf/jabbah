@@ -23,13 +23,16 @@ import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.Map;
 import org.xml.sax.SAXException;
 
 public class jabbah
-        extends JApplet
+        extends JApplet implements ActionListener, ItemListener
 {
     //~ Static fields/initializers ---------------------------------------------
 
@@ -46,22 +49,24 @@ public class jabbah
     private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_right;
 
     //~ Methods ----------------------------------------------------------------
-    /**
-     * An alternative starting point for this demo, to also allow running this
-     * applet as an application.
-     *
-     * @param args ignored.
-     */
-    public static void main(String[] args) 
-    {
+
+
+    public void actionPerformed(ActionEvent e) {
+        JMenuItem source = (JMenuItem)(e.getSource());
+        System.out.println("action Performed!");
+    }
+
+    public void itemStateChanged(ItemEvent e) {
+        JMenuItem source = (JMenuItem)(e.getSource());
+        System.out.println("item State Changed!");
+    }
+
+    @SuppressWarnings("unchecked") 
+    public JMenuBar createMenuBar() {
 
         JMenuBar menuBar;
         JMenu menu, submenu;
         JMenuItem menuItem;
-
-        jabbah applet = new jabbah();
-
-        System.setProperty("sun.java2d.d3d", "false");
 
         menuBar = new JMenuBar();
         //Build the first menu.
@@ -77,6 +82,9 @@ public class jabbah
                 KeyEvent.VK_O, ActionEvent.ALT_MASK));
         menuItem.getAccessibleContext().setAccessibleDescription(
                 "Open the specified file");
+
+        menuItem.addActionListener(this);
+
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Exit ", KeyEvent.VK_T);
@@ -84,11 +92,33 @@ public class jabbah
                 KeyEvent.VK_X, ActionEvent.ALT_MASK));
         menuItem.getAccessibleContext().setAccessibleDescription(
                 "Exit the JABBAH application");
+
+        menuItem.addActionListener(this);
+
         menu.add(menuItem);
+
+        return menuBar;
+
+    }
+
+
+    /**
+     * An alternative starting point for this demo, to also allow running this
+     * applet as an application.
+     *
+     * @param args ignored.
+     */
+    public static void main(String[] args)
+    {
+        System.setProperty("sun.java2d.d3d", "false");
+
+        jabbah applet = new jabbah();
 
         JFrame frame = new JFrame(JGraphLayout.VERSION);
 
-        frame.setJMenuBar(menuBar);
+        JMenuBar menu = applet.createMenuBar();
+
+        frame.setJMenuBar(menu);
         
         frame.getContentPane().add(applet);
         frame.setTitle("JABBAH Framework");
@@ -98,9 +128,67 @@ public class jabbah
         applet.init();
         frame.setVisible(true);
 
-
     }
 
+
+
+     // a method to build our example graph
+    private void buildGraphFromXPDL(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
+    {
+        XpdlObjectMapping xom = new XpdlObjectMapping();
+        try
+        {
+            xom.parse("/Users/arturogf/ecarules/JABBAH/input/elearning.xpdl");
+        } catch (SAXException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (XPathExpressionException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ParserConfigurationException ex)
+        {
+            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        int ig = 0;
+        for (int i=0; i<xom.Activities.length; i++)
+        {
+            if(xom.Activities[i].type == NodeType.GATEWAY)
+            {
+                if (xom.Activities[i].restriction == TransitionRestriction.JOIN_EXCLUSIVE ||
+                    xom.Activities[i].restriction == TransitionRestriction.JOIN_INCLUSIVE)
+                    xom.Activities[i].node = new MyWeightedVertex("END_G"+ig);
+                else
+                    xom.Activities[i].node = new MyWeightedVertex("G"+ig);
+                ig = ig+1;
+            }
+            else
+                xom.Activities[i].node = new MyWeightedVertex("A"+i);
+
+            xom.Activities[i].node.type = xom.Activities[i].type;
+            xom.Activities[i].node.restriction = xom.Activities[i].restriction;
+            g.addVertex(xom.Activities[i].node);
+        }
+
+
+        for (int t=0; t< xom.Transitions.length; t++)
+        {
+            MyWeightedVertex from = xom.findActivityNode(xom.Transitions[t].from);
+            MyWeightedVertex to = xom.findActivityNode(xom.Transitions[t].to);
+
+            if ((from!=null) && (to!=null))
+            {
+                g.addEdge(from, to,
+                    new MyWeightedEdge(from, to, "E"+t));
+            }
+            else
+                System.out.println("Mal asunto");
+
+        }
+    }
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
@@ -108,7 +196,7 @@ public class jabbah
         XpdlObjectMapping xom = new XpdlObjectMapping();
         try
         {
-            xom.parse("/Users/arturogf/ecarules/JABBAH/input/GA.xpdl.xml");
+            xom.parse("/Users/arturogf/ecarules/JABBAH/input/elearning.xpdl");
         } catch (SAXException ex)
         {
             Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
@@ -228,7 +316,7 @@ public class jabbah
                 MyWeightedEdge.class);
 
         // build or proof of concept graph
-        this.buildMyGraph(g_left);
+        this.buildGraphFromXPDL(g_left);
 
         /* Create the left side jgraph and respective layout and JGraphModelAdapter */
         jgAdapter = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_left);
@@ -257,7 +345,7 @@ public class jabbah
                 MyWeightedEdge.class);
         //g_right = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
 
-        this.buildMyGraph(g_right);
+        this.buildGraphFromXPDL(g_right);
 
         // call the ECA Rules Block Detection Algorithm
         BlockDetection block = new BlockDetection(g_right);

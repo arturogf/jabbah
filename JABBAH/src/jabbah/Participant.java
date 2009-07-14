@@ -13,9 +13,9 @@ package jabbah;
  * @author arturogf
  */
 public class Participant {
+    String id;
     String name;
-    String LaneId;
-    String LaneName;
+    String lane;
     //Vector abilities;
     // Date[] unavailable;
 }

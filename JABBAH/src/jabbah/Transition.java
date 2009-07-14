@@ -10,11 +10,16 @@ package jabbah;
  * @author arturogf
  */
 public class Transition {
-    String Id;
-    String From;
-    String To;
+    String id;
+    String name;
+    String from;
+    String to;
     // next are filled in case there are any condition for the transition
-    String ParameterId = "";
-    String Operator = "";
-    String ParameterValue = "";
+    String parameterId = "";
+    String operator = "";
+    String parameterValue = "";
+
+    public Transition()
+    {
+    }
 }

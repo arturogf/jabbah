@@ -287,12 +287,12 @@ public class BlockDetection
 
         queue.addElement(S);
 
-        while (LOOP)
+        while ((LOOP) && (!queue.isEmpty()))
         {
-            if (queue.isEmpty())
-            {
-                return null;
-            }
+           // if (queue.isEmpty())
+           // {
+           //     return null;
+           // }
 
             v = (MyWeightedVertex) queue.firstElement();
             queue.removeElementAt(0);
@@ -303,9 +303,10 @@ public class BlockDetection
                     (G.inDegreeOf(v) <= 1) &&
                     (G.outDegreeOf(v) == 1))
             {
-                LOOP = false;
+                //LOOP = false;
                 SB.addElement(v);
 
+                finish = true;
                 while (finish)
                 {
                     continua = false;
@@ -329,6 +330,10 @@ public class BlockDetection
                         v = (MyWeightedVertex) SB.lastElement();
                     }
                 }
+                // si al salir de aquí sólo tiene 1 elemento, borralo
+                if (SB.size() == 1)
+                    SB.removeAllElements();
+
             } else // Add the successors of v to queue
             {
                 for (MyWeightedVertex j : Graphs.successorListOf(G, v))

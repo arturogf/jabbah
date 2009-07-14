@@ -17,7 +17,7 @@ public class XpdlNamespaceContext implements NamespaceContext {
 
     public String getNamespaceURI(String prefix) {
         if (prefix == null) throw new NullPointerException("Null prefix");
-        else if ("xpdl2".equals(prefix)) return "http://www.wfmc.org/2004/XPDL2.0alpha";
+        else if ("xpdl2".equals(prefix)) return "http://www.wfmc.org/2008/XPDL2.1";
         else if ("simulation".equals(prefix)) return "http://www.tibco.com/xpd/Simulation1.0.1";
         else if ("xml".equals(prefix)) return XMLConstants.XML_NS_URI;
         return XMLConstants.NULL_NS_URI;

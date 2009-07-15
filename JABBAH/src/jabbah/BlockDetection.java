@@ -333,6 +333,8 @@ public class BlockDetection
                 // si al salir de aquí sólo tiene 1 elemento, borralo
                 if (SB.size() == 1)
                     SB.removeAllElements();
+                else
+                    return SB;
 
             } else // Add the successors of v to queue
             {

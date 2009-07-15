@@ -34,6 +34,7 @@ import org.xml.sax.SAXException;
 public class jabbah
         extends JApplet implements ActionListener, ItemListener
 {
+
     //~ Static fields/initializers ---------------------------------------------
 
     //private static final long serialVersionUID = 3256444702936019250L;
@@ -52,8 +53,29 @@ public class jabbah
 
 
     public void actionPerformed(ActionEvent e) {
-        JMenuItem source = (JMenuItem)(e.getSource());
-        System.out.println("action Performed!");
+
+        String action = e.getActionCommand();
+        System.out.println("action Performed!"+action+"h");
+
+        if (action.equals("Import XPDL file "))
+        {
+            JFileChooser chooser = new JFileChooser();
+            // Note: source for ExampleFileFilter can be found in FileChooserDemo,
+            // under the demo/jfc directory in the Java 2 SDK, Standard Edition.
+            //ExampleFileFilter filter = new ExampleFileFilter();
+            //filter.addExtension("jpg");
+            //filter.addExtension("gif");
+            //filter.setDescription("JPG & GIF Images");
+            //chooser.setFileFilter(filter);
+
+            int returnVal = chooser.showOpenDialog(this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION)
+            {
+                System.out.println("You chose to open this file: " +
+                        chooser.getSelectedFile().getAbsolutePath());
+            }
+        }
     }
 
     public void itemStateChanged(ItemEvent e) {
@@ -323,29 +345,22 @@ public class jabbah
         
         this.putColor(jgAdapter, g_left);
 
-
-        // esto crea para un nodo determinado una serie de atributos
-        //DefaultGraphCell cell = jgAdapter.getVertexCell(g_left.vertexSet().iterator().next());
-        //AttributeMap attr = cell.getAttributes();
-        //GraphConstants.setBackground(attr, Color.GRAY);
-
         JGraph jgraph = new JGraph(jgAdapter);
         JGraphFacade facade = new JGraphFacade(jgraph);
         JGraphTreeLayout layout = new JGraphTreeLayout();
-        //layout.setOrientation(SwingConstants.WEST);
+        //layout.setOrientation(SwingConstants.EAST);
+        
         layout.run(facade);
         Map nested = facade.createNestedMap(true, true);
         jgraph.getGraphLayoutCache().edit(nested);
 
-        /* Create the left side jgraph and respective layout and JGraphModelAdapter,
-        using a clone of g */
-
-        // this must be changed in the future, just to show...
+        /* Create the right side jgraph and respective layout and JGraphModelAdapter,
+        using a clone of g_left */
         g_right = new ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>(
                 MyWeightedEdge.class);
-        //g_right = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
+        g_right = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g_left.clone();
 
-        this.buildGraphFromXPDL(g_right);
+        //this.buildMyGraph(g_right);
 
         // call the ECA Rules Block Detection Algorithm
         BlockDetection block = new BlockDetection(g_right);
@@ -363,19 +378,43 @@ public class jabbah
         Map nested2 = facade2.createNestedMap(true, true);
         jgraph2.getGraphLayoutCache().edit(nested2);
 
-        // adjust the settings for the graph
+        // adjust the settings for the graphs
         adjustDisplaySettings(jgraph);
         adjustDisplaySettings(jgraph2);
 
-        // set a 2 columns layout
-        getContentPane().setLayout(new GridLayout(1, 2));
-     
-        //getContentPane().add(new Button("Do a new step"));
+        // panel vertical
+        JPanel vpanel = new JPanel();
+        vpanel.setLayout(new BoxLayout(vpanel,BoxLayout.Y_AXIS));
+
+        // primer panel horizontal para los grafos
+        JPanel panel1 = new JPanel();
+        panel1.setLayout(new BoxLayout(panel1,BoxLayout.X_AXIS));
+
+        getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
+
         JScrollPane left = new JScrollPane(jgraph);
         JScrollPane right = new JScrollPane(jgraph2);
 
-        getContentPane().add(left);
-        getContentPane().add(right);
+        panel1.add(left);
+        panel1.add(right);
+
+        // segundo panel horizontal para boton y progress bar
+        JPanel panel2 = new JPanel();
+        panel2.setLayout(new BoxLayout(panel2,BoxLayout.X_AXIS));
+
+        JButton button = new JButton("Run me!");
+        JProgressBar pbar = new JProgressBar();
+        pbar.setPreferredSize(new Dimension(400,200));
+
+        panel2.add(button);
+        button.setPreferredSize(new Dimension(200,200));
+
+        panel2.add(pbar);
+
+        vpanel.add(panel1);
+        vpanel.add(panel2);
+        
+        getContentPane().add(vpanel);
 
          // create a translator instance and call the corresponding PDDL translation
         Translator T = new Translator(g_right,

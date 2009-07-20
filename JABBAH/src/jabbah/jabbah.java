@@ -43,6 +43,9 @@ public class jabbah
 
     //~ Instance fields --------------------------------------------------------
 
+
+    public static JFrame frame;
+
     //
     private JGraphModelAdapter jgAdapter;
     private JGraphModelAdapter jgAdapter2;
@@ -52,10 +55,12 @@ public class jabbah
     //~ Methods ----------------------------------------------------------------
 
 
+    @SuppressWarnings("static-access")
     public void actionPerformed(ActionEvent e) {
 
         String action = e.getActionCommand();
-        System.out.println("action Performed!"+action+"h");
+        
+        System.out.println("action Performed!"+action+"\n");
 
         if (action.equals("Import XPDL file "))
         {
@@ -74,6 +79,11 @@ public class jabbah
             {
                 System.out.println("You chose to open this file: " +
                         chooser.getSelectedFile().getAbsolutePath());
+
+                this.init(chooser.getSelectedFile().getAbsolutePath());
+                //repaint
+                this.frame.validate();
+                //this.frame.setVisible(true);
             }
         }
     }
@@ -95,7 +105,7 @@ public class jabbah
         menu = new JMenu("Archive");
         menu.setMnemonic(KeyEvent.VK_A);
         menu.getAccessibleContext().setAccessibleDescription(
-        "The only menu in this program that has menu items");
+        "Archive menu");
         menuBar.add(menu);
 
         //a group of JMenuItems
@@ -119,6 +129,23 @@ public class jabbah
 
         menu.add(menuItem);
 
+
+         //Build the first menu.
+        JMenu menu2 = new JMenu("Help");
+        menu2.setMnemonic(KeyEvent.VK_B);
+        menu2.getAccessibleContext().setAccessibleDescription("Help menu");
+
+
+        menuItem = new JMenuItem("About JABBAH ", KeyEvent.VK_B);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_B, ActionEvent.ALT_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
+                "About JABBAH");
+        menuItem.addActionListener(this);
+
+        menu2.add(menuItem);
+        menuBar.add(menu2);
+
         return menuBar;
 
     }
@@ -136,31 +163,32 @@ public class jabbah
 
         jabbah applet = new jabbah();
 
-        JFrame frame = new JFrame(JGraphLayout.VERSION);
+        jabbah.frame = new JFrame(JGraphLayout.VERSION);
 
         JMenuBar menu = applet.createMenuBar();
 
-        frame.setJMenuBar(menu);
+        jabbah.frame.setJMenuBar(menu);
         
-        frame.getContentPane().add(applet);
-        frame.setTitle("JABBAH Framework");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jabbah.frame.getContentPane().add(applet);
+        jabbah.frame.setTitle("JABBAH Framework");
+        jabbah.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setSize(800, 600);
-        applet.init();
-        frame.setVisible(true);
+        jabbah.frame.setSize(800, 600);
+        //applet.init();
+        jabbah.frame.setVisible(true);
 
     }
 
 
 
-     // a method to build our example graph
-    private void buildGraphFromXPDL(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
+     // a method to build our example graph g from the Absolute Path to XPDL file
+    private void buildGraphFromXPDL(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
+                                    String AbsolutePath)
     {
         XpdlObjectMapping xom = new XpdlObjectMapping();
         try
         {
-            xom.parse("/Users/arturogf/ecarules/JABBAH/input/elearning.xpdl");
+            xom.parse(AbsolutePath);
         } catch (SAXException ex)
         {
             Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
@@ -330,7 +358,7 @@ public class jabbah
     /**
      * {@inheritDoc}
      */
-    public void init()
+    public void init(String AbsolutePath)
     {
 
         // create a JGraphT directed weighted graph, using a custom class MyWeightedEdge
@@ -338,7 +366,7 @@ public class jabbah
                 MyWeightedEdge.class);
 
         // build or proof of concept graph
-        this.buildGraphFromXPDL(g_left);
+        this.buildGraphFromXPDL(g_left,AbsolutePath);
 
         /* Create the left side jgraph and respective layout and JGraphModelAdapter */
         jgAdapter = new JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge>(g_left);

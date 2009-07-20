@@ -60,7 +60,7 @@ public class jabbah
 
         String action = e.getActionCommand();
         
-        System.out.println("action Performed!"+action+"\n");
+        System.out.println("action performed: "+action+"\n");
 
         if (action.equals("Import XPDL file "))
         {
@@ -170,7 +170,7 @@ public class jabbah
         jabbah.frame.setJMenuBar(menu);
         
         jabbah.frame.getContentPane().add(applet);
-        jabbah.frame.setTitle("JABBAH Framework");
+        jabbah.frame.setTitle("JABBAH framework");
         jabbah.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         jabbah.frame.setSize(800, 600);
@@ -206,7 +206,7 @@ public class jabbah
         int ig = 0;
         for (int i=0; i<xom.Activities.length; i++)
         {
-            if(xom.Activities[i].type == NodeType.GATEWAY)
+            if (xom.Activities[i].type == NodeType.GATEWAY)
             {
                 if (xom.Activities[i].restriction == TransitionRestriction.JOIN_EXCLUSIVE ||
                     xom.Activities[i].restriction == TransitionRestriction.JOIN_INCLUSIVE)
@@ -215,8 +215,10 @@ public class jabbah
                     xom.Activities[i].node = new MyWeightedVertex("G"+ig);
                 ig = ig+1;
             }
-            else
+            else {
                 xom.Activities[i].node = new MyWeightedVertex("A"+i);
+                xom.Activities[i].node.lane = xom.findLane(xom.Activities[i].lane_id);
+            }
 
             xom.Activities[i].node.type = xom.Activities[i].type;
             xom.Activities[i].node.restriction = xom.Activities[i].restriction;
@@ -235,15 +237,14 @@ public class jabbah
                     new MyWeightedEdge(from, to, "E"+t));
             }
             else
-                System.out.println("Mal asunto");
-
+                System.out.println("Bad thing happened...");
         }
     }
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
 
-        XpdlObjectMapping xom = new XpdlObjectMapping();
+        /*XpdlObjectMapping xom = new XpdlObjectMapping();
         try
         {
             xom.parse("/Users/arturogf/ecarules/JABBAH/input/elearning.xpdl");
@@ -260,6 +261,7 @@ public class jabbah
         {
             Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
         }
+         */
 
         MyWeightedVertex S = new MyWeightedVertex("S");
         MyWeightedVertex A1 = new MyWeightedVertex("A1");

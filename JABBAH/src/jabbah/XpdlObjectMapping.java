@@ -42,6 +42,16 @@ public class XpdlObjectMapping
     {
     }
 
+    public String findLane(String id)
+    {
+        for (int i=0; i<this.Lanes.length; i++)
+        {
+            if (this.Lanes[i].id.equals(id))
+                return Lanes[i].name;
+        }
+        return "";
+    }
+
     public MyWeightedVertex findActivityNode(String id)
     {
         for (int i=0; i< this.Activities.length; i++)
@@ -222,7 +232,7 @@ public class XpdlObjectMapping
         {
             Activities[i] = new Activity();
 
-            Node a_name, a_id, a_gateway, g_type;
+            Node a_name, a_id, a_lane, a_gateway, g_type;
             try
             {
                 a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
@@ -235,6 +245,14 @@ public class XpdlObjectMapping
                 if (a_id != null)
                 {
                     Activities[i].id = a_id.getNodeValue();
+                }
+
+                a_lane = (Node) xpath.evaluate("xpdl2:NodeGraphicsInfos/xpdl2:NodeGraphicsInfo/@LaneId", nodes.item(i),
+                        XPathConstants.NODE);
+                // there is a lane_id for this activity
+                if (a_lane != null)
+                {
+                    Activities[i].lane_id = a_lane.getNodeValue();
                 }
 
                 a_gateway = (Node) xpath.evaluate("xpdl2:Route/@GatewayType", nodes.item(i),

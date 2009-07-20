@@ -75,7 +75,6 @@ public class Translator {
         result = result + "optimize - parameter\n";
 
         // TODO: add LANES and maybe gateways
-        
         result = result+")\n";
         
         return result;

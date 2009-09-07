@@ -17,6 +17,7 @@ import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 public class Translator {
 
     ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G;
+    XpdlObjectMapping xom;
     String d_filepath;
     String p_filepath;
     
@@ -28,8 +29,10 @@ public class Translator {
      * @param pfilepath the problem file path
      */
     public Translator(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
+                        XpdlObjectMapping mapping,
                         String dfilepath, String pfilepath)
     {
+        this.xom = mapping;
         this.G = g;
         this.d_filepath = dfilepath;
         this.p_filepath = pfilepath;
@@ -46,7 +49,31 @@ public class Translator {
     {
         return ("(define (domain " + dname + ")\n");
     }
-    
+
+      /**
+     *
+     * Method to set the domain name
+     * @param dname the problem name we want to appear at the problem
+     * file
+     * @return a string with the header for the problem file
+     */
+    public String setProblemName(String pname)
+    {
+        return ("(define (problem " + pname + ")\n");
+    }
+
+       /**
+     *
+     * Method to set the domain name in the problem file
+     * @param dname the domain name we want to appear at the problem
+     * file
+     * @return a string with the header for the problem file
+     */
+    public String setPDomain(String dname)
+    {
+        return ("(:domain " + dname + ")\n");
+    }
+
     /**
      * 
      * Build up the constants section in HTN-PDDL, mainly activities, lanes and
@@ -74,7 +101,13 @@ public class Translator {
         // TODO: add ALL PARAMETERS FOUND like 'optimize - parameter'
         result = result + "optimize - parameter\n";
 
-        // TODO: add LANES and maybe gateways
+        for (int i=0; i<this.xom.Lanes.length; i++)
+        {
+            result = result + this.xom.Lanes[i].name + " ";
+        }
+        result = result + " - lane\n";
+
+
         result = result+")\n";
         
         return result;
@@ -111,9 +144,10 @@ public class Translator {
      
     public String setDurativeActions()
     {
+
         String result = "";
     
-        for (MyWeightedVertex v : this.G.vertexSet())
+        /*for (MyWeightedVertex v : this.G.vertexSet())
         {
             if (v.type == NodeType.DEFAULT) 
             {
@@ -121,8 +155,25 @@ public class Translator {
                                         v.duration,v.lane);
             }
         
-        }  
-        
+        }  */
+
+        for (int i=0; i<xom.Activities.length; i++)
+        {
+            if (xom.Activities[i].type == NodeType.DEFAULT)
+            {
+                if (this.xom.Activities[i].duration != null)
+                    result = result + this.buildDurativeAction(this.xom.Activities[i].node.label,
+                            Double.parseDouble(this.xom.Activities[i].duration),
+                            xom.findLane(xom.Activities[i].lane_id));
+                else
+                    // if there is no duration at this stage, we consider it has a duration of 1.0 units of time
+                    result = result + this.buildDurativeAction(this.xom.Activities[i].node.label,
+                            1.0,
+                            xom.findLane(xom.Activities[i].lane_id));
+
+
+            }
+        }
         
         return result;    
     }
@@ -286,6 +337,36 @@ public class Translator {
         return result;
     
     }
+
+    public String setObjects()
+    {
+
+        String result = "(:objects\n";
+
+        for (int i=0; i<this.xom.Participants.length; i++)
+             result = result + " " + this.xom.Participants[i].name;
+
+        result = result+ " - participant\n)\n";
+    
+        return result;
+    }
+
+    public String setInitConditions()
+    {
+
+        String result = "(:init\n";
+
+        for (int i=0; i<this.xom.Participants.length; i++)
+             result = result + "(belongs_to_lane " 
+                     + this.xom.Participants[i].name
+                     + " "
+                     + this.xom.Participants[i].lane
+                     + ")\n";
+
+        result = result + ")\n";
+        return result;
+    
+    }
     
     /**
      * 
@@ -307,7 +388,15 @@ public class Translator {
             dfile.write(this.setDurativeActions());
             dfile.write(this.setSerialBlocks());
             dfile.write(this.setSimpleMerges());
-            dfile.close();    
+            dfile.close();
+
+            pfile = new FileWriter(this.p_filepath, false);
+            pfile.write(this.setProblemName("midominio"));
+            pfile.write(this.setPDomain("midominio"));
+            pfile.write(this.setObjects());
+            pfile.write(this.setInitConditions());
+            pfile.close();
+
         } catch (IOException ex)
         {
             Logger.getLogger(Translator.class.getName()).log(Level.SEVERE, null, ex);

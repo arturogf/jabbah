@@ -14,6 +14,7 @@ public class Activity {
     String id;
     String name;
     String lane_id;
+    String duration;
     int type = NodeType.DEFAULT;
     int restriction = TransitionRestriction.NONE;
     //int numInputs;

@@ -16,6 +16,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -183,7 +184,6 @@ public class XpdlObjectMapping
                 {
                     if (a_extended.getNodeValue().equalsIgnoreCase("Lane"))
                     {
-
                         a_lane = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/@Value", nodes.item(i),
                                 XPathConstants.NODE);
                         if (a_lane != null)
@@ -226,13 +226,16 @@ public class XpdlObjectMapping
         NodeList nodes = (NodeList) res_act;
 
         Activities = new Activity[nodes.getLength()];
+        NamedNodeMap n;
 
         // in this loop, the "Activities" array is populated, using xpath parsing on the context node
         for (int i = 0; i < nodes.getLength(); i++)
         {
             Activities[i] = new Activity();
 
-            Node a_name, a_id, a_lane, a_gateway, g_type;
+            NodeList a_extended;
+            NamedNodeMap attr;
+            Node a_name, a_id, a_lane, a_gateway, a_duration, g_type;
             try
             {
                 a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
@@ -254,6 +257,27 @@ public class XpdlObjectMapping
                 {
                     Activities[i].lane_id = a_lane.getNodeValue();
                 }
+
+                 // check if the activity has associated a specific duration, by using
+                // an extended Attribute called "Duration"
+
+                a_extended = (NodeList) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute", nodes.item(i),
+                        XPathConstants.NODESET);
+
+                if (a_extended != null)
+                {
+                    // in this loop, the "Activities" array is populated, using xpath parsing on the context node
+                    for (int j = 0; j < a_extended.getLength(); j++)
+                    {
+                        attr = a_extended.item(j).getAttributes();
+                        if (attr.item(0).getNodeValue().equalsIgnoreCase("Duration"))
+                            if (!(attr.item(1).getNodeValue().equalsIgnoreCase("")))
+                                Activities[i].duration = attr.item(1).getNodeValue();
+                            else
+                                System.out.print("Warning: a Duration extended attribute was found with empty value!");
+                    }
+                }
+
 
                 a_gateway = (Node) xpath.evaluate("xpdl2:Route/@GatewayType", nodes.item(i),
                         XPathConstants.NODE);
@@ -299,6 +323,9 @@ public class XpdlObjectMapping
                     }
 
                 }
+
+               
+
 
             } catch (XPathExpressionException ex)
             {

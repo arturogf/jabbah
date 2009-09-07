@@ -52,6 +52,8 @@ public class jabbah
     private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_left;
     private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_right;
 
+    XpdlObjectMapping xom;
+
     //~ Methods ----------------------------------------------------------------
 
 
@@ -185,7 +187,7 @@ public class jabbah
     private void buildGraphFromXPDL(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
                                     String AbsolutePath)
     {
-        XpdlObjectMapping xom = new XpdlObjectMapping();
+        xom = new XpdlObjectMapping();
         try
         {
             xom.parse(AbsolutePath);
@@ -429,7 +431,7 @@ public class jabbah
         panel1.add(right);
 
         // segundo panel horizontal para boton y progress bar
-        JPanel panel2 = new JPanel();
+        /*JPanel panel2 = new JPanel();
         panel2.setLayout(new BoxLayout(panel2,BoxLayout.X_AXIS));
 
         JButton button = new JButton("Run me!");
@@ -439,15 +441,16 @@ public class jabbah
         panel2.add(button);
         button.setPreferredSize(new Dimension(200,200));
 
-        panel2.add(pbar);
+        panel2.add(pbar);*/
 
         vpanel.add(panel1);
-        vpanel.add(panel2);
+        //vpanel.add(panel2);
         
         getContentPane().add(vpanel);
 
          // create a translator instance and call the corresponding PDDL translation
         Translator T = new Translator(g_right,
+                                        xom,
                                       "/Users/arturogf/ecarules/JABBAH/output/domain.pddl",
                                       "/Users/arturogf/ecarules/JABBAH/output/problem.pddl");
         T.PDDLTranslator();

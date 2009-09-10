@@ -212,9 +212,17 @@ public class jabbah
             {
                 if (xom.Activities[i].restriction == TransitionRestriction.JOIN_EXCLUSIVE ||
                     xom.Activities[i].restriction == TransitionRestriction.JOIN_INCLUSIVE)
+                {
                     xom.Activities[i].node = new MyWeightedVertex("END_G"+ig);
+                    xom.Activities[i].node.param = xom.Activities[i].param;
+                }
+
                 else
+                {
                     xom.Activities[i].node = new MyWeightedVertex("G"+ig);
+                    xom.Activities[i].node.param = xom.Activities[i].param;
+                }
+                
                 ig = ig+1;
             }
             else {

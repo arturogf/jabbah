@@ -74,6 +74,41 @@ public class Translator {
         return ("(:domain " + dname + ")\n");
     }
 
+
+    /**
+     *
+     * Build up the types section in HTN-PDDL
+     * @return a string containing the types section
+     */
+    public String setTypes()
+    {
+        String result = PDDLBlocks.types;
+        for (int i=0; i<xom.Parameters.length; i++)
+            result = result + xom.Parameters[i].type.toLowerCase() + " - object\n";
+
+        result = result+")\n\n";
+        return result;
+    }
+
+     /**
+     *
+     * Build up the predicates section in HTN-PDDL
+     * @return a string containing the predicates section
+     */
+    public String setPredicates()
+    {
+        String result = PDDLBlocks.predicates;
+        for (int i=0; i<xom.Parameters.length; i++)
+            if (xom.Parameters[i].type.equalsIgnoreCase("boolean"))
+                {
+                    result = result + "(value ?x - parameter ?v - boolean)\n";
+                    break;
+                }
+
+        result = result + ")\n\n";
+        return result;
+    }
+
     /**
      * 
      * Build up the constants section in HTN-PDDL, mainly activities, lanes and
@@ -98,9 +133,11 @@ public class Translator {
         
         result = result + "- activity\n";
 
-        // TODO: add ALL PARAMETERS FOUND like 'optimize - parameter'
-        result = result + "optimize - parameter\n";
+        //add ALL PARAMETERS FOUND like 'optimize - parameter'
+         for (int i=0; i<xom.Parameters.length; i++)
+            result = result + xom.Parameters[i].name + " - parameter\n";
 
+        //add ALL LANES FOUND like 'Training - lane'
         for (int i=0; i<this.xom.Lanes.length; i++)
         {
             result = result + this.xom.Lanes[i].name + " ";
@@ -211,10 +248,10 @@ public class Translator {
                    else
                    {
                         result = result + "(Block" + j.label;
-                        //add the parameter
+                        //add the parameter in case that it is a XOR PB Block
                         if (j.type == NodeType.PARALLEL &&
                                 j.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
-                            result = result + " " + "optimize";
+                            result = result + " " + j.param.name;
                          result = result + ") ";
 
                    }
@@ -321,16 +358,40 @@ public class Translator {
                 if (v.type == NodeType.PARALLEL &&
                     v.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
                 {
-                    result = result + "(:task Block" + v.label + "\n";
-                    result = result + ":parameters (?x - parameter)\n";
+                   
 
-                    // we do BY NOW only the ones with boolean parameters (IF/ELSE)
-
-                    /*if (v.param.type.equals("boolean"))
+                    if (v.param != null)
                     {
-                        result = result + "(:method A\n";
-                        result = result + ":precondition " + "()";
-                    }*/ 
+                         result = result + "(:task Block" + v.label + "\n";
+                         result = result + ":parameters (?x - parameter)\n";
+                         
+                        // we do BY NOW only the ones with boolean parameters (IF/ELSE)
+                        String methodname, predicate;
+                        for (int i=0; i<v.param.affectedTransitions.length;i++)
+                        {
+                            if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
+                            {
+
+                                MyWeightedVertex act_node = this.xom.findActivityNode(v.param.affectedTransitions[i].to);
+                                methodname = "if_" + act_node.label;
+                                predicate = "(value ?x false)";
+                                result = result + "(:method "+ methodname+"\n";
+                                result = result + ":precondition " + predicate +"\n";
+                                result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
+                            }
+                            else
+                            {
+                                MyWeightedVertex act_node = this.xom.findActivityNode(v.param.affectedTransitions[i].to);
+                                methodname = "if_" + act_node.label;
+                                predicate = "(value ?x " + v.param.affectedTransitions[i].parameterValue+")";
+                                result = result + "(:method "+ methodname+"\n";
+                                result = result + ":precondition " + predicate +"\n";
+                                result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
+                            }
+                        }                        
+                    }
+                    result = result + ")\n\n";
+
                 }
         }  
         
@@ -356,6 +417,14 @@ public class Translator {
 
         String result = "(:init\n";
 
+        // INITIAL VALUES FOR THE PARAMETERS MUST BE SET BY USER OR EXTERNAL SERVICE
+        for (int i=0; i<this.xom.Parameters.length;i++)
+        {
+            if (this.xom.Parameters[i].type.equalsIgnoreCase("boolean"))
+                    result = result + "(value " + this.xom.Parameters[i].name + " SET_BY_USER_OR_SERVICE)\n";
+        }
+
+        // PARTICIPANTS BELONGS TO SPECIFIC LANES
         for (int i=0; i<this.xom.Participants.length; i++)
              result = result + "(belongs_to_lane " 
                      + this.xom.Participants[i].name
@@ -367,6 +436,31 @@ public class Translator {
         return result;
     
     }
+
+    public String setCustomize()
+    {
+        String result = "(:customization\n" +
+	" (= :time-format \"%d/%m/%Y %H:%M\")\n" +
+	"(= :time-horizon-relative 10000)\n" +
+	"(= :time-start \"21/09/2009 8:00\")\n"+
+	"(= :time-unit :hours)\n)\n\n";
+
+        return result;
+
+    }
+
+    public String setTaskGoal()
+    {
+        MyWeightedVertex rootnode = this.G.vertexSet().iterator().next();
+
+        String result = "(:tasks-goal\n:tasks(\n";
+
+        result = result + "(Block" + rootnode.label + ")\n";
+        result = result + "))\n";
+        
+        return result;
+    }
+
     
     /**
      * 
@@ -382,19 +476,23 @@ public class Translator {
             dfile = new FileWriter(this.d_filepath, false);
             dfile.write(this.setDomainName("midominio"));
             dfile.write(PDDLBlocks.requirements);
-            dfile.write(PDDLBlocks.types);
+            dfile.write(this.setTypes());
             dfile.write(this.setConstants());
-            dfile.write(PDDLBlocks.predicates);
+            dfile.write(this.setPredicates());
             dfile.write(this.setDurativeActions());
             dfile.write(this.setSerialBlocks());
             dfile.write(this.setSimpleMerges());
+            dfile.write("\n)");
             dfile.close();
 
             pfile = new FileWriter(this.p_filepath, false);
             pfile.write(this.setProblemName("midominio"));
             pfile.write(this.setPDomain("midominio"));
+            pfile.write(this.setCustomize());
             pfile.write(this.setObjects());
             pfile.write(this.setInitConditions());
+            pfile.write(this.setTaskGoal());
+            pfile.write("\n)");
             pfile.close();
 
         } catch (IOException ex)

@@ -53,12 +53,33 @@ public class XpdlObjectMapping
         return "";
     }
 
+    public Transition findTransition(String id)
+    {
+        for (int i=0; i<this.Transitions.length; i++)
+        {
+            if (this.Transitions[i].id.equals(id))
+                return Transitions[i];
+        }
+
+        return null;
+
+    }
+
     public MyWeightedVertex findActivityNode(String id)
     {
         for (int i=0; i< this.Activities.length; i++)
             if (this.Activities[i].id.equalsIgnoreCase(id))
                 return this.Activities[i].node;
         
+        return null;
+    }
+
+     public Activity findActivity(String id)
+    {
+        for (int i=0; i< this.Activities.length; i++)
+            if (this.Activities[i].id.equalsIgnoreCase(id))
+                return this.Activities[i];
+
         return null;
     }
 
@@ -78,12 +99,67 @@ public class XpdlObjectMapping
         XPath xpath = xfactory.newXPath();
         xpath.setNamespaceContext(new XpdlNamespaceContext());
 
+        this.parseParameters(doc, xpath);
         this.parseLanes(doc, xpath);
         this.parseParticipants(doc, xpath);
 
-        this.parseActivities(doc, xpath);
         this.parseTransitions(doc, xpath);
+        this.parseActivities(doc, xpath);
     }
+
+
+    private void parseParameters(org.w3c.dom.Document doc, XPath xpath)
+    {
+        XPathExpression exp_param = null;
+        try
+        {
+            exp_param = xpath.compile("//xpdl2:FormalParameter");
+        } catch (XPathExpressionException ex)
+        {
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        Object res_param = null;
+        try
+        {
+            res_param = exp_param.evaluate(doc, XPathConstants.NODESET);
+        } catch (XPathExpressionException ex)
+        {
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        NodeList nodes = (NodeList) res_param;
+
+        Parameters = new Parameter[nodes.getLength()];
+
+        // in this loop, the "Lanes" array is populated, using xpath parsing on the context node
+        for (int i = 0; i < nodes.getLength(); i++)
+        {
+            Parameters[i] = new Parameter();
+
+            Node p_name, p_id, p_type;
+            try
+            {
+                p_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
+                Parameters[i].id = p_id.getNodeValue();
+                
+                p_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
+                Parameters[i].name = p_name.getNodeValue();
+
+                p_type = (Node) xpath.evaluate("xpdl2:DataType/xpdl2:BasicType", nodes.item(i),
+                        XPathConstants.NODE);
+                Parameters[i].type = p_type.getAttributes().item(0).getNodeValue();
+
+                
+            } catch (XPathExpressionException ex)
+            {
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
+    }
+
 
     private void parseLanes(org.w3c.dom.Document doc, XPath xpath)
     {
@@ -233,7 +309,7 @@ public class XpdlObjectMapping
         {
             Activities[i] = new Activity();
 
-            NodeList a_extended;
+            NodeList a_extended, a_trefs;
             NamedNodeMap attr;
             Node a_name, a_id, a_lane, a_gateway, a_duration, g_type;
             try
@@ -319,10 +395,30 @@ public class XpdlObjectMapping
                             else if (g_type.getNodeValue().equalsIgnoreCase("Exclusive"))
                             {
                                 Activities[i].restriction = TransitionRestriction.SPLIT_EXCLUSIVE;
+
+                                a_trefs = (NodeList) xpath.evaluate("xpdl2:TransitionRestrictions/xpdl2:TransitionRestriction/xpdl2:Split/xpdl2:TransitionRefs/xpdl2:TransitionRef", nodes.item(i),
+                        XPathConstants.NODESET);
+
+                                if (a_trefs != null)
+                                {
+
+                                    Activities[i].param = new Parameter();
+                                    Activities[i].param.affectedTransitions = new Transition[a_trefs.getLength()];
+                                    // now we need to parse the transitions that are involved in the XOR SPLIT
+                                    for (int j = 0; j < a_trefs.getLength(); j++)
+                                    {
+                                        attr = a_trefs.item(j).getAttributes();
+                                        Activities[i].param.affectedTransitions[j] = this.findTransition(attr.item(0).getNodeValue());
+                                        Activities[i].param.name = Activities[i].param.affectedTransitions[j].parameterId;
+                                    }
+
                             }
                     }
 
                 }
+            }
+
+
 
                
 
@@ -365,7 +461,7 @@ public class XpdlObjectMapping
         {
             Transitions[i] = new Transition();
 
-            Node a_name, a_id, a_from, a_to;
+            Node a_name, a_id, a_from, a_to, a_param_id, a_operator, a_param_value;
             try
             {
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
@@ -379,6 +475,26 @@ public class XpdlObjectMapping
 
                 a_to = (Node) xpath.evaluate("@To", nodes.item(i), XPathConstants.NODE);
                 Transitions[i].to = a_to.getNodeValue();
+                
+                a_param_id = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:ParameterId",
+                nodes.item(i), XPathConstants.NODE);
+                if (a_param_id!=null)
+                    if (a_param_id.getFirstChild()!=null)
+                        Transitions[i].parameterId = a_param_id.getFirstChild().getTextContent();
+
+                a_operator = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:Operator",
+                nodes.item(i), XPathConstants.NODE);
+                if (a_operator!=null)
+                    if (a_operator.getFirstChild()!=null)
+                        Transitions[i].operator = a_operator.getFirstChild().getTextContent();
+
+                a_param_value = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:ParameterValue",
+                nodes.item(i), XPathConstants.NODE);
+                if (a_param_value!=null)
+                    if (a_param_value.getFirstChild()!=null)
+                    Transitions[i].parameterValue = a_param_value.getFirstChild().getTextContent();
+
+
 
             } catch (XPathExpressionException ex)
             {

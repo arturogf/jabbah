@@ -24,17 +24,13 @@ public class PDDLBlocks
 
   public static final String types = "\n(:types\n" +
  	"parameter - object\n" +
-    "boolean - object\n" +
 	"activity - object\n" +
-    "gateway - object\n" +
 	"participant - object\n" +
-	"role - object\n" +
-	"lane - object)\n\n";
+	"lane - object\n";
 
 
-public static final String predicates = "\n(:predicates\n" +
+public static final String predicates =
+        "\n(:predicates\n" +
 	"(completed ?a - activity)\n"+
-	"(belongs_to_lane ?p - participant ?a - lane)\n" +
-    "(igual ?x - parameter ?y - boolean)" +
-        ")\n\n";
-}
+	"(belongs_to_lane ?p - participant ?a - lane)\n";
+    }

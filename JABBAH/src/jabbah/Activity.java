@@ -19,6 +19,7 @@ public class Activity {
     int restriction = TransitionRestriction.NONE;
     //int numInputs;
     MyWeightedVertex node;
+    Parameter param;
 
     public Activity()
     {

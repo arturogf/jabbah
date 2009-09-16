@@ -65,6 +65,15 @@ public class XpdlObjectMapping
 
     }
 
+    public String findActivityName(String label)
+    {
+        for (int i=0; i< this.Activities.length; i++)
+            if (this.Activities[i].node.label.equalsIgnoreCase(label))
+                return this.Activities[i].name;
+
+        return null;
+    }
+
     public MyWeightedVertex findActivityNode(String id)
     {
         for (int i=0; i< this.Activities.length; i++)

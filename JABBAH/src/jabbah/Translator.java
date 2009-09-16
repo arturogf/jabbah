@@ -20,6 +20,7 @@ public class Translator {
     XpdlObjectMapping xom;
     String d_filepath;
     String p_filepath;
+    int uid = 1;
     
     /**
      * 
@@ -163,9 +164,27 @@ public class Translator {
     {
         String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
 	":parameters(?w - participant)" + "\n" +
+        ":meta (\n" +
+        "(:tag prettyprint  \"?start; ?end; ?duration; " + this.xom.findActivityName(name) + "\")\n" +
+	"(:tag short \"ACTIVIDAD " + this.xom.findActivityName(name) + "\")\n" +
+	//	(:tag resource "?f")
+	//	(:tag resource "?dosis")
+		"(:tag resource \"?w\")\n" +
+		"(:tag monitoring \"manual\")\n" +
+	//	"(:tag UID \""+ name.substring(1,name.length()) + "\")\n" +
+                "(:tag UID \""+ this.uid + "\")\n" +
+		"(:tag Type \"0\")\n" +
+		"(:tag OutlineLevel \"1\")\n" +
+		"(:tag OutlineNumber \"1\")\n" +
+		"(:tag WBS \"1\")\n" +
+		"(:tag Summary \"0\")\n)\n" +
+        //		(:tag scope "?objetivo")
+	
 	":duration (= ?duration " + duration.toString() + ")\n" +
 	":condition(belongs_to_lane ?w " + lane + ")\n" +
 	":effect (completed " + name.toLowerCase() +"))\n";
+
+        this.uid = this.uid + 1;
         
         return result;
     }
@@ -236,14 +255,21 @@ public class Translator {
                          ":tasks (";
                 
                 int num_worker = 1;
+                int dont_do_next = 0;
                 
                 for (MyWeightedEdge e : this.G.outgoingEdgesOf(v))
                 {
                    MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
                    if (j.type == NodeType.DEFAULT)
                    {
-                        result = result + "(" + j.label + " ?w" + num_worker + ") ";
-                        num_worker = num_worker + 1;
+                       // the next is a right brother of a parallel block
+                       if (dont_do_next==1) {
+                           dont_do_next=0;
+                           }
+                       else {
+                            result = result + "(" + j.label + " ?w" + num_worker + ") ";
+                            num_worker = num_worker + 1;
+                        }
                    }
                    else
                    {
@@ -252,7 +278,10 @@ public class Translator {
                         if (j.type == NodeType.PARALLEL &&
                                 j.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
                             result = result + " " + j.param.name;
+                        else
+                            dont_do_next = 1;
                          result = result + ") ";
+
 
                    }
                 }

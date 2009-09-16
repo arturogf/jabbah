@@ -459,8 +459,8 @@ public class jabbah
          // create a translator instance and call the corresponding PDDL translation
         Translator T = new Translator(g_right,
                                         xom,
-                                      "/Users/arturogf/ecarules/JABBAH/output/domain.pddl",
-                                      "/Users/arturogf/ecarules/JABBAH/output/problem.pddl");
+                                      "/home/arturogf/ecarules/JABBAH/output/domain.pddl",
+                                      "/home/arturogf/ecarules/JABBAH/output/problem.pddl");
         T.PDDLTranslator();
 
     }

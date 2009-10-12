@@ -165,10 +165,8 @@ public class Translator {
         String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
 	":parameters(?w - participant)" + "\n" +
         ":meta (\n" +
-        "(:tag prettyprint  \"?start; ?end; ?duration; " + this.xom.findActivityName(name) + "\")\n" +
+        "(:tag prettyprint  \"START: ?start; | END: ?end; | DURATION: ?duration; |   '" + this.xom.findActivityName(name) + "' ALLOCATED TO '?w' \")\n" +
 	"(:tag short \"ACTIVIDAD " + this.xom.findActivityName(name) + "\")\n" +
-	//	(:tag resource "?f")
-	//	(:tag resource "?dosis")
 		"(:tag resource \"?w\")\n" +
 		"(:tag monitoring \"manual\")\n" +
 	//	"(:tag UID \""+ name.substring(1,name.length()) + "\")\n" +
@@ -177,9 +175,7 @@ public class Translator {
 		"(:tag OutlineLevel \"1\")\n" +
 		"(:tag OutlineNumber \"1\")\n" +
 		"(:tag WBS \"1\")\n" +
-		"(:tag Summary \"0\")\n)\n" +
-        //		(:tag scope "?objetivo")
-	
+		"(:tag Summary \"0\")\n)\n" +	
 	":duration (= ?duration " + duration.toString() + ")\n" +
 	":condition(belongs_to_lane ?w " + lane + ")\n" +
 	":effect (completed " + name.toLowerCase() +"))\n";
@@ -450,7 +446,7 @@ public class Translator {
         for (int i=0; i<this.xom.Parameters.length;i++)
         {
             if (this.xom.Parameters[i].type.equalsIgnoreCase("boolean"))
-                    result = result + "(value " + this.xom.Parameters[i].name + " SET_BY_USER_OR_SERVICE)\n";
+                    result = result + "(value " + this.xom.Parameters[i].name + " true)\n";
         }
 
         // PARTICIPANTS BELONGS TO SPECIFIC LANES

@@ -32,11 +32,6 @@ import com.jgraph.layout.*;
 import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 import com.jgraph.layout.tree.JGraphTreeLayout;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.Map;
 import org.xml.sax.SAXException;
@@ -53,9 +48,9 @@ public class Main extends javax.swing.JFrame {
     private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
     private static final Dimension DEFAULT_SIZE = new Dimension(1200, 1200);
 
-    //~ Instance fields --------------------------------------------------------
+    private static Logger logger = Logger.getLogger(Main.class.getName());
 
-    //public static JFrame frame;
+    //~ Instance fields --------------------------------------------------------
     //
     private JGraphModelAdapter jgAdapter;
     private JGraphModelAdapter jgAdapter2;
@@ -84,6 +79,16 @@ public class Main extends javax.swing.JFrame {
         fileMenu = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         exitMenuItem = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        jSeparator1 = new javax.swing.JSeparator();
+        jCheckBoxMenuItem3 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem4 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem5 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem6 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem7 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem8 = new javax.swing.JCheckBoxMenuItem();
+        jCheckBoxMenuItem9 = new javax.swing.JCheckBoxMenuItem();
         helpMenu = new javax.swing.JMenu();
         contentsMenuItem = new javax.swing.JMenuItem();
         aboutMenuItem = new javax.swing.JMenuItem();
@@ -96,11 +101,11 @@ public class Main extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGap(0, 582, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 279, Short.MAX_VALUE)
+            .addGap(0, 414, Short.MAX_VALUE)
         );
 
         fileMenu.setText("File");
@@ -123,6 +128,55 @@ public class Main extends javax.swing.JFrame {
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
+
+        jMenu1.setText("Debug");
+        jMenu1.setName("jMenu1"); // NOI18N
+
+        jCheckBoxMenuItem1.setSelected(true);
+        jCheckBoxMenuItem1.setText("Turn Debug OFF");
+        jCheckBoxMenuItem1.setName("jCheckBoxMenuItem1"); // NOI18N
+        jCheckBoxMenuItem1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jCheckBoxMenuItem1MouseReleased(evt);
+            }
+        });
+        jMenu1.add(jCheckBoxMenuItem1);
+
+        jSeparator1.setName("jSeparator1"); // NOI18N
+        jMenu1.add(jSeparator1);
+
+        jCheckBoxMenuItem3.setSelected(true);
+        jCheckBoxMenuItem3.setText("Log SEVERE");
+        jCheckBoxMenuItem3.setName("jCheckBoxMenuItem3"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem3);
+
+        jCheckBoxMenuItem4.setSelected(true);
+        jCheckBoxMenuItem4.setText("Log WARNING");
+        jCheckBoxMenuItem4.setName("jCheckBoxMenuItem4"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem4);
+
+        jCheckBoxMenuItem5.setSelected(true);
+        jCheckBoxMenuItem5.setText("Log INFO");
+        jCheckBoxMenuItem5.setName("jCheckBoxMenuItem5"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem5);
+
+        jCheckBoxMenuItem6.setText("Log CONFIG");
+        jCheckBoxMenuItem6.setName("jCheckBoxMenuItem6"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem6);
+
+        jCheckBoxMenuItem7.setText("Log FINE");
+        jCheckBoxMenuItem7.setName("jCheckBoxMenuItem7"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem7);
+
+        jCheckBoxMenuItem8.setText("Log FINER");
+        jCheckBoxMenuItem8.setName("jCheckBoxMenuItem8"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem8);
+
+        jCheckBoxMenuItem9.setText("Log FINEST");
+        jCheckBoxMenuItem9.setName("jCheckBoxMenuItem9"); // NOI18N
+        jMenu1.add(jCheckBoxMenuItem9);
+
+        menuBar.add(jMenu1);
 
         helpMenu.setText("Help");
 
@@ -160,7 +214,7 @@ public class Main extends javax.swing.JFrame {
         int returnVal = chooser.showOpenDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            System.out.println("You chose to open this file: " +
+            logger.fine("You chose to open this file: " +
                     chooser.getSelectedFile().getAbsolutePath());
 
             this.init(chooser.getSelectedFile().getAbsolutePath());
@@ -169,6 +223,30 @@ public class Main extends javax.swing.JFrame {
             //this.frame.setVisible(true);
             }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jCheckBoxMenuItem1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItem1MouseReleased
+        // TODO add your handling code here:
+          if (this.jCheckBoxMenuItem1.isSelected()) {
+            this.jCheckBoxMenuItem1.setText("Turn Debug ON");
+            this.jCheckBoxMenuItem3.setEnabled(false);
+            this.jCheckBoxMenuItem4.setEnabled(false);
+            this.jCheckBoxMenuItem5.setEnabled(false);
+            this.jCheckBoxMenuItem6.setEnabled(false);
+            this.jCheckBoxMenuItem7.setEnabled(false);
+            this.jCheckBoxMenuItem8.setEnabled(false);
+            this.jCheckBoxMenuItem9.setEnabled(false);
+         }
+        else {
+            this.jCheckBoxMenuItem1.setText("Turn Debug OFF");
+            this.jCheckBoxMenuItem3.setEnabled(true);
+            this.jCheckBoxMenuItem4.setEnabled(true);
+            this.jCheckBoxMenuItem5.setEnabled(true);
+            this.jCheckBoxMenuItem6.setEnabled(true);
+            this.jCheckBoxMenuItem7.setEnabled(true);
+            this.jCheckBoxMenuItem8.setEnabled(true);
+            this.jCheckBoxMenuItem9.setEnabled(true);
+        }
+    }//GEN-LAST:event_jCheckBoxMenuItem1MouseReleased
 
     /**
     * @param args the command line arguments
@@ -187,8 +265,18 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenu helpMenu;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem3;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem4;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem5;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem6;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem7;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem8;
+    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem9;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JMenuBar menuBar;
     // End of variables declaration//GEN-END:variables
 
@@ -204,19 +292,24 @@ public class Main extends javax.swing.JFrame {
             xom.parse(AbsolutePath);
         } catch (SAXException ex)
         {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Ocurrió una excepción al parsear el XPDL", ex);
         } catch (XPathExpressionException ex)
         {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Ocurrió un error con XPATH al parsear el XPDL", ex);
         } catch (IOException ex)
         {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Ocurrió una excepción de I/O al parsear el XPDL", ex);
         } catch (ParserConfigurationException ex)
         {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, "Ocurrió una excepción de configuración de " +
+                    "parser al leer el XPDL", ex);
         }
 
+        if (xom.Activities.length==0)
+            logger.severe ("El número de actividades es CERO en el método buildGraphFromXPDL()");
+
         int ig = 0;
+        
         for (int i=0; i<xom.Activities.length; i++)
         {
             if (xom.Activities[i].type == NodeType.GATEWAY)
@@ -246,6 +339,9 @@ public class Main extends javax.swing.JFrame {
             g.addVertex(xom.Activities[i].node);
         }
 
+        if (xom.Transitions.length==0)
+            logger.severe ("El número de transiciones es CERO en "+
+                    Main.class.getName() + "buildGraphFromXPDL()");
 
         for (int t=0; t< xom.Transitions.length; t++)
         {
@@ -258,32 +354,13 @@ public class Main extends javax.swing.JFrame {
                     new MyWeightedEdge(from, to, "E"+t));
             }
             else
-                System.out.println("Bad thing happened...");
+                logger.severe("se encontró una transición con origen o destino " +
+                        "NULL en " + Main.class.getName() + " buildGraphFromXPDL");
         }
     }
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
-
-        /*XpdlObjectMapping xom = new XpdlObjectMapping();
-        try
-        {
-            xom.parse("/Users/arturogf/ecarules/JABBAH/input/elearning.xpdl");
-        } catch (SAXException ex)
-        {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (XPathExpressionException ex)
-        {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex)
-        {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException ex)
-        {
-            Logger.getLogger(jabbah.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         */
-
         MyWeightedVertex S = new MyWeightedVertex("S");
         MyWeightedVertex A1 = new MyWeightedVertex("A1");
         MyWeightedVertex A2 = new MyWeightedVertex("A2");

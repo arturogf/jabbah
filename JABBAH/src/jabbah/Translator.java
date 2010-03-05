@@ -267,7 +267,7 @@ public class Translator {
                             num_worker = num_worker + 1;
                         }
                    }
-                   else
+                   else if (j.type!=NodeType.START && j.type!=NodeType.END)
                    {
                         result = result + "(Block" + j.label;
                         //add the parameter in case that it is a XOR PB Block

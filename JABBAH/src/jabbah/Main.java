@@ -30,8 +30,10 @@ import org.jgrapht.graph.*;
 // resolve ambiguity
 import com.jgraph.layout.*;
 import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
-import com.jgraph.layout.tree.JGraphTreeLayout;
 
+import java.awt.geom.Rectangle2D;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 import org.xml.sax.SAXException;
@@ -46,7 +48,7 @@ public class Main extends javax.swing.JFrame {
 
     //private static final long serialVersionUID = 3256444702936019250L;
     private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
-    private static final Dimension DEFAULT_SIZE = new Dimension(1200, 1200);
+    //private static final Dimension DEFAULT_SIZE = new Dimension(1200, 800);
 
     private static Logger logger = Logger.getLogger(Main.class.getName());
 
@@ -58,6 +60,7 @@ public class Main extends javax.swing.JFrame {
     private ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g_right;
 
     XpdlObjectMapping xom;
+    Translator T;
 
 
     /** Creates new form Main */
@@ -75,6 +78,15 @@ public class Main extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        graphPanel = new javax.swing.JPanel();
+        npmPanel = new javax.swing.JPanel();
+        domainPanel = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextPane1 = new javax.swing.JTextPane();
+        problemPanel = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextPane2 = new javax.swing.JTextPane();
         menuBar = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
@@ -97,15 +109,98 @@ public class Main extends javax.swing.JFrame {
 
         jPanel1.setName("jPanel1"); // NOI18N
 
+        jTabbedPane1.setTabPlacement(javax.swing.JTabbedPane.LEFT);
+        jTabbedPane1.setEnabled(false);
+        jTabbedPane1.setName("jTabbedPane1"); // NOI18N
+        jTabbedPane1.setOpaque(true);
+
+        graphPanel.setName("graphPanel"); // NOI18N
+
+        javax.swing.GroupLayout graphPanelLayout = new javax.swing.GroupLayout(graphPanel);
+        graphPanel.setLayout(graphPanelLayout);
+        graphPanelLayout.setHorizontalGroup(
+            graphPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 444, Short.MAX_VALUE)
+        );
+        graphPanelLayout.setVerticalGroup(
+            graphPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 410, Short.MAX_VALUE)
+        );
+
+        jTabbedPane1.addTab("Graph View", graphPanel);
+
+        npmPanel.setName("npmPanel"); // NOI18N
+
+        javax.swing.GroupLayout npmPanelLayout = new javax.swing.GroupLayout(npmPanel);
+        npmPanel.setLayout(npmPanelLayout);
+        npmPanelLayout.setHorizontalGroup(
+            npmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 444, Short.MAX_VALUE)
+        );
+        npmPanelLayout.setVerticalGroup(
+            npmPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 410, Short.MAX_VALUE)
+        );
+
+        jTabbedPane1.addTab("Nested Process View", npmPanel);
+
+        domainPanel.setName("domainPanel"); // NOI18N
+
+        jScrollPane1.setName("jScrollPane1"); // NOI18N
+
+        jTextPane1.setName("jTextPane1"); // NOI18N
+        jScrollPane1.setViewportView(jTextPane1);
+
+        javax.swing.GroupLayout domainPanelLayout = new javax.swing.GroupLayout(domainPanel);
+        domainPanel.setLayout(domainPanelLayout);
+        domainPanelLayout.setHorizontalGroup(
+            domainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 444, Short.MAX_VALUE)
+            .addGroup(domainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 444, Short.MAX_VALUE))
+        );
+        domainPanelLayout.setVerticalGroup(
+            domainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 410, Short.MAX_VALUE)
+            .addGroup(domainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("HTN-PDDL Domain", domainPanel);
+
+        problemPanel.setName("problemPanel"); // NOI18N
+
+        jScrollPane2.setName("jScrollPane2"); // NOI18N
+
+        jTextPane2.setName("jTextPane2"); // NOI18N
+        jScrollPane2.setViewportView(jTextPane2);
+
+        javax.swing.GroupLayout problemPanelLayout = new javax.swing.GroupLayout(problemPanel);
+        problemPanel.setLayout(problemPanelLayout);
+        problemPanelLayout.setHorizontalGroup(
+            problemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 444, Short.MAX_VALUE)
+            .addGroup(problemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 444, Short.MAX_VALUE))
+        );
+        problemPanelLayout.setVerticalGroup(
+            problemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 410, Short.MAX_VALUE)
+            .addGroup(problemPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 410, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("HTN-PDDL Problem", problemPanel);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 582, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 589, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 414, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
         );
 
         fileMenu.setText("File");
@@ -262,8 +357,10 @@ public class Main extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem contentsMenuItem;
+    private javax.swing.JPanel domainPanel;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JPanel graphPanel;
     private javax.swing.JMenu helpMenu;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem3;
@@ -276,8 +373,15 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JTextPane jTextPane2;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JPanel npmPanel;
+    private javax.swing.JPanel problemPanel;
     // End of variables declaration//GEN-END:variables
 
 
@@ -330,7 +434,10 @@ public class Main extends javax.swing.JFrame {
                 ig = ig+1;
             }
             else {
-                xom.Activities[i].node = new MyWeightedVertex("A"+i);
+                xom.Activities[i].node = new MyWeightedVertex(xom.Activities[i].name);
+
+                //xom.Activities[i].node = new MyWeightedVertex("A"+i);
+
                 xom.Activities[i].node.lane = xom.findLane(xom.Activities[i].lane_id);
             }
 
@@ -474,9 +581,10 @@ public class Main extends javax.swing.JFrame {
         this.putColor(jgAdapter, g_left);
 
         JGraph jgraph = new JGraph(jgAdapter);
+        jgraph.setGridVisible(true);
         JGraphFacade facade = new JGraphFacade(jgraph);
-        JGraphTreeLayout layout = new JGraphTreeLayout();
-        //layout.setOrientation(SwingConstants.EAST);
+        JGraphHierarchicalLayout layout = new JGraphHierarchicalLayout();
+        layout.setOrientation(SwingConstants.WEST);
 
         layout.run(facade);
         Map nested = facade.createNestedMap(true, true);
@@ -510,103 +618,170 @@ public class Main extends javax.swing.JFrame {
         adjustDisplaySettings(jgraph);
         adjustDisplaySettings(jgraph2);
 
-        // panel vertical
-        JPanel vpanel = new JPanel();
-        vpanel.setLayout(new BoxLayout(vpanel,BoxLayout.Y_AXIS));
+        this.jTabbedPane1.setEnabled(true);
+        this.graphPanel.setLayout(new BoxLayout(this.graphPanel, BoxLayout.X_AXIS));
+        this.npmPanel.setLayout(new BoxLayout(this.npmPanel, BoxLayout.X_AXIS));
+        
+        //getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
 
-        // primer panel horizontal para los grafos
-        JPanel panel1 = new JPanel();
-        panel1.setLayout(new BoxLayout(panel1,BoxLayout.X_AXIS));
-
-        getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
-
-        JScrollPane left = new JScrollPane(jgraph);
+        JScrollPane left = new JScrollPane(jgraph);// = new JScrollPane(jgraph);
+        left.createHorizontalScrollBar();
         JScrollPane right = new JScrollPane(jgraph2);
+        
+        this.graphPanel.add(left);
+        this.npmPanel.add(right);
 
-        panel1.add(left);
-        panel1.add(right);
-
-        // segundo panel horizontal para boton y progress bar
-        /*JPanel panel2 = new JPanel();
-        panel2.setLayout(new BoxLayout(panel2,BoxLayout.X_AXIS));
-
-        JButton button = new JButton("Run me!");
-        JProgressBar pbar = new JProgressBar();
-        pbar.setPreferredSize(new Dimension(400,200));
-
-        panel2.add(button);
-        button.setPreferredSize(new Dimension(200,200));
-
-        panel2.add(pbar);*/
-
-        vpanel.add(panel1);
-        //vpanel.add(panel2);
-
-        getContentPane().add(vpanel);
 
          // create a translator instance and call the corresponding PDDL translation
-        Translator T = new Translator(g_right,
+        this.T = new Translator(g_right,
                                         xom,
                                       "/home/arturogf/jabbah/JABBAH/output/domain.pddl",
                                       "/home/arturogf/jabbah/JABBAH/output/problem.pddl");
-        T.PDDLTranslator();
+        this.T.PDDLTranslator();
+
+        try {
+            this.jTextPane1.read(new FileInputStream(this.T.d_filepath), null);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            this.jTextPane2.read(new FileInputStream(this.T.p_filepath), null);
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }
 
 
     private void putColor(JGraphModelAdapter<MyWeightedVertex, MyWeightedEdge> adapter,
-                                   ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> graph)
-    {
-         DefaultGraphCell cell;
-         AttributeMap attr;
-    // esto crea para un nodo determinado una serie de atributos
+            ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> graph) {
+        DefaultGraphCell cell;
+        AttributeMap attr;
+        // esto crea para un nodo determinado una serie de atributos
         Iterator iter = graph.vertexSet().iterator();
 
-        while (iter.hasNext())
-        {
-             MyWeightedVertex foo = ( MyWeightedVertex )  iter.next (  ) ;
+        while (iter.hasNext()) {
+            MyWeightedVertex foo = (MyWeightedVertex) iter.next();
             cell = adapter.getVertexCell(foo);
             attr = cell.getAttributes();
-            if (foo.type == NodeType.GATEWAY)
-            {
+
+            if (foo.type == NodeType.GATEWAY) {
                 GraphConstants.setBackground(attr, Color.ORANGE);
+                GraphConstants.setAutoSize(attr, true);
+
+                if (foo.restriction == TransitionRestriction.SPLIT_PARALLEL ||
+                        foo.restriction == TransitionRestriction.JOIN_INCLUSIVE) {
+                    ImageIcon i = new ImageIcon("/home/arturogf/jabbah/JABBAH/src/icons/split22.png");
+                    GraphConstants.setIcon(attr, i);
+                } else {
+                    ImageIcon i = new ImageIcon("/home/arturogf/jabbah/JABBAH/src/icons/conditional22.png");
+                    GraphConstants.setIcon(attr, i);
+                }
 
                 GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.BLACK));
             }
-             if (foo.type == NodeType.PARALLEL)
-            {
+            if (foo.type == NodeType.PARALLEL) {
                 GraphConstants.setBackground(attr, Color.RED);
 
                 GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.BLACK));
             }
-             if (foo.type == NodeType.SERIAL)
-            {
+
+            if (foo.type == NodeType.SERIAL) {
                 GraphConstants.setBackground(attr, Color.BLUE);
 
                 GraphConstants.setBorder(attr, BorderFactory.createLineBorder(Color.BLACK));
 
+
             }
-             if (foo.type == NodeType.DEFAULT)
-            {
-                GraphConstants.setBackground(attr, Color.GRAY);
+            if (foo.type == NodeType.START) {
+                Rectangle2D cellrec = new Rectangle(20, 20, 100, 50);
+
+                ImageIcon i = new ImageIcon("/home/arturogf/jabbah/JABBAH/src/icons/begin22.png");
+                GraphConstants.setIcon(attr, i);
+
+                GraphConstants.setBounds(attr, cellrec);
+                GraphConstants.setConstrained(attr, true);
+                GraphConstants.setSizeable(attr, false);
+
+                GraphConstants.setGradientColor(attr, Color.blue.brighter());
+
+                GraphConstants.setBorderColor(attr, Color.black);
+
+                GraphConstants.setBackground(attr, Color.white);
+
+                GraphConstants.setOpaque(attr, true);
+
+                GraphConstants.setEditable(attr, false);
+
+                GraphConstants.setSelectable(attr, true);
+
+                GraphConstants.setForeground(attr, Color.BLACK);
+            }
+
+            if (foo.type == NodeType.END) {
+                Rectangle2D cellrec = new Rectangle(20, 20, 100, 50);
+
+                ImageIcon i = new ImageIcon("/home/arturogf/jabbah/JABBAH/src/icons/end22.png");
+                GraphConstants.setIcon(attr, i);
+
+                GraphConstants.setBounds(attr, cellrec);
+                GraphConstants.setConstrained(attr, true);
+                GraphConstants.setSizeable(attr, false);
+
+                GraphConstants.setGradientColor(attr, Color.blue.brighter());
+
+                GraphConstants.setBorderColor(attr, Color.black);
+
+                GraphConstants.setBackground(attr, Color.white);
+
+                GraphConstants.setOpaque(attr, true);
+
+                GraphConstants.setEditable(attr, false);
+
+                GraphConstants.setSelectable(attr, true);
+
+                GraphConstants.setForeground(attr, Color.BLACK);
+            }
+            if (foo.type == NodeType.DEFAULT) {
+                Rectangle2D cellrec = new Rectangle(20, 20, 100, 50);
+
+                ImageIcon i = new ImageIcon("/home/arturogf/jabbah/JABBAH/src/icons/user22.png");
+                GraphConstants.setIcon(attr, i);
+
+                GraphConstants.setBounds(attr, cellrec);
+                GraphConstants.setConstrained(attr, true);
+                GraphConstants.setSizeable(attr, false);
+
+                GraphConstants.setGradientColor(attr, Color.yellow.brighter());
+
+                GraphConstants.setBorderColor(attr, Color.black);
+
+                GraphConstants.setBackground(attr, Color.white);
+
+                GraphConstants.setOpaque(attr, true);
+
+                GraphConstants.setEditable(attr, false);
+
+                GraphConstants.setSelectable(attr, true);
+
+                GraphConstants.setForeground(attr, Color.BLACK);
+
             }
         }
     }
 
-
-
-    private void adjustDisplaySettings(JGraph jg)
-    {
-        jg.setPreferredSize(DEFAULT_SIZE);
+    private void adjustDisplaySettings(JGraph jg) {
+        //jg.setPreferredSize(DEFAULT_SIZE);
 
         Color c = DEFAULT_BG_COLOR;
 
         String colorStr = null;
 
-       // try {
-       //     colorStr = getParameter("bgcolor");
-       // } catch (Exception e) {
-       // }
+        // try {
+        //     colorStr = getParameter("bgcolor");
+        // } catch (Exception e) {
+        // }
 
         if (colorStr != null) {
             c = Color.decode(colorStr);
@@ -621,13 +796,11 @@ public class Main extends javax.swing.JFrame {
      */
     private static class ListenableDirectedMultigraph<V, E>
             extends DefaultListenableGraph<V, E>
-            implements DirectedGraph<V, E>
-    {
+            implements DirectedGraph<V, E> {
 
         private static final long serialVersionUID = 1L;
 
-        ListenableDirectedMultigraph(Class<E> edgeClass)
-        {
+        ListenableDirectedMultigraph(Class<E> edgeClass) {
             super(new DirectedMultigraph<V, E>(edgeClass));
         }
     }

@@ -158,7 +158,9 @@ public class BlockDetection
     private void rebuildTree(MyWeightedVertex j)
     {
         // normal nodes are not explored
-        if (j.type == NodeType.DEFAULT)
+        if (j.type == NodeType.DEFAULT || 
+            j.type == NodeType.START ||
+            j.type == NodeType.END)
         {
             return;
         }

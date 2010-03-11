@@ -238,7 +238,7 @@ public class Translator {
      */
     public String setSerialBlocks()
     {
-        String result = "";
+        String result = "\n";
         
         for (MyWeightedVertex v : this.G.vertexSet())
         {

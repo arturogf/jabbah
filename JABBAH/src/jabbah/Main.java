@@ -51,7 +51,7 @@ public class Main extends javax.swing.JFrame {
     //private static final Dimension DEFAULT_SIZE = new Dimension(1200, 800);
 
     private static Logger logger = Logger.getLogger(Main.class.getName());
-
+    
     //~ Instance fields --------------------------------------------------------
     //
     private JGraphModelAdapter jgAdapter;
@@ -412,48 +412,68 @@ public class Main extends javax.swing.JFrame {
         if (xom.Activities.length==0)
             logger.severe ("El número de actividades es CERO en el método buildGraphFromXPDL()");
 
-        int ig = 0;
-        
-        for (int i=0; i<xom.Activities.length; i++)
-        {
-            if (xom.Activities[i].type == NodeType.GATEWAY)
-            {
-                if (xom.Activities[i].restriction == TransitionRestriction.JOIN_EXCLUSIVE ||
-                    xom.Activities[i].restriction == TransitionRestriction.JOIN_INCLUSIVE)
-                {
-                    xom.Activities[i].node = new MyWeightedVertex("END_G"+ig);
-                    xom.Activities[i].node.param = xom.Activities[i].param;
-                }
 
+        // it also needs xom as parameter only to call the method findLane
+        PopulateGraph(g, xom.Activities, xom.Transitions, xom);
+        
+    }
+
+    // method to add vertex and transitions to a graph, which should be also used for subprocesses graphs
+    // in a recursive manner
+    private void PopulateGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
+            Activity[] activities, Transition[] transitions, XpdlObjectMapping xom)
+    {
+        int ig = 0;
+
+        for (int i=0; i<activities.length; i++)
+        {
+            if (activities[i].type == NodeType.SUBPROCESS)
+            {
+                // crear un nodo sólo, y crear un subgrafo asociado, para despues
+                // poder llamar al BlockDetection sobre dicho subgrafo, algo asi:
+                //PopulateGraph(newsubg, activities[i].subactivities, activities[i].subgraph)
+
+                // la idea es, poder crear un sub-arbol para cada subproceso, y al
+                // reconstruir el arbol principal, enganchar el sub-arbol como parte
+                // de él mismo, creando un único grafo
+            }
+            if (activities[i].type == NodeType.GATEWAY)
+            {
+                if (activities[i].restriction == TransitionRestriction.JOIN_EXCLUSIVE ||
+                    activities[i].restriction == TransitionRestriction.JOIN_INCLUSIVE)
+                {
+                    activities[i].node = new MyWeightedVertex("END_G"+ig);
+                    activities[i].node.param = activities[i].param;
+                }
                 else
                 {
-                    xom.Activities[i].node = new MyWeightedVertex("G"+ig);
-                    xom.Activities[i].node.param = xom.Activities[i].param;
+                    activities[i].node = new MyWeightedVertex("G"+ig);
+                    activities[i].node.param = activities[i].param;
                 }
 
                 ig = ig+1;
             }
-            else {
-                xom.Activities[i].node = new MyWeightedVertex(xom.Activities[i].name);
-
-                //xom.Activities[i].node = new MyWeightedVertex("A"+i);
-
-                xom.Activities[i].node.lane = xom.findLane(xom.Activities[i].lane_id);
+            else
+            {
+                activities[i].node = new MyWeightedVertex(activities[i].name);
+                // TODO: habra que retocar estos metodos para los subprocesos
+                activities[i].node.lane = xom.findLane(activities[i].lane_id);
             }
 
-            xom.Activities[i].node.type = xom.Activities[i].type;
-            xom.Activities[i].node.restriction = xom.Activities[i].restriction;
-            g.addVertex(xom.Activities[i].node);
+            activities[i].node.type = activities[i].type;
+            activities[i].node.restriction = activities[i].restriction;
+
+            g.addVertex(activities[i].node);
         }
 
-        if (xom.Transitions.length==0)
+        if (transitions.length==0)
             logger.severe ("El número de transiciones es CERO en "+
-                    Main.class.getName() + "buildGraphFromXPDL()");
+                    Main.class.getName() + "PopulateGraph()");
 
-        for (int t=0; t< xom.Transitions.length; t++)
+        for (int t=0; t< transitions.length; t++)
         {
-            MyWeightedVertex from = xom.findActivityNode(xom.Transitions[t].from);
-            MyWeightedVertex to = xom.findActivityNode(xom.Transitions[t].to);
+            MyWeightedVertex from = xom.findActivityNode(transitions[t].from);
+            MyWeightedVertex to = xom.findActivityNode(transitions[t].to);
 
             if ((from!=null) && (to!=null))
             {
@@ -462,9 +482,12 @@ public class Main extends javax.swing.JFrame {
             }
             else
                 logger.severe("se encontró una transición con origen o destino " +
-                        "NULL en " + Main.class.getName() + " buildGraphFromXPDL");
+                        "NULL en " + Main.class.getName() + " PopulateGraph()");
         }
+
     }
+
+
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
@@ -622,23 +645,22 @@ public class Main extends javax.swing.JFrame {
         this.graphPanel.setLayout(new BoxLayout(this.graphPanel, BoxLayout.X_AXIS));
         this.npmPanel.setLayout(new BoxLayout(this.npmPanel, BoxLayout.X_AXIS));
         
-        //getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
-
-        JScrollPane left = new JScrollPane(jgraph);// = new JScrollPane(jgraph);
-        left.createHorizontalScrollBar();
+        JScrollPane left = new JScrollPane(jgraph);
         JScrollPane right = new JScrollPane(jgraph2);
         
         this.graphPanel.add(left);
         this.npmPanel.add(right);
 
 
-         // create a translator instance and call the corresponding PDDL translation
+        // create a translator instance and call the corresponding PDDL translation
+        // over the generated Nested Process Model
         this.T = new Translator(g_right,
                                         xom,
                                       "/home/arturogf/jabbah/JABBAH/output/domain.pddl",
                                       "/home/arturogf/jabbah/JABBAH/output/problem.pddl");
         this.T.PDDLTranslator();
 
+        // load the domain and problem files generated into their corresponding jTextPanels
         try {
             this.jTextPane1.read(new FileInputStream(this.T.d_filepath), null);
         } catch (IOException ex) {

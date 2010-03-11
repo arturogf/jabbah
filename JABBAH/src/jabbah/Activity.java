@@ -17,9 +17,12 @@ public class Activity {
     String duration;
     int type = NodeType.DEFAULT;
     int restriction = TransitionRestriction.NONE;
-    //int numInputs;
     MyWeightedVertex node;
+    // if it is a gateway
     Parameter param;
+    // if it is a subprocess
+    Activity[] subactivities;
+    String sub_id;
 
     public Activity()
     {

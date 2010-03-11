@@ -17,4 +17,5 @@ public class NodeType
     public static final int GATEWAY = 3;
     public static final int START = 4;
     public static final int END = 5;
+    public static final int SUBPROCESS = 6;
 }

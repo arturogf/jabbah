@@ -1,4 +1,3 @@
-
 package jabbah;
 
 import java.util.Vector;
@@ -99,5 +98,3 @@ public class MyWeightedVertex
             this.block = v;
     }
 }
-
-

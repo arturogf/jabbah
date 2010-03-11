@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Computes the ECA Rules block detection algorithm.
@@ -43,7 +45,7 @@ public class BlockDetection
         this.G = (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>) g;
         this.N = G.vertexSet();
 
-        this.branchWater();
+        this.branchWater(1.0);
 
         // consecutive serial and parallel block detection, searching for
         // the most inner block until we have only one node (root) in G
@@ -57,8 +59,8 @@ public class BlockDetection
 
                 if (parallel == null)
                 {
-                    System.out.print("WARNING!!!: serial and parallel block " +
-                            "detection were unsucessful!");
+                    Logger.getLogger(BlockDetection.class.getName()).log(Level.SEVERE,
+                         "serial and parallel block detection were unsucessful");
                 } else
                 {
                     this.replaceNodesWithPB(parallel);
@@ -85,7 +87,7 @@ public class BlockDetection
     {
         // if a parallel block was detected, substitute it with
         // a new PB node
-        MyWeightedVertex pb = new MyWeightedVertex("PB" + this.pb_index, 0);
+        MyWeightedVertex pb = new MyWeightedVertex("PB" + BlockDetection.pb_index, 0);
         G.addVertex(pb);
         pb.type = NodeType.PARALLEL;
         pb.setBlock(v);
@@ -109,7 +111,7 @@ public class BlockDetection
         // remove all vertices from G that are not in vector "parallel"
         G.removeAllVertices(v);
 
-        this.pb_index = this.pb_index + 1;
+        BlockDetection.pb_index = BlockDetection.pb_index + 1;
     }
 
 
@@ -122,7 +124,7 @@ public class BlockDetection
     private void replaceNodesWithSB(Vector v)
     {
         // if a serial block was detected, we substitute it by a new SB node
-        MyWeightedVertex sb = new MyWeightedVertex("SB" + this.sb_index, 0);
+        MyWeightedVertex sb = new MyWeightedVertex("SB" + BlockDetection.sb_index, 0);
         G.addVertex(sb);
         sb.type = NodeType.SERIAL;
         sb.setBlock(v);
@@ -144,7 +146,7 @@ public class BlockDetection
         // remove all vertices from G that are not in vector "serial"
         G.removeAllVertices(v);
 
-        this.sb_index = this.sb_index + 1;
+        BlockDetection.sb_index = BlockDetection.sb_index + 1;
 
     }
 
@@ -192,7 +194,7 @@ public class BlockDetection
      * of water that goes from start_node S to end_node E.
      *
      */
-    private void branchWater()
+    private void branchWater(double initial)
     {
         boolean add_to_queue = true;
 
@@ -202,10 +204,10 @@ public class BlockDetection
         Iterator i = this.N.iterator();
 
         MyWeightedVertex S = (MyWeightedVertex) i.next();
-        S.setWeight(1.0);
+        S.setWeight(initial);
 
         queue.addElement(S);
-        w_list.addElement(1.0);
+        w_list.addElement(initial);
 
         while (!queue.isEmpty())
         {
@@ -291,11 +293,6 @@ public class BlockDetection
 
         while ((LOOP) && (!queue.isEmpty()))
         {
-           // if (queue.isEmpty())
-           // {
-           //     return null;
-           // }
-
             v = (MyWeightedVertex) queue.firstElement();
             queue.removeElementAt(0);
 

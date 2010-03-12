@@ -26,8 +26,7 @@ import org.xml.sax.SAXException;
  *  Object filled with the corresponding values from the source XPDL
  * file, so that we maintain an OO structure that is going to be used everywhere
  */
-public class XpdlObjectMapping
-{
+public class XpdlObjectMapping {
 
     Participant[] Participants;
     Parameter[] Parameters;
@@ -36,63 +35,62 @@ public class XpdlObjectMapping
     ActivitySet[] ASets;
     Lane[] Lanes;
 
-    public void XpdlObjectMapping()
-    {
+    public void XpdlObjectMapping() {
     }
 
-    public String findLane(String id)
-    {
-        for (int i=0; i<this.Lanes.length; i++)
-        {
-            if (this.Lanes[i].id.equals(id))
+    public String findLane(String id) {
+        for (int i = 0; i < this.Lanes.length; i++) {
+            if (this.Lanes[i].id.equals(id)) {
                 return Lanes[i].name;
+            }
         }
         return "";
     }
 
-    public Transition findTransition(String id)
-    {
-        for (int i=0; i<this.Transitions.length; i++)
-        {
-            if (this.Transitions[i].id.equals(id))
+    public Transition findTransition(String id) {
+        for (int i = 0; i < this.Transitions.length; i++) {
+            if (this.Transitions[i].id.equals(id)) {
                 return Transitions[i];
+            }
         }
 
         return null;
 
     }
 
-    public String findActivityName(String label)
-    {
-        for (int i=0; i< this.Activities.length; i++)
-            if (this.Activities[i].node.label.equalsIgnoreCase(label))
+    public String findActivityName(String label) {
+        for (int i = 0; i < this.Activities.length; i++) {
+            if (this.Activities[i].node.label.equalsIgnoreCase(label)) {
                 return this.Activities[i].name;
+            }
+        }
 
         return null;
     }
 
-    public MyWeightedVertex findActivityNode(String id)
-    {
-        for (int i=0; i< this.Activities.length; i++)
-            if (this.Activities[i].id.equalsIgnoreCase(id))
+    public MyWeightedVertex findActivityNode(String id) {
+        for (int i = 0; i < this.Activities.length; i++) {
+            if (this.Activities[i].id.equalsIgnoreCase(id)) {
                 return this.Activities[i].node;
-        
+            }
+        }
+
         return null;
     }
 
-    public Activity findActivity(String id)
-    {
-        for (int i=0; i< this.Activities.length; i++)
-            if (this.Activities[i].id.equalsIgnoreCase(id))
+    public Activity findActivity(String id) {
+        for (int i = 0; i < this.Activities.length; i++) {
+            if (this.Activities[i].id.equalsIgnoreCase(id)) {
                 return this.Activities[i];
+            }
+        }
 
         return null;
     }
 
     public void parse(String source_file)
             throws SAXException, XPathExpressionException,
-            IOException, ParserConfigurationException
-    {
+            IOException, ParserConfigurationException {
         // TODO code application logic here
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -109,29 +107,23 @@ public class XpdlObjectMapping
         this.parseLanes(doc, xpath);
         this.parseParticipants(doc, xpath);
 
-        this.parseTransitions(doc, xpath);
+        this.Transitions = this.parseTransitions(doc, null, xpath, this.Transitions);
         this.Activities = this.parseActivities(doc, null, xpath, this.Activities);
         this.parseActivitySet(doc, xpath);
     }
 
-
-    private void parseParameters(org.w3c.dom.Document doc, XPath xpath)
-    {
+    private void parseParameters(org.w3c.dom.Document doc, XPath xpath) {
         XPathExpression exp_param = null;
-        try
-        {
+        try {
             exp_param = xpath.compile("//xpdl2:FormalParameter");
-        } catch (XPathExpressionException ex)
-        {
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         Object res_param = null;
-        try
-        {
+        try {
             res_param = exp_param.evaluate(doc, XPathConstants.NODESET);
-        } catch (XPathExpressionException ex)
-        {
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -140,29 +132,29 @@ public class XpdlObjectMapping
         Parameters = new Parameter[nodes.getLength()];
 
         // in this loop, the "Lanes" array is populated, using xpath parsing on the context node
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
+        for (int i = 0; i < nodes.getLength(); i++) {
             Parameters[i] = new Parameter();
 
             Node p_name, p_id, p_type;
-            try
-            {
+            try {
                 p_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
-                if (p_id!=null)
+                if (p_id != null) {
                     Parameters[i].id = p_id.getNodeValue();
-                
+                }
+
                 p_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
-                if (p_name!=null)
+                if (p_name != null) {
                     Parameters[i].name = p_name.getNodeValue();
+                }
 
                 p_type = (Node) xpath.evaluate("xpdl2:DataType/xpdl2:BasicType", nodes.item(i),
                         XPathConstants.NODE);
-                if (p_type != null)
+                if (p_type != null) {
                     Parameters[i].type = p_type.getAttributes().item(0).getNodeValue();
+                }
 
-                
-            } catch (XPathExpressionException ex)
-            {
+
+            } catch (XPathExpressionException ex) {
                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
             }
 
@@ -170,24 +162,18 @@ public class XpdlObjectMapping
 
     }
 
-
-    private void parseLanes(org.w3c.dom.Document doc, XPath xpath)
-    {
+    private void parseLanes(org.w3c.dom.Document doc, XPath xpath) {
         XPathExpression exp_lane = null;
-        try
-        {
+        try {
             exp_lane = xpath.compile("//xpdl2:Lane");
-        } catch (XPathExpressionException ex)
-        {
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         Object res_lane = null;
-        try
-        {
+        try {
             res_lane = exp_lane.evaluate(doc, XPathConstants.NODESET);
-        } catch (XPathExpressionException ex)
-        {
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -196,21 +182,18 @@ public class XpdlObjectMapping
         Lanes = new Lane[nodes.getLength()];
 
         // in this loop, the "Lanes" array is populated, using xpath parsing on the context node
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
+        for (int i = 0; i < nodes.getLength(); i++) {
             Lanes[i] = new Lane();
 
             Node l_name, l_id;
-            try
-            {
+            try {
                 l_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
                 Lanes[i].name = l_name.getNodeValue();
 
                 l_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
                 Lanes[i].id = l_id.getNodeValue();
 
-            } catch (XPathExpressionException ex)
-            {
+            } catch (XPathExpressionException ex) {
                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
             }
 
@@ -218,23 +201,18 @@ public class XpdlObjectMapping
 
     }
 
-    private void parseParticipants(org.w3c.dom.Document doc, XPath xpath)
-    {
+    private void parseParticipants(org.w3c.dom.Document doc, XPath xpath) {
         XPathExpression exp_participant = null;
-        try
-        {
+        try {
             exp_participant = xpath.compile("//xpdl2:Participant");
-        } catch (XPathExpressionException ex)
-        {
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         Object res_act = null;
-        try
-        {
+        try {
             res_act = exp_participant.evaluate(doc, XPathConstants.NODESET);
-        } catch (XPathExpressionException ex)
-        {
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -243,22 +221,18 @@ public class XpdlObjectMapping
         Participants = new Participant[nodes.getLength()];
 
         // in this loop, the "Activities" array is populated, using xpath parsing on the context node
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
+        for (int i = 0; i < nodes.getLength(); i++) {
             Participants[i] = new Participant();
 
             Node a_name, a_id, a_extended, a_lane;
-            try
-            {
+            try {
                 a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
-                if (a_name != null)
-                {
+                if (a_name != null) {
                     Participants[i].name = a_name.getNodeValue();
                 }
 
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
-                if (a_id != null)
-                {
+                if (a_id != null) {
                     Participants[i].id = a_id.getNodeValue();
                 }
 
@@ -266,22 +240,18 @@ public class XpdlObjectMapping
                 // an extended Attribute called "Lane"
                 a_extended = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/@Name", nodes.item(i),
                         XPathConstants.NODE);
-                if (a_extended != null)
-                {
-                    if (a_extended.getNodeValue().equalsIgnoreCase("Lane"))
-                    {
+                if (a_extended != null) {
+                    if (a_extended.getNodeValue().equalsIgnoreCase("Lane")) {
                         a_lane = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/@Value", nodes.item(i),
                                 XPathConstants.NODE);
-                        if (a_lane != null)
-                        {
+                        if (a_lane != null) {
                             Participants[i].lane = a_lane.getNodeValue();
                         }
                     }
                 }
 
 
-            } catch (XPathExpressionException ex)
-            {
+            } catch (XPathExpressionException ex) {
                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
             }
 
@@ -295,9 +265,10 @@ public class XpdlObjectMapping
         XPathExpression exp_activity = null;
 
         try {
-            if (set==null)
+            if (set == null) {
                 exp_activity = xpath.compile("//xpdl2:Activity");
- 
+            }
+
         } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -306,10 +277,11 @@ public class XpdlObjectMapping
 
         try {
             // if the method receive a null NodeList, we use the document
-            if (set == null)
+            if (set == null) {
                 res_act = exp_activity.evaluate(doc, XPathConstants.NODESET);
-            else
+            } else {
                 res_act = set;
+            }
 
         } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
@@ -453,7 +425,7 @@ public class XpdlObjectMapping
     private void parseActivitySet(org.w3c.dom.Document doc, XPath xpath) {
 
         XPathExpression exp_set = null;
-        NodeList res_set, subact = null;
+        NodeList res_set, subact, subtrans = null;
         Node a_subsetid;
 
         try {
@@ -477,25 +449,46 @@ public class XpdlObjectMapping
                 if (a_subsetid != null) {
                     this.ASets[i].id = a_subsetid.getNodeValue();
 
-                    //ahora tenemos que parsear las actividades internas a este ActivitySet
+                    //we need to parse activities internal to this ActivitySet
                     try {
-                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='"
-                                + this.ASets[i].id + "']/xpdl2:Activities/xpdl2:Activity");
+                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='" + this.ASets[i].id + "']/xpdl2:Activities/xpdl2:Activity");
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     try {
                         subact = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
-                        if (subact.getLength()>0)
+                        if (subact.getLength() > 0) {
                             this.ASets[i].activities = this.parseActivities(null, subact, xpath, this.ASets[i].activities);
+                        }
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
 
                     }
 
-        }
+                    //we need to parse Transitions internal to this ActivitySet
+                    try {
+                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='"
+                                + this.ASets[i].id + "']/xpdl2:Transitions/xpdl2:Transition");
+
+                    } catch (XPathExpressionException ex) {
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        subtrans = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
+                        if (subtrans.getLength() > 0) {
+                            this.ASets[i].transitions = this.parseTransitions(null, subtrans, xpath, this.ASets[i].transitions);
+                        }
+
+                    } catch (XPathExpressionException ex) {
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+
+                    }
+
+
+
+                }
 
 
 
@@ -507,76 +500,81 @@ public class XpdlObjectMapping
 
     }
 
-    private void parseTransitions(org.w3c.dom.Document doc, XPath xpath)
-    {
+    private Transition[] parseTransitions(org.w3c.dom.Document doc, NodeList set,
+            XPath xpath, Transition[] transitions) {
         XPathExpression exp_trans = null;
-        try
-        {
-            exp_trans = xpath.compile("//xpdl2:Transition");
-        } catch (XPathExpressionException ex)
-        {
+        try {
+            if (set==null)
+                exp_trans = xpath.compile("//xpdl2:Transition");
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         Object res_trans = null;
-        try
-        {
-            res_trans = exp_trans.evaluate(doc, XPathConstants.NODESET);
-        } catch (XPathExpressionException ex)
-        {
+        try {
+            if (set==null)
+                res_trans = exp_trans.evaluate(doc, XPathConstants.NODESET);
+            else
+                res_trans = set;
+        } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         NodeList nodes = (NodeList) res_trans;
 
-        Transitions = new Transition[nodes.getLength()];
+        transitions = new Transition[nodes.getLength()];
 
         // in this loop, the "Activities" array is populated, using xpath parsing on the context node
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            Transitions[i] = new Transition();
+        for (int i = 0; i < nodes.getLength(); i++) {
+            transitions[i] = new Transition();
 
             Node a_name, a_id, a_from, a_to, a_param_id, a_operator, a_param_value;
-            try
-            {
+            try {
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
-                Transitions[i].id = a_id.getNodeValue();
+                transitions[i].id = a_id.getNodeValue();
 
                 a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
-                Transitions[i].name = a_name.getNodeValue();
+                transitions[i].name = a_name.getNodeValue();
 
                 a_from = (Node) xpath.evaluate("@From", nodes.item(i), XPathConstants.NODE);
-                Transitions[i].from = a_from.getNodeValue();
+                transitions[i].from = a_from.getNodeValue();
 
                 a_to = (Node) xpath.evaluate("@To", nodes.item(i), XPathConstants.NODE);
-                Transitions[i].to = a_to.getNodeValue();
-                
+                transitions[i].to = a_to.getNodeValue();
+
                 a_param_id = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:ParameterId",
-                nodes.item(i), XPathConstants.NODE);
-                if (a_param_id!=null)
-                    if (a_param_id.getFirstChild()!=null)
-                        Transitions[i].parameterId = a_param_id.getFirstChild().getTextContent();
+                        nodes.item(i), XPathConstants.NODE);
+                if (a_param_id != null) {
+                    if (a_param_id.getFirstChild() != null) {
+                        transitions[i].parameterId = a_param_id.getFirstChild().getTextContent();
+                    }
+                }
 
                 a_operator = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:Operator",
-                nodes.item(i), XPathConstants.NODE);
-                if (a_operator!=null)
-                    if (a_operator.getFirstChild()!=null)
-                        Transitions[i].operator = a_operator.getFirstChild().getTextContent();
+                        nodes.item(i), XPathConstants.NODE);
+                if (a_operator != null) {
+                    if (a_operator.getFirstChild() != null) {
+                        transitions[i].operator = a_operator.getFirstChild().getTextContent();
+                    }
+                }
 
                 a_param_value = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:ParameterValue",
-                nodes.item(i), XPathConstants.NODE);
-                if (a_param_value!=null)
-                    if (a_param_value.getFirstChild()!=null)
-                    Transitions[i].parameterValue = a_param_value.getFirstChild().getTextContent();
+                        nodes.item(i), XPathConstants.NODE);
+                if (a_param_value != null) {
+                    if (a_param_value.getFirstChild() != null) {
+                        transitions[i].parameterValue = a_param_value.getFirstChild().getTextContent();
+                    }
+                }
 
 
 
-            } catch (XPathExpressionException ex)
-            {
+            } catch (XPathExpressionException ex) {
                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
+
+        return transitions;
 
     }
 }

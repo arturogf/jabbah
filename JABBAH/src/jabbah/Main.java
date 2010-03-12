@@ -431,7 +431,7 @@ public class Main extends javax.swing.JFrame {
             {
                 // crear un nodo sólo, y crear un subgrafo asociado, para despues
                 // poder llamar al BlockDetection sobre dicho subgrafo, algo asi:
-                //PopulateGraph(newsubg, activities[i].subactivities, activities[i].subgraph)
+                //PopulateGraph(activities[i].subgraph, activities[i].subactivities, activities[i].transitions, xom)
 
                 // la idea es, poder crear un sub-arbol para cada subproceso, y al
                 // reconstruir el arbol principal, enganchar el sub-arbol como parte

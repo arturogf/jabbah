@@ -21,8 +21,7 @@ public class Activity {
     // if it is a gateway
     Parameter param;
     // if it is a subprocess
-    Activity[] subactivities;
-    String sub_id;
+    String subset_id="";
 
     public Activity()
     {

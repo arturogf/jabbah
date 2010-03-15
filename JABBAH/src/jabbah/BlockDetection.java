@@ -157,33 +157,47 @@ public class BlockDetection
      *
      * @param j  the root Vertex from which we rebuild the hierarchical tree
      */
-    private void rebuildTree(MyWeightedVertex j)
-    {
+    private void rebuildTree(MyWeightedVertex j) {
+
         // normal nodes are not explored
-        if (j.type == NodeType.DEFAULT || 
-            j.type == NodeType.START ||
-            j.type == NodeType.END)
-        {
+        if (j.type == NodeType.DEFAULT ||
+                j.type == NodeType.START ||
+                j.type == NodeType.END) {
             return;
         }
 
-        // iterate the respective j block nodes
-        Iterator i = j.block.iterator();
-        while (i.hasNext())
-        {
-            MyWeightedVertex y = (MyWeightedVertex) i.next();
+        
+        if (j.type == NodeType.SUBPROCESS) {
+            
+            MyWeightedVertex p = Graphs.predecessorListOf(G, j).iterator().next();
+            MyWeightedVertex v = j.subgraph.vertexSet().iterator().next();
 
-            // gateways nodes are not shown
-            if (y.type != NodeType.GATEWAY)
-            {
-                G.addVertex(y);
-                G.addEdge(j, y, new MyWeightedEdge(j, y, ""));
-                if (y.type != NodeType.DEFAULT)
-                {
-                    this.rebuildTree(y);
+            G.addVertex(v);
+            G.addEdge(p,v,new MyWeightedEdge(p, v, ""));
+            
+            this.rebuildTree(v);
+            G.removeVertex(j);
+
+        } else {
+            // iterate the respective j block nodes
+            Iterator i;
+            i = j.block.iterator();
+
+            while (i.hasNext()) {
+                MyWeightedVertex y = (MyWeightedVertex) i.next();
+
+                // gateways and subprocesses nodes are not shown
+                if (y.type != NodeType.GATEWAY) {
+
+                    G.addVertex(y);
+                    G.addEdge(j, y, new MyWeightedEdge(j, y, ""));
+                    
+                    if (y.type != NodeType.DEFAULT) {
+                        this.rebuildTree(y);
+                    }
                 }
-            }
 
+            }
         }
 
         return;
@@ -202,39 +216,44 @@ public class BlockDetection
         Vector w_list = new Vector();
 
         Iterator i = this.N.iterator();
+        MyWeightedVertex S;
 
-        MyWeightedVertex S = (MyWeightedVertex) i.next();
-        S.setWeight(initial);
+        Vector StartNodes = this.findStartNodes(this.N);
 
-        queue.addElement(S);
-        w_list.addElement(initial);
+        if (!StartNodes.isEmpty()) {
 
-        while (!queue.isEmpty())
-        {
-            MyWeightedVertex v = (MyWeightedVertex) queue.firstElement();
-            queue.removeElementAt(0);
-            v.marked = true;
+            S = (MyWeightedVertex) StartNodes.firstElement();
+            S.setWeight(initial);
 
-            for (MyWeightedVertex j : Graphs.successorListOf(G, v))
-            {
-                j.setWeight(j.weight + (v.weight / Graphs.successorListOf(G, v).size()));
+            queue.addElement(S);
+            w_list.addElement(initial);
 
-                add_to_queue = true;
-                // check that all predecesors are marked
-                for (MyWeightedVertex p : Graphs.predecessorListOf(G, j))
-                {
-                    if (!p.marked)
-                    {
-                        add_to_queue = false;
+            while (!queue.isEmpty()) {
+                MyWeightedVertex v = (MyWeightedVertex) queue.firstElement();
+                queue.removeElementAt(0);
+                v.marked = true;
+
+                for (MyWeightedVertex j : Graphs.successorListOf(G, v)) {
+                    j.setWeight(j.weight + (v.weight / Graphs.successorListOf(G, v).size()));
+
+                    add_to_queue = true;
+                    // check that all predecesors are marked
+                    for (MyWeightedVertex p : Graphs.predecessorListOf(G, j)) {
+                        if (!p.marked) {
+                            add_to_queue = false;
+                        }
                     }
-                }
 
-                if (add_to_queue)
-                {
-                    queue.addElement((MyWeightedVertex) j);
+                    if (add_to_queue) {
+                        queue.addElement((MyWeightedVertex) j);
+                    }
                 }
             }
         }
+        else
+            Logger.getLogger(BlockDetection.class.getName()).log(Level.SEVERE,
+                         "there are no start nodes when doing branchWater procedure");
+
     }
 
     /**
@@ -282,12 +301,16 @@ public class BlockDetection
 
         List<MyWeightedVertex> successors;
 
+        MyWeightedVertex S;
+        
         Vector queue = new Vector();
         Vector SB = new Vector();
+        Vector StartNodes = this.findStartNodes(this.N);
 
-        Iterator i = this.N.iterator();
-
-        MyWeightedVertex S = (MyWeightedVertex) i.next();
+        if (!StartNodes.isEmpty())
+             S = (MyWeightedVertex) StartNodes.firstElement();
+        else
+            return null;
 
         queue.addElement(S);
 
@@ -414,5 +437,56 @@ public class BlockDetection
         {
             return null;
         }
+    }
+
+    /**
+     * return a Set of Start Nodes, useful for other methods
+     *
+     * @param N  the Set of Vertex
+     */
+    private Vector findStartNodes(Set N)
+    {
+        Vector StartNodes = new Vector();
+
+        Iterator i = N.iterator();
+        
+
+        do
+        {
+            MyWeightedVertex node = (MyWeightedVertex) i.next();
+
+            if (node.type == NodeType.START)
+                StartNodes.add(node);
+        }
+        while (i.hasNext());
+
+        return StartNodes;
+
+    }
+
+    /**
+     * return a Set of End Nodes, useful for other methods
+     *
+     * @param N  the Set of Vertex
+     */
+    private Vector findEndNodes(Set N)
+    {
+        Vector EndNodes = new Vector();
+
+        Iterator i = N.iterator();
+
+        
+
+        do
+        {
+            MyWeightedVertex node = (MyWeightedVertex) i.next();
+            
+            if (node.type == NodeType.END)
+                EndNodes.add(node);
+        }
+        while (i.hasNext());
+
+        return EndNodes;
+
     }
 }

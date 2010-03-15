@@ -29,7 +29,7 @@ public class Translator {
      * @param dfilepath the domain file path
      * @param pfilepath the problem file path
      */
-    public Translator(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
+    public Translator (ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
                         XpdlObjectMapping mapping,
                         String dfilepath, String pfilepath)
     {
@@ -129,7 +129,6 @@ public class Translator {
             {
                 result = result + v.label.toLowerCase() + " ";
             }
-        
         }
         
         result = result + "- activity\n";
@@ -165,8 +164,8 @@ public class Translator {
         String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
 	":parameters(?w - participant)" + "\n" +
         ":meta (\n" +
-        "(:tag prettyprint  \"START: ?start; | END: ?end; | DURATION: ?duration; |   '" + this.xom.findActivityName(name) + "' ALLOCATED TO '?w' \")\n" +
-	"(:tag short \"ACTIVIDAD " + this.xom.findActivityName(name) + "\")\n" +
+        "(:tag prettyprint  \"START: ?start; | END: ?end; | DURATION: ?duration; |   '" + name + "' ALLOCATED TO '?w' \")\n" +
+	"(:tag short \"ACTIVIDAD " + name + "\")\n" +
 		"(:tag resource \"?w\")\n" +
 		"(:tag monitoring \"manual\")\n" +
 	//	"(:tag UID \""+ name.substring(1,name.length()) + "\")\n" +
@@ -199,33 +198,39 @@ public class Translator {
 
         String result = "";
     
-        /*for (MyWeightedVertex v : this.G.vertexSet())
+        for (MyWeightedVertex v : this.G.vertexSet())
         {
             if (v.type == NodeType.DEFAULT) 
             {
-                result = result + this.buildDurativeAction(v.label,
+                if (v.duration != null) {
+                    result = result + this.buildDurativeAction(v.label,
                                         v.duration,v.lane);
+                }
+                else {
+                    result = result + this.buildDurativeAction(v.label, 1.0, v.lane);
+                }
+                
             }
         
-        }  */
+        } 
 
-        for (int i=0; i<xom.Activities.length; i++)
+        /*for (int i=0; i<xom.Activities.length; i++)
         {
             if (xom.Activities[i].type == NodeType.DEFAULT)
             {
                 if (this.xom.Activities[i].duration != null)
                     result = result + this.buildDurativeAction(this.xom.Activities[i].node.label,
                             Double.parseDouble(this.xom.Activities[i].duration),
-                            xom.findLane(xom.Activities[i].lane_id));
+                            xom.findLane(xom.Lanes,xom.Activities[i].lane_id));
                 else
                     // if there is no duration at this stage, we consider it has a duration of 1.0 units of time
                     result = result + this.buildDurativeAction(this.xom.Activities[i].node.label,
                             1.0,
-                            xom.findLane(xom.Activities[i].lane_id));
+                            xom.findLane(xom.Lanes,xom.Activities[i].lane_id));
 
 
             }
-        }
+        }*/
         
         return result;    
     }
@@ -274,7 +279,10 @@ public class Translator {
                         if (j.type == NodeType.PARALLEL &&
                                 j.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
                             result = result + " " + j.param.name;
-                        else
+                        // if the node is a parallel block, we don't include the next
+                        // which is a right brother node
+                        else if (j.type == NodeType.PARALLEL &&
+                                j.restriction == TransitionRestriction.SPLIT_PARALLEL)
                             dont_do_next = 1;
                          result = result + ") ";
 
@@ -396,8 +404,8 @@ public class Translator {
                         {
                             if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
                             {
-
-                                MyWeightedVertex act_node = this.xom.findActivityNode(v.param.affectedTransitions[i].to);
+                                // ojo aqui, va a fallar el xom.Activities
+                                MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
                                 methodname = "if_" + act_node.label;
                                 predicate = "(value ?x false)";
                                 result = result + "(:method "+ methodname+"\n";
@@ -406,7 +414,7 @@ public class Translator {
                             }
                             else
                             {
-                                MyWeightedVertex act_node = this.xom.findActivityNode(v.param.affectedTransitions[i].to);
+                                MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
                                 methodname = "if_" + act_node.label;
                                 predicate = "(value ?x " + v.param.affectedTransitions[i].parameterValue+")";
                                 result = result + "(:method "+ methodname+"\n";

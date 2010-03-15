@@ -414,14 +414,14 @@ public class Main extends javax.swing.JFrame {
 
 
         // it also needs xom as parameter only to call the method findLane
-        PopulateGraph(g, xom.Activities, xom.Transitions, xom);
+        PopulateGraph(g, xom.Activities, xom.Transitions, null, xom);
         
     }
 
     // method to add vertex and transitions to a graph, which should be also used for subprocesses graphs
     // in a recursive manner
     private void PopulateGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
-            Activity[] activities, Transition[] transitions, XpdlObjectMapping xom)
+            Activity[] activities, Transition[] transitions, String l, XpdlObjectMapping xom)
     {
         int ig = 0;
 
@@ -429,15 +429,27 @@ public class Main extends javax.swing.JFrame {
         {
             if (activities[i].type == NodeType.SUBPROCESS)
             {
-                // crear un nodo sólo, y crear un subgrafo asociado, para despues
-                // poder llamar al BlockDetection sobre dicho subgrafo, algo asi:
-                //PopulateGraph(activities[i].subgraph, activities[i].subactivities, activities[i].transitions, xom)
-
                 // la idea es, poder crear un sub-arbol para cada subproceso, y al
                 // reconstruir el arbol principal, enganchar el sub-arbol como parte
                 // de él mismo, creando un único grafo
+
+                activities[i].node = new MyWeightedVertex(activities[i].name);
+                // TODO: habra que retocar estos metodos para los subprocesos
+                activities[i].node.lane = xom.findLane(xom.Lanes,activities[i].lane_id);
+                // aqui poblamos el subgrafo para este subproceso
+                ActivitySet as = (ActivitySet) xom.ASets.get(activities[i].subset_id);
+
+                if (activities[i].node.subgraph==null)
+                    activities[i].node.subgraph =
+                        new ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge>(MyWeightedEdge.class);
+
+                // populate the subgraph and pass the lane string for all subactivities 
+                PopulateGraph(activities[i].node.subgraph, as.activities , as.transitions,
+                        activities[i].node.lane, xom);
+                BlockDetection n = new BlockDetection(activities[i].node.subgraph);
+            
             }
-            if (activities[i].type == NodeType.GATEWAY)
+            else if (activities[i].type == NodeType.GATEWAY)
             {
                 if (activities[i].restriction == TransitionRestriction.JOIN_EXCLUSIVE ||
                     activities[i].restriction == TransitionRestriction.JOIN_INCLUSIVE)
@@ -450,14 +462,24 @@ public class Main extends javax.swing.JFrame {
                     activities[i].node = new MyWeightedVertex("G"+ig);
                     activities[i].node.param = activities[i].param;
                 }
+                // if a lane l is passed as parameter, it means that all nodes
+                // populated must have this value for the lane (where the subprocess is)
+                
+                if (l!=null)
+                    activities[i].node.lane = l;
 
                 ig = ig+1;
             }
             else
             {
                 activities[i].node = new MyWeightedVertex(activities[i].name);
-                // TODO: habra que retocar estos metodos para los subprocesos
-                activities[i].node.lane = xom.findLane(activities[i].lane_id);
+
+                // if a lane l has been passed as parameter, it means that all nodes
+                // populated must have this value for the lane (where the subprocess is)
+                if (l!=null)
+                    activities[i].node.lane = l;
+                else
+                    activities[i].node.lane = xom.findLane(xom.Lanes,activities[i].lane_id);
             }
 
             activities[i].node.type = activities[i].type;
@@ -472,8 +494,8 @@ public class Main extends javax.swing.JFrame {
 
         for (int t=0; t< transitions.length; t++)
         {
-            MyWeightedVertex from = xom.findActivityNode(transitions[t].from);
-            MyWeightedVertex to = xom.findActivityNode(transitions[t].to);
+            MyWeightedVertex from = xom.findActivityNode(activities,transitions[t].from);
+            MyWeightedVertex to = xom.findActivityNode(activities,transitions[t].to);
 
             if ((from!=null) && (to!=null))
             {

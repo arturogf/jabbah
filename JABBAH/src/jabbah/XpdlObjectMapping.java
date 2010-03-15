@@ -5,6 +5,7 @@
 package jabbah;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -32,25 +33,25 @@ public class XpdlObjectMapping {
     Parameter[] Parameters;
     Transition[] Transitions;
     Activity[] Activities;
-    ActivitySet[] ASets;
+    HashMap ASets;
     Lane[] Lanes;
 
     public void XpdlObjectMapping() {
     }
 
-    public String findLane(String id) {
-        for (int i = 0; i < this.Lanes.length; i++) {
-            if (this.Lanes[i].id.equals(id)) {
-                return Lanes[i].name;
+    public String findLane(Lane[] lanes, String id) {
+        for (int i = 0; i < lanes.length; i++) {
+            if (lanes[i].id.equals(id)) {
+                return lanes[i].name;
             }
         }
         return "";
     }
 
-    public Transition findTransition(String id) {
-        for (int i = 0; i < this.Transitions.length; i++) {
-            if (this.Transitions[i].id.equals(id)) {
-                return Transitions[i];
+    public Transition findTransition(Transition[] transitions,String id) {
+        for (int i = 0; i < transitions.length; i++) {
+            if (transitions[i].id.equals(id)) {
+                return transitions[i];
             }
         }
 
@@ -58,30 +59,31 @@ public class XpdlObjectMapping {
 
     }
 
-    public String findActivityName(String label) {
-        for (int i = 0; i < this.Activities.length; i++) {
-            if (this.Activities[i].node.label.equalsIgnoreCase(label)) {
-                return this.Activities[i].name;
+    public String findActivityName(Activity[] activities, String label) {
+        for (int i = 0; i < activities.length; i++) {
+
+            if (activities[i].node.label.equalsIgnoreCase(label)) {
+                return activities[i].name;
             }
         }
 
         return null;
     }
 
-    public MyWeightedVertex findActivityNode(String id) {
-        for (int i = 0; i < this.Activities.length; i++) {
-            if (this.Activities[i].id.equalsIgnoreCase(id)) {
-                return this.Activities[i].node;
+    public MyWeightedVertex findActivityNode(Activity[] activities,String id) {
+        for (int i = 0; i < activities.length; i++) {
+            if (activities[i].id.equalsIgnoreCase(id)) {
+                return activities[i].node;
             }
         }
 
         return null;
     }
 
-    public Activity findActivity(String id) {
-        for (int i = 0; i < this.Activities.length; i++) {
-            if (this.Activities[i].id.equalsIgnoreCase(id)) {
-                return this.Activities[i];
+    public Activity findActivity(Activity[] activities, String id) {
+        for (int i = 0; i < activities.length; i++) {
+            if (activities[i].id.equalsIgnoreCase(id)) {
+                return activities[i];
             }
         }
 
@@ -108,7 +110,7 @@ public class XpdlObjectMapping {
         this.parseParticipants(doc, xpath);
 
         this.Transitions = this.parseTransitions(doc, null, xpath, this.Transitions);
-        this.Activities = this.parseActivities(doc, null, xpath, this.Activities);
+        this.Activities = this.parseActivities(doc, null, xpath, this.Activities, this.Transitions);
         this.parseActivitySet(doc, xpath);
     }
 
@@ -228,7 +230,8 @@ public class XpdlObjectMapping {
             try {
                 a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
                 if (a_name != null) {
-                    Participants[i].name = a_name.getNodeValue();
+                    // replace all spaces for nothing
+                    Participants[i].name = a_name.getNodeValue().replace(" ", "");
                 }
 
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
@@ -260,13 +263,13 @@ public class XpdlObjectMapping {
     }
 
     private Activity[] parseActivities(org.w3c.dom.Document doc, NodeList set,
-            XPath xpath, Activity[] activities) {
+            XPath xpath, Activity[] activities,Transition[] transitions) {
 
         XPathExpression exp_activity = null;
 
         try {
             if (set == null) {
-                exp_activity = xpath.compile("//xpdl2:Activity");
+                exp_activity = xpath.compile("//xpdl2:WorkflowProcesses/xpdl2:WorkflowProcess/xpdl2:Activities/xpdl2:Activity");
             }
 
         } catch (XPathExpressionException ex) {
@@ -313,6 +316,7 @@ public class XpdlObjectMapping {
                         XPathConstants.NODE);
                 // there is a lane_id for this activity
                 if (a_lane != null) {
+                    //TODO: cuando son actividades internas a un subproceso, no pillan el lane!
                     activities[i].lane_id = a_lane.getNodeValue();
                 }
 
@@ -402,7 +406,7 @@ public class XpdlObjectMapping {
                                 // now we need to parse the transitions that are involved in the XOR SPLIT
                                 for (int j = 0; j < a_trefs.getLength(); j++) {
                                     attr = a_trefs.item(j).getAttributes();
-                                    activities[i].param.affectedTransitions[j] = this.findTransition(attr.item(0).getNodeValue());
+                                    activities[i].param.affectedTransitions[j] = this.findTransition(transitions,attr.item(0).getNodeValue());
                                     activities[i].param.name = activities[i].param.affectedTransitions[j].parameterId;
                                 }
 
@@ -437,21 +441,22 @@ public class XpdlObjectMapping {
         try {
             res_set = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
 
-            this.ASets = new ActivitySet[res_set.getLength()];
-
+            //this.ASets = new ActivitySet[res_set.getLength()];
+            this.ASets = new HashMap();
+            
             // para cada ActivitySet
             for (int i = 0; i < res_set.getLength(); i++) {
 
-                this.ASets[i] = new ActivitySet();
+                ActivitySet as = new ActivitySet();
 
                 a_subsetid = (Node) xpath.evaluate("@Id", res_set.item(i), XPathConstants.NODE);
 
                 if (a_subsetid != null) {
-                    this.ASets[i].id = a_subsetid.getNodeValue();
+                    as.id = a_subsetid.getNodeValue();
 
                     //we need to parse activities internal to this ActivitySet
                     try {
-                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='" + this.ASets[i].id + "']/xpdl2:Activities/xpdl2:Activity");
+                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='" + as.id + "']/xpdl2:Activities/xpdl2:Activity");
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
@@ -459,7 +464,7 @@ public class XpdlObjectMapping {
                     try {
                         subact = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
                         if (subact.getLength() > 0) {
-                            this.ASets[i].activities = this.parseActivities(null, subact, xpath, this.ASets[i].activities);
+                            as.activities = this.parseActivities(null, subact, xpath, as.activities, as.transitions);
                         }
 
                     } catch (XPathExpressionException ex) {
@@ -470,7 +475,7 @@ public class XpdlObjectMapping {
                     //we need to parse Transitions internal to this ActivitySet
                     try {
                         exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='"
-                                + this.ASets[i].id + "']/xpdl2:Transitions/xpdl2:Transition");
+                                + as.id + "']/xpdl2:Transitions/xpdl2:Transition");
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
@@ -478,19 +483,17 @@ public class XpdlObjectMapping {
                     try {
                         subtrans = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
                         if (subtrans.getLength() > 0) {
-                            this.ASets[i].transitions = this.parseTransitions(null, subtrans, xpath, this.ASets[i].transitions);
+                            as.transitions = this.parseTransitions(null, subtrans, xpath, as.transitions);
                         }
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
 
                     }
-
-
-
+                    // colocamos el ActivitySet en el HashMap con la clave "id"
+                    // del propio ActivitySet, asi nos sera facil encontrarlo
+                    this.ASets.put(as.id,as);
                 }
-
-
 
             }
 
@@ -505,7 +508,7 @@ public class XpdlObjectMapping {
         XPathExpression exp_trans = null;
         try {
             if (set==null)
-                exp_trans = xpath.compile("//xpdl2:Transition");
+                exp_trans = xpath.compile("//xpdl2:WorkflowProcesses/xpdl2:WorkflowProcess/xpdl2:Transitions/xpdl2:Transition");
         } catch (XPathExpressionException ex) {
             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
         }

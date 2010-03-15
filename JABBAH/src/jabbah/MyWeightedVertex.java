@@ -1,6 +1,7 @@
 package jabbah;
 
 import java.util.Vector;
+import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
 /**
  * Represents a weighted vertex for a graph. 
@@ -31,6 +32,9 @@ public class MyWeightedVertex
     // needed for the BlockDetection class
     boolean marked;
     Vector block = null;
+
+    // needed in case it is a subprocess node
+    ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> subgraph;
 
 
 

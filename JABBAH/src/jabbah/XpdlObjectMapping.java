@@ -119,14 +119,16 @@ public class XpdlObjectMapping {
         try {
             exp_param = xpath.compile("//xpdl2:FormalParameter");
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error compiling xpath expression for FormalParater", ex);
         }
 
         Object res_param = null;
         try {
             res_param = exp_param.evaluate(doc, XPathConstants.NODESET);
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error evaluating xpath expression for FormalParater", ex);
         }
 
         NodeList nodes = (NodeList) res_param;
@@ -157,7 +159,8 @@ public class XpdlObjectMapping {
 
 
             } catch (XPathExpressionException ex) {
-                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                        "Error evaluating id,names or types for FormalParater", ex);
             }
 
         }
@@ -169,14 +172,16 @@ public class XpdlObjectMapping {
         try {
             exp_lane = xpath.compile("//xpdl2:Lane");
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error compiling xpath expression for Lane", ex);
         }
 
         Object res_lane = null;
         try {
             res_lane = exp_lane.evaluate(doc, XPathConstants.NODESET);
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error evaluating xpath expression for Lane", ex);
         }
 
         NodeList nodes = (NodeList) res_lane;
@@ -196,7 +201,8 @@ public class XpdlObjectMapping {
                 Lanes[i].id = l_id.getNodeValue();
 
             } catch (XPathExpressionException ex) {
-                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                        "Error evaluating Name or Id for Lane", ex);
             }
 
         }
@@ -208,14 +214,16 @@ public class XpdlObjectMapping {
         try {
             exp_participant = xpath.compile("//xpdl2:Participant");
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error compiling xpath expression for Participant", ex);
         }
 
         Object res_act = null;
         try {
             res_act = exp_participant.evaluate(doc, XPathConstants.NODESET);
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error evaluating xpath expression for Participant", ex);
         }
 
         NodeList nodes = (NodeList) res_act;
@@ -228,16 +236,25 @@ public class XpdlObjectMapping {
 
             Node a_name, a_id, a_extended, a_lane;
             try {
-                a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
-                if (a_name != null) {
-                    // replace all spaces for nothing
-                    Participants[i].name = a_name.getNodeValue().replace(" ", "");
-                }
 
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
                 if (a_id != null) {
                     Participants[i].id = a_id.getNodeValue();
                 }
+                 else
+                     Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                                "There is no @Id for a Participant!");
+
+                a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
+                if (a_name != null) {
+                    // replace all spaces for nothing
+                    Participants[i].name = a_name.getNodeValue().replace(" ", "");
+                } else
+                     Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                "There is no @Name for a Participant with id "+Participants[i].id);
+
+
+                
 
                 // check if the participant is assigned to a specific Lane, by using
                 // an extended Attribute called "Lane"
@@ -250,12 +267,21 @@ public class XpdlObjectMapping {
                         if (a_lane != null) {
                             Participants[i].lane = a_lane.getNodeValue();
                         }
-                    }
-                }
+                        else
+                            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                "There is no ExtendedAttribute @Value for Participant "+ a_name);
+
+                    } else
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                "There is ExtendedAttribute for Participant "+ a_name+ " but it is not called 'Lane'");
+                } else
+                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                    "There is no ExtendedAttribute @Name for Participant "+ a_name);
 
 
             } catch (XPathExpressionException ex) {
-                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                        "Error evaluating Name, Id, or Lane for Participant", ex);
             }
 
         }
@@ -273,7 +299,8 @@ public class XpdlObjectMapping {
             }
 
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error compiling xpath expression for Main Activities", ex);
         }
 
         Object res_act = null;
@@ -287,7 +314,8 @@ public class XpdlObjectMapping {
             }
 
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error evaluating xpath expression for Main Activities", ex);
         }
 
         NodeList nodes = (NodeList) res_act;
@@ -417,7 +445,8 @@ public class XpdlObjectMapping {
                 }
 
             } catch (XPathExpressionException ex) {
-                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                        "Error evaluating XPDL information about Activities", ex);
             }
 
         }
@@ -435,7 +464,8 @@ public class XpdlObjectMapping {
         try {
             exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet");
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                    "Error compiling xpath expression for ActivitySet", ex);
         }
 
         try {
@@ -459,7 +489,8 @@ public class XpdlObjectMapping {
                         exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='" + as.id + "']/xpdl2:Activities/xpdl2:Activity");
 
                     } catch (XPathExpressionException ex) {
-                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                                "Error evaluating activities xpath expression for ActivitySet "+as.id, ex);
                     }
                     try {
                         subact = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
@@ -468,7 +499,8 @@ public class XpdlObjectMapping {
                         }
 
                     } catch (XPathExpressionException ex) {
-                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                                "Error evaluating activities internal to ActivitySet "+as.id, ex);
 
                     }
 
@@ -478,7 +510,8 @@ public class XpdlObjectMapping {
                                 + as.id + "']/xpdl2:Transitions/xpdl2:Transition");
 
                     } catch (XPathExpressionException ex) {
-                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                                "Error compiling transitions xpath expression for ActivitySet "+as.id, ex);
                     }
                     try {
                         subtrans = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
@@ -487,7 +520,8 @@ public class XpdlObjectMapping {
                         }
 
                     } catch (XPathExpressionException ex) {
-                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                                "Error evaluating transitions internal to ActivitySet "+as.id, ex);
 
                     }
                     // colocamos el ActivitySet en el HashMap con la clave "id"
@@ -498,7 +532,8 @@ public class XpdlObjectMapping {
             }
 
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                     "Error evaluating xpath expression for ActivitySet", ex);
         }
 
     }
@@ -510,7 +545,8 @@ public class XpdlObjectMapping {
             if (set==null)
                 exp_trans = xpath.compile("//xpdl2:WorkflowProcesses/xpdl2:WorkflowProcess/xpdl2:Transitions/xpdl2:Transition");
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                     "Error compiling xpath expression for Main Transitions", ex);
         }
 
         Object res_trans = null;
@@ -520,7 +556,8 @@ public class XpdlObjectMapping {
             else
                 res_trans = set;
         } catch (XPathExpressionException ex) {
-            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                     "Error evaluating xpath expression for Main Transitions", ex);
         }
 
         NodeList nodes = (NodeList) res_trans;
@@ -572,7 +609,8 @@ public class XpdlObjectMapping {
 
 
             } catch (XPathExpressionException ex) {
-                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
+                         "Error evaluating xpdl info for Transitions", ex);
             }
 
         }

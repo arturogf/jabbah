@@ -33,7 +33,6 @@ import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 
 import java.awt.geom.Rectangle2D;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
 import org.xml.sax.SAXException;

@@ -472,6 +472,8 @@ public class Main extends javax.swing.JFrame {
             else
             {
                 activities[i].node = new MyWeightedVertex(activities[i].name);
+                if (activities[i].duration != null)
+                    activities[i].node.setDuration(activities[i].duration);
 
                 // if a lane l has been passed as parameter, it means that all nodes
                 // populated must have this value for the lane (where the subprocess is)

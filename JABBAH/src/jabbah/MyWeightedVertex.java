@@ -80,6 +80,16 @@ public class MyWeightedVertex
         this.label = l;
     }
 
+     /**
+     * Set the duration for a vertex
+     *
+     * @param l the duration to be set as a String
+     */
+    public void setDuration(String l)
+    {
+        this.duration = Double.parseDouble(l);
+    }
+
     /**
      * Overrides the original method, so that the corresponding node label shown
      * is the result of concatenate the node label with its weight

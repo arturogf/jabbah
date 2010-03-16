@@ -145,17 +145,26 @@ public class XpdlObjectMapping {
                 if (p_id != null) {
                     Parameters[i].id = p_id.getNodeValue();
                 }
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "The Parameter @Id is empty or null");
 
                 p_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
                 if (p_name != null) {
                     Parameters[i].name = p_name.getNodeValue();
                 }
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "The Parameter @Name is empty or null");
 
                 p_type = (Node) xpath.evaluate("xpdl2:DataType/xpdl2:BasicType", nodes.item(i),
                         XPathConstants.NODE);
                 if (p_type != null) {
                     Parameters[i].type = p_type.getAttributes().item(0).getNodeValue();
                 }
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "The Parameter type is empty or null");
 
 
             } catch (XPathExpressionException ex) {
@@ -195,10 +204,18 @@ public class XpdlObjectMapping {
             Node l_name, l_id;
             try {
                 l_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
-                Lanes[i].name = l_name.getNodeValue();
+                if (l_name != null)
+                    Lanes[i].name = l_name.getNodeValue();
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "The Lane @Name is empty or null");
 
                 l_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
-                Lanes[i].id = l_id.getNodeValue();
+                if (l_id != null)
+                    Lanes[i].id = l_id.getNodeValue();
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "The Lane @Id is empty or null");
 
             } catch (XPathExpressionException ex) {
                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
@@ -269,7 +286,7 @@ public class XpdlObjectMapping {
                         }
                         else
                             Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
-                                "There is no ExtendedAttribute @Value for Participant "+ a_name);
+                                "There is no ExtendedAttribute Lane @Value for Participant "+ a_name);
 
                     } else
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
@@ -334,11 +351,17 @@ public class XpdlObjectMapping {
                 if (a_name != null) {
                     activities[i].name = a_name.getNodeValue();
                 }
+                else
+                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                    "There is no @Name for Activity");
 
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
                 if (a_id != null) {
                     activities[i].id = a_id.getNodeValue();
                 }
+                else
+                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                    "There is no ExtendedAttribute @Id for Activity "+activities[i].name);
 
                 a_lane = (Node) xpath.evaluate("xpdl2:NodeGraphicsInfos/xpdl2:NodeGraphicsInfo/@LaneId", nodes.item(i),
                         XPathConstants.NODE);
@@ -347,6 +370,10 @@ public class XpdlObjectMapping {
                     //TODO: cuando son actividades internas a un subproceso, no pillan el lane!
                     activities[i].lane_id = a_lane.getNodeValue();
                 }
+                else
+                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                    "There is no @LaneId for Activity "+ a_name);
+
 
                 a_start = (Node) xpath.evaluate("xpdl2:Event/xpdl2:StartEvent", nodes.item(i),
                         XPathConstants.NODE);
@@ -374,8 +401,29 @@ public class XpdlObjectMapping {
                 // check if the activity has associated a specific duration, by using
                 // an extended Attribute called "Duration"
 
-                a_extended = (NodeList) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute", nodes.item(i),
-                        XPathConstants.NODESET);
+                a_extended = (NodeList) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute[@Name='Duration']",
+                        nodes.item(i),XPathConstants.NODESET);
+
+                 if (a_extended != null) {
+                    // in this loop, the "Activities" array is populated, using xpath parsing on the context node
+                    for (int j = 0; j < a_extended.getLength(); j++) {
+
+                        attr = a_extended.item(j).getAttributes();
+                        
+                        if (!attr.getNamedItem("Value").getNodeValue().equalsIgnoreCase(""))
+                        {
+                                activities[i].duration = attr.getNamedItem("Value").getNodeValue();
+                        }
+                        else
+                            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                        "an extended attribute Duration was found with empty value in activity " +
+                                        activities[i].name);
+                    }
+                 }
+
+
+                /*a_extended = (NodeList) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute", nodes.item(i),
+                       XPathConstants.NODESET);
 
                 if (a_extended != null) {
                     // in this loop, the "Activities" array is populated, using xpath parsing on the context node
@@ -385,13 +433,18 @@ public class XpdlObjectMapping {
                             if (!(attr.item(1).getNodeValue().equalsIgnoreCase(""))) {
                                 activities[i].duration = attr.item(1).getNodeValue();
                             } else {
-                                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING, null,
+                                Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
                                         "an extended attribute Duration was found with no value in activity " +
                                         activities[i].name);
                             }
                         }
+                        else
+                            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                        "an extended attribute was found for activity " +
+                                        activities[i].name+" but it is not Duration");
                     }
                 }
+                */
 
 
                 a_gateway = (Node) xpath.evaluate("xpdl2:Route/@GatewayType", nodes.item(i),
@@ -497,6 +550,9 @@ public class XpdlObjectMapping {
                         if (subact.getLength() > 0) {
                             as.activities = this.parseActivities(null, subact, xpath, as.activities, as.transitions);
                         }
+                        else
+                            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                        "There is no subactivities for ActivitySet "+as.id);
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
@@ -518,14 +574,18 @@ public class XpdlObjectMapping {
                         if (subtrans.getLength() > 0) {
                             as.transitions = this.parseTransitions(null, subtrans, xpath, as.transitions);
                         }
+                        else
+                            Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                                        "There is no transitions within ActivitySet "+as.id);
+
 
                     } catch (XPathExpressionException ex) {
                         Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
                                 "Error evaluating transitions internal to ActivitySet "+as.id, ex);
 
                     }
-                    // colocamos el ActivitySet en el HashMap con la clave "id"
-                    // del propio ActivitySet, asi nos sera facil encontrarlo
+                    // colocamos el ActivitySet en el HashMap ASets con la clave "id"
+                    // del propio ActivitySet, asi nos sera facil encontrarlo luego
                     this.ASets.put(as.id,as);
                 }
 
@@ -571,16 +631,32 @@ public class XpdlObjectMapping {
             Node a_name, a_id, a_from, a_to, a_param_id, a_operator, a_param_value;
             try {
                 a_id = (Node) xpath.evaluate("@Id", nodes.item(i), XPathConstants.NODE);
-                transitions[i].id = a_id.getNodeValue();
+                if (a_id != null)
+                    transitions[i].id = a_id.getNodeValue();
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "There is no @Id for Transition");
 
                 a_name = (Node) xpath.evaluate("@Name", nodes.item(i), XPathConstants.NODE);
-                transitions[i].name = a_name.getNodeValue();
+                if (a_name != null)
+                    transitions[i].name = a_name.getNodeValue();
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "There is no @Name for Transition");
 
                 a_from = (Node) xpath.evaluate("@From", nodes.item(i), XPathConstants.NODE);
-                transitions[i].from = a_from.getNodeValue();
+                if (a_from != null)
+                    transitions[i].from = a_from.getNodeValue();
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "There is no @From for Transition");
 
                 a_to = (Node) xpath.evaluate("@To", nodes.item(i), XPathConstants.NODE);
-                transitions[i].to = a_to.getNodeValue();
+                if (a_to != null)
+                    transitions[i].to = a_to.getNodeValue();
+                else
+                    Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.WARNING,
+                        "There is no @To for Transition");
 
                 a_param_id = (Node) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute/simulation:TransitionSimulationData/simulation:StructuredCondition/simulation:ParameterId",
                         nodes.item(i), XPathConstants.NODE);
@@ -605,9 +681,6 @@ public class XpdlObjectMapping {
                         transitions[i].parameterValue = a_param_value.getFirstChild().getTextContent();
                     }
                 }
-
-
-
             } catch (XPathExpressionException ex) {
                 Logger.getLogger(XpdlObjectMapping.class.getName()).log(Level.SEVERE,
                          "Error evaluating xpdl info for Transitions", ex);

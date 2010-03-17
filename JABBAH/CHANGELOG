@@ -1,3 +1,294 @@
+commit c4eb1230b4b5b42eae07615984323d3d0490ef7f
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Wed Mar 17 00:36:14 2010 +0100
+
+    - Added more logging to XPDL parsing
+    - Corrected a bug for the parsing of Duration by adding a setDuration method for MyWeightedVertex class
+
+commit 3bca693bdfb5b6fa5dc60cd4c6fdebeedd070e3e
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Mon Mar 15 14:17:41 2010 +0100
+
+    - Added some logging handlers for xpdl parsing
+
+commit 7d8c4474e6986fb4fa8235e85010b8454dc0d521
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Mon Mar 15 13:41:46 2010 +0100
+
+    - Completed all the logic for subprocesses (can be buggy, need to be tested deeply)
+
+commit f1a5cb18f337bf78cb10e2e14bd9236725dbb016
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Fri Mar 12 12:55:21 2010 +0100
+
+    - Added the parsing of transitions internal to ActivitySets
+
+commit 7928d1652ff3d99d54438f16914a36c74a54a42c
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Fri Mar 12 11:53:12 2010 +0100
+
+    - Added new class ActivitySet for subprocesses, and the corresponding ParseActivitySets()
+    - Adapted ParseActivities() to be also used for internal Activities of ActivitySets
+
+commit cc3c2d4f7b3158d2673b8c24b5e4af4655d87dc9
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Thu Mar 11 12:55:08 2010 +0100
+
+    - Added PopulateGraph(g,activities,transitions,xom) method to Main Class
+
+commit 6be2ff481fa58114589caa4aaf30fb519e8b0075
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Fri Mar 5 14:14:29 2010 +0100
+
+    - added icons for begin and end events.
+
+commit 2bdaead364068b534a7aaba4a38b301b76147f57
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Fri Mar 5 14:13:37 2010 +0100
+
+    - added tabbedPanes for Domain and Problem files, now can be seen within the framework
+
+commit 10e27fe8ff8cc6fd81323947f035384c59f6ebed
+Author: arturogf <arturogf@arturogf-laptop.(none)>
+Date:   Wed Mar 3 12:45:59 2010 +0100
+
+    - Change again the UI to use icons, grid, tabbedPanes and HierarchicalLayout for the graph view.
+    - Correct some problems with the scrolling (unset Dimension for the jgraph).
+
+commit 92d6049f95e16496237583da293761ea4fed2ac7
+Author: arturogf <arturogf@micasa.(none)>
+Date:   Thu Jan 28 01:25:44 2010 +0100
+
+    Some changes to UI and begin to use some new logging code.
+
+commit a291f1e73dbf9f534993c12811b5d306f003fe4d
+Author: arturogf <arturogf@micasa.(none)>
+Date:   Mon Jan 25 22:22:41 2010 +0100
+
+    Update to run with netbeans 7.1 (ubuntu 9.10)
+
+commit 26a82d3c9f032d09ee2bda4954ef455d8fe94bc0
+Author: arturogf <arturogf@micasa.(none)>
+Date:   Mon Jan 25 22:07:54 2010 +0100
+
+    Update jabbah to use the netbeans Palette for the Main Form.
+
+commit 8afa52d998aa9f61b6981cccba1dd4c3007bf9ce
+Author: arturogf <arturogf@parallels.(none)>
+Date:   Mon Oct 12 18:24:45 2009 +0200
+
+    Modified prettyprint and default values...
+
+commit e7acca97a7d43cf4701a39abff4186420c76134f
+Author: arturogf <arturogf@parallels.(none)>
+Date:   Wed Sep 16 08:59:03 2009 +0200
+
+    - Added findActivityName(String label) to XpdlObjectMapping
+    - Fix problem with right brother nodes (duplicate entries in the translation)
+    - Added metatags for prettyprint and import in msproject
+
+commit 295af4dc3e1a7178f5906deb6ee2d030b6109858
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Sun Sep 13 13:35:47 2009 +0200
+
+    Adding the elearning32.xpdl file
+
+commit 4ccd54e0fb2d1f2e8a07e39ede22f9fcf090614b
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Sun Sep 13 13:33:54 2009 +0200
+
+    - Adding all the files for the netbeans 6.7 project.
+
+commit 6fc4e1c47a71a7eec0f3ccd06e8a1da0bf44a0d4
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Thu Sep 10 20:30:10 2009 +0200
+
+    - Modified the program to consider the extraction of FormalParameters, and its
+    translation into the PDDL fragments.
+
+commit 7365d1840b5c877d596f80b77695d31151cebb92
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Mon Sep 7 19:42:41 2009 +0200
+
+    - added the parsing and translation of Durations as ExtendedAttributes.
+
+commit 55feb455e2758d66d9fb4f0cd7aa164506341258
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Mon Jul 20 19:10:55 2009 +0200
+
+    - Added the lane information extraction neccessary for belongs_to_lane() predicate.
+    TODO: participants belongs to Lane ... (as an extended attribute)
+
+commit 21ecd9a849cae2a90023584baee99e8b8a498788
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Mon Jul 20 17:40:51 2009 +0200
+
+    - Now the file is choosen from the menu using a Jfilechooser.
+
+commit 65a30086ace56fa5917a7f23189390ada9cbd42c
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Wed Jul 15 20:26:15 2009 +0200
+
+    - Fixed another bug in SerialBlockDetection.
+    - Added the actionListener for the menuitem "Import XPDL file", using a JFileChooser.
+    - Change the layout manager to boxLayout with vpanel + panel1 + panel2.
+
+commit b1268943c266bab778afd81c6d826a45249c59e0
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Tue Jul 14 21:16:51 2009 +0200
+
+    Changed a lot of things, mainly:
+    - Fixed bugs in the SerialBlockDetection() method.
+    - Better parsing of Split, Joins restrictions.
+    - Now the program reads the XPDL file and runs quite good, time to improve the translation process! The block detection algorithm seems to run over the XPDL graph as well.
+
+commit a2ed7ef2143efe46550d72c5ea6e225dffb13aa7
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Thu Jun 25 19:49:30 2009 +0200
+
+    added files to HEAD.
+
+commit d60a177ca75a76545a852e44557e33f37fa01b72
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Wed Jun 24 19:41:47 2009 +0200
+
+    Changed to Xpath parsing with context nodes.
+
+commit 86dab9882509b8334934f97bdc56cefd89c03438
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Mon Jun 15 00:17:04 2009 +0200
+
+    Added a very simple menubar with "Archive->Import XPDL file" and "Archive->Exit"
+
+commit 09c614ecc5170deac432d5a330041360cd233bbf
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Thu Jun 4 19:35:04 2009 +0200
+
+    Added first stage of XPDL parsing in XpdlObjectMapping.java.
+    - added parseLanes()
+
+commit a322bdb643ba25759d91168ba07e5c3e1ef4af0e
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Wed Jun 3 22:43:40 2009 +0200
+
+    - Added Namespace management for XPATH parsing
+    - Added method for parsing XPATH in class XpdlObjectMapping
+
+commit 187473d2fb91fc79ad370ec3bf12739acb9a5dad
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Wed Jun 3 21:18:03 2009 +0200
+
+    Added new classes Activity, Lane, Parameter, Transition and the structure XpdlObjectMapping.
+
+commit 99692cfb57659b59d10e7f3e3cfcaece5e0eb4cc
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Wed Jun 3 21:17:04 2009 +0200
+
+    some modifications mainly related to gateway parameters.
+
+commit 353649b1691637286451d798aaeae33ad19880f5
+Author: arturo <arturo@localhost.localdomain>
+Date:   Mon May 4 11:18:59 2009 +0200
+
+    - added method putColor() to color the graph taking into account the NodeType attributes
+
+commit 42069e7538ccb31687c00f00e4dc67fbeffb4879
+Author: arturo <arturo@localhost.localdomain>
+Date:   Tue Apr 28 19:58:26 2009 +0200
+
+    - Added transitionRestrictions to Gateways nodes in jabbah class.
+    - Added method setSimpleMerges() and getRightNode() to Translator class.
+    
+    With this, we can now generate the HTN-PDDL code for split/join blocks. Now we have to do the XOR blocks using the information from Gateways (should include that information in the PB Blocks created in replaceNodesWithPB() method.
+
+commit ce143a2e847f74b2ba56eec3bb74020276b28422
+Author: arturo <arturo@localhost.localdomain>
+Date:   Mon Apr 27 23:39:01 2009 +0200
+
+    - Fixed some javadocs comments and more.
+
+commit b25f8e15a9b24f67a33c87d6cab8477166db772a
+Author: arturo <arturo@localhost.localdomain>
+Date:   Mon Apr 27 14:37:38 2009 +0200
+
+    add the PDDLBlocks class file and some comments compliant with javadoc
+
+commit 20d6a767b82eeeaeed3e8341866b7b2dbc31bfb5
+Author: arturo <arturo@localhost.localdomain>
+Date:   Mon Apr 27 14:18:14 2009 +0200
+
+    Add the classes for predefined constants in proper class files.
+
+commit 371dd37e82b2b1e1446abe792bc468295674beb6
+Author: arturo <arturo@localhost.localdomain>
+Date:   Mon Apr 27 13:22:24 2009 +0200
+
+    More HTN-PDDL output in Translator class.
+
+commit 7d4dbdcd6011061049800bb5a88223be303d534e
+Author: arturo <arturo@localhost.localdomain>
+Date:   Tue Apr 21 17:36:37 2009 +0200
+
+    - added setConstants() method to translator
+
+commit 02121b4e750900810d68d3186617c8ed46a703a1
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Thu Apr 16 21:47:40 2009 +0200
+
+    - Complete the rename process.
+
+commit 0c6f5208cc69b7421214ca3e10394f085f5a5e27
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Thu Apr 16 21:37:16 2009 +0200
+
+    - Renamed project to JABBAH
+    - Added some code to PDDLTranslator()
+
+commit 81cc4fe3c37353e15b7b4c65b8c524ec98a51818
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Mon Mar 30 21:52:51 2009 +0200
+
+    - Added javadocs comments for most of the source files
+    - Added the NodeType class, compound of constants definitions.
+
+commit 45e68785cace350d431cc3da0a1f18e546dd1e08
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Tue Mar 24 20:08:12 2009 +0100
+
+    - Refactored some methods in BlockDetection.
+    - Formated code using Netbeans Format command.
+    - Renamed some variables for readability.
+
+commit 06dd1a1c2133b8be7173199354f391a96201dfc6
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Mon Mar 23 19:50:58 2009 +0100
+
+    - Finish BlockDetection() method. We need to refactor it to make it clear and we need to redraw the obtained graph as a tree, using internal 'block' node variables.
+
+commit c96816b893572b2979c52bcba195156683958afa
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Sun Mar 22 22:02:06 2009 +0100
+
+    - added ParallelBlockDetection() method. It returns the PB Vector, including the opening gateway as first element and the closing one as latest.
+
+commit 0e4623f3484059bb5214211b138d06e9e5197d7c
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Thu Mar 19 00:19:13 2009 +0100
+
+    - Added a first [buggy] SerialBlockDetection() method
+
+commit 69df75660793ce4bcf5a05ebba2c74ae2d517b18
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Tue Mar 17 20:26:31 2009 +0100
+
+    - The branch-water marking procedure seems to be completed.
+
+commit cc7057b6af2b5f139b8c36851e5eca512e3840ba
+Author: Arturo Gonzalez <arturogf@gmail.com>
+Date:   Tue Mar 17 18:44:30 2009 +0100
+
+    - add MyWeightedVertex class, so that we can implement branch-water marking accordingly.
+
 commit 618f9d2647db5ac51194f34a3392061b6f0a2bab
 Author: Arturo Gonzalez <arturogf@gmail.com>
 Date:   Mon Mar 16 18:34:43 2009 +0100

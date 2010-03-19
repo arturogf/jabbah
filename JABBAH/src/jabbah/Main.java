@@ -35,6 +35,9 @@ import java.awt.geom.Rectangle2D;
 import java.io.FileInputStream;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.LogManager;
+import java.util.logging.SimpleFormatter;
 import org.xml.sax.SAXException;
 
 /**
@@ -50,6 +53,9 @@ public class Main extends javax.swing.JFrame {
     //private static final Dimension DEFAULT_SIZE = new Dimension(1200, 800);
 
     private static Logger logger = Logger.getLogger(Main.class.getName());
+    private static FileHandler handler;
+
+
     
     //~ Instance fields --------------------------------------------------------
     //
@@ -64,7 +70,27 @@ public class Main extends javax.swing.JFrame {
 
     /** Creates new form Main */
     public Main() {
+
+        try {
+            String tmpdir = System.getProperty("java.io.tmpdir");
+            handler = new FileHandler(tmpdir + "/jabbah.log");
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // Add to the desired logger
+        SimpleFormatter fm = new SimpleFormatter();
+        handler.setFormatter(fm);
+        logger.setUseParentHandlers(false);
+        logger.addHandler(handler);
+
+        try {
         initComponents();
+        }
+        finally {
+            handler.close();
+        }
     }
 
     /** This method is called from within the constructor to
@@ -389,25 +415,24 @@ public class Main extends javax.swing.JFrame {
     private void buildGraphFromXPDL(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g,
                                     String AbsolutePath)
     {
-        xom = new XpdlObjectMapping();
-        try
-        {
-            xom.parse(AbsolutePath);
-        } catch (SAXException ex)
-        {
-            logger.log(Level.SEVERE, "Ocurrió una excepción al parsear el XPDL", ex);
-        } catch (XPathExpressionException ex)
-        {
-            logger.log(Level.SEVERE, "Ocurrió un error con XPATH al parsear el XPDL", ex);
-        } catch (IOException ex)
-        {
-            logger.log(Level.SEVERE, "Ocurrió una excepción de I/O al parsear el XPDL", ex);
-        } catch (ParserConfigurationException ex)
-        {
-            logger.log(Level.SEVERE, "Ocurrió una excepción de configuración de " +
-                    "parser al leer el XPDL", ex);
-        }
+        try {
+            xom = new XpdlObjectMapping();
 
+            try {
+                xom.parse(AbsolutePath);
+            } catch (SAXException ex) {
+                logger.log(Level.SEVERE, "Ocurrió una excepción al parsear el XPDL", ex);
+            } catch (XPathExpressionException ex) {
+                logger.log(Level.SEVERE, "Ocurrió un error con XPATH al parsear el XPDL", ex);
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, "Ocurrió una excepción de I/O al parsear el XPDL", ex);
+            } catch (ParserConfigurationException ex) {
+                logger.log(Level.SEVERE, "Ocurrió una excepción de configuración de " +
+                        "parser al leer el XPDL", ex);
+            }
+        } finally {
+            xom.closeLoggerHandler();
+        }
         if (xom.Activities.length==0)
             logger.severe ("El número de actividades es CERO en el método buildGraphFromXPDL()");
 

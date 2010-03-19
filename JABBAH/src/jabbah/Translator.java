@@ -127,7 +127,7 @@ public class Translator {
         {
             if (v.type == NodeType.DEFAULT) 
             {
-                result = result + v.label.toLowerCase() + " ";
+                result = result + v.label.replace(" ","_").toLowerCase() + " ";
             }
         }
         
@@ -143,7 +143,6 @@ public class Translator {
             result = result + this.xom.Lanes[i].name + " ";
         }
         result = result + " - lane\n";
-
 
         result = result+")\n";
         
@@ -161,29 +160,55 @@ public class Translator {
      */
     public String buildDurativeAction(String name, Double duration, String lane)
     {
-        String result = "\n(:durative-action " + name.toUpperCase() + "\n" +
+        String result = "\n(:durative-action " + name.replace(" ", "_").toUpperCase() + "\n" +
 	":parameters(?w - participant)" + "\n" +
-        ":meta (\n" +
-        "(:tag prettyprint  \"START: ?start; | END: ?end; | DURATION: ?duration; |   '" + name + "' ALLOCATED TO '?w' \")\n" +
-	"(:tag short \"ACTIVIDAD " + name + "\")\n" +
+        setMetaTags(name) +
+	setActionDuration(duration) +
+	":condition(belongs_to_lane ?w " + lane + ")\n" +
+	":effect (completed " + name.toLowerCase() +"))\n";
+
+        
+        return result;
+    }
+
+     /**
+     *
+     * @param duration the duration for the durative action
+     * @return a string containing the duration expression
+     */
+    public String setActionDuration(Double duration)
+    {
+    String result = ":duration (= ?duration " + duration.toString() + ")\n";
+
+    return result;
+    }
+
+     /**
+     *
+     * @param name the name for the durative action, usually the activity node label
+     * @return a string containing the metatags needed for the durative action
+     */
+    public String setMetaTags(String name)
+    {
+    String result =
+                ":meta (\n" +
+                "(:tag prettyprint  \"START: ?start; | END: ?end; | DURATION: ?duration; |   '" +
+                name + "' ALLOCATED TO '?w' \")\n" +
+                "(:tag short \"ACTIVITY " + name + "\")\n" +
 		"(:tag resource \"?w\")\n" +
 		"(:tag monitoring \"manual\")\n" +
-	//	"(:tag UID \""+ name.substring(1,name.length()) + "\")\n" +
                 "(:tag UID \""+ this.uid + "\")\n" +
 		"(:tag Type \"0\")\n" +
 		"(:tag OutlineLevel \"1\")\n" +
 		"(:tag OutlineNumber \"1\")\n" +
 		"(:tag WBS \"1\")\n" +
-		"(:tag Summary \"0\")\n)\n" +	
-	":duration (= ?duration " + duration.toString() + ")\n" +
-	":condition(belongs_to_lane ?w " + lane + ")\n" +
-	":effect (completed " + name.toLowerCase() +"))\n";
+		"(:tag Summary \"0\")\n)\n";
 
         this.uid = this.uid + 1;
-        
+
         return result;
+
     }
-            
             
     /**
      * 
@@ -202,36 +227,15 @@ public class Translator {
         {
             if (v.type == NodeType.DEFAULT) 
             {
-                if (v.duration != null) {
-                    result = result + this.buildDurativeAction(v.label,
-                                        v.duration,v.lane);
-                }
-                else {
+                if (v.duration != null) 
+                    result = result + this.buildDurativeAction(v.label,v.duration,v.lane); 
+                else
+                    // we use duration 1.0 if not duration was specified for node v
                     result = result + this.buildDurativeAction(v.label, 1.0, v.lane);
-                }
-                
             }
-        
+       
         } 
 
-        /*for (int i=0; i<xom.Activities.length; i++)
-        {
-            if (xom.Activities[i].type == NodeType.DEFAULT)
-            {
-                if (this.xom.Activities[i].duration != null)
-                    result = result + this.buildDurativeAction(this.xom.Activities[i].node.label,
-                            Double.parseDouble(this.xom.Activities[i].duration),
-                            xom.findLane(xom.Lanes,xom.Activities[i].lane_id));
-                else
-                    // if there is no duration at this stage, we consider it has a duration of 1.0 units of time
-                    result = result + this.buildDurativeAction(this.xom.Activities[i].node.label,
-                            1.0,
-                            xom.findLane(xom.Lanes,xom.Activities[i].lane_id));
-
-
-            }
-        }*/
-        
         return result;    
     }
     /**
@@ -336,13 +340,10 @@ public class Translator {
     public String setSimpleMerges()
     {
         String result = "";
-        int simple_merge = 0;
-        int num_worker = 1;
-
+        int num_worker;
         
         for (MyWeightedVertex v : this.G.vertexSet())
         {
-            
             num_worker = 1;
             
             if (v.type == NodeType.PARALLEL
@@ -391,8 +392,6 @@ public class Translator {
                 if (v.type == NodeType.PARALLEL &&
                     v.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
                 {
-                   
-
                     if (v.param != null)
                     {
                          result = result + "(:task Block" + v.label + "\n";
@@ -404,7 +403,7 @@ public class Translator {
                         {
                             if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
                             {
-                                // ojo aqui, va a fallar el xom.Activities
+                                // TODO: ojo aqui, va a fallar el xom.Activities
                                 MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
                                 methodname = "if_" + act_node.label;
                                 predicate = "(value ?x false)";

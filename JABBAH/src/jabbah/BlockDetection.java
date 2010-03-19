@@ -4,6 +4,7 @@
  */
 package jabbah;
 
+import java.io.IOException;
 import org.jgrapht.graph.*;
 import org.jgrapht.Graphs;
 
@@ -12,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Computes the ECA Rules block detection algorithm.
@@ -30,6 +33,8 @@ public class BlockDetection
     private static int pb_index = 1; // index for parallel blocks nodes
     private static int sb_index = 1;    // index for serial blocks nodes
 
+    private static Logger logger = Logger.getLogger(BlockDetection.class.getName());
+    private static FileHandler handler;
     /**
      * Execute the ECA Rules Block Detection algorithm over the graph
      * passed as parameters, and change it to a hierarchical tree representation
@@ -38,6 +43,22 @@ public class BlockDetection
      */
     public BlockDetection(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)
     {
+
+        try {
+            String tmpdir = System.getProperty("java.io.tmpdir");
+            handler = new FileHandler(tmpdir + "/jabbah.log", true);
+
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "IOException Creating the log file ", ex);
+        } catch (SecurityException ex) {
+            logger.log(Level.SEVERE, "SecurityException Creating the log file ", ex);
+        }
+        // Add to the desired logger
+        SimpleFormatter fm = new SimpleFormatter();
+        handler.setFormatter(fm);
+        logger.setUseParentHandlers(false);
+        logger.setLevel(Level.ALL);
+        logger.addHandler(handler);
 
         Vector serial, parallel = new Vector();
 
@@ -59,8 +80,9 @@ public class BlockDetection
 
                 if (parallel == null)
                 {
-                    Logger.getLogger(BlockDetection.class.getName()).log(Level.SEVERE,
-                         "serial and parallel block detection were unsucessful");
+                    logger.log(Level.SEVERE,
+                         "Serial and Parallel block detection were unsucessful");
+                    break;
                 } else
                 {
                     this.replaceNodesWithPB(parallel);
@@ -251,8 +273,8 @@ public class BlockDetection
             }
         }
         else
-            Logger.getLogger(BlockDetection.class.getName()).log(Level.SEVERE,
-                         "there are no start nodes when doing branchWater procedure");
+            logger.log(Level.SEVERE,
+                         "There are no Start nodes when doing branchWater procedure");
 
     }
 
@@ -413,10 +435,16 @@ public class BlockDetection
             {
                 LOOP = false;
 
-                MyWeightedVertex pre = Graphs.predecessorListOf(G, v).get(0);
-                for (MyWeightedVertex j : Graphs.successorListOf(G, pre))
-                {
-                    PB.addElement((MyWeightedVertex) j);
+                try {
+                    MyWeightedVertex pre = Graphs.predecessorListOf(G, v).get(0);
+
+
+                    for (MyWeightedVertex j : Graphs.successorListOf(G, pre)) {
+                        PB.addElement((MyWeightedVertex) j);
+                    }
+                } catch (java.lang.IndexOutOfBoundsException ex) {
+                    logger.severe("Cannot get predecessors List for node in ParallelBlockDetection()");
+                    //System.exit(1);
                 }
             } else // Add the successors of v to queue
             {
@@ -432,6 +460,7 @@ public class BlockDetection
             MyWeightedVertex j = (MyWeightedVertex) PB.get(0);
             PB.add(0, Graphs.predecessorListOf(G, j).get(0));
             PB.addElement(Graphs.successorListOf(G, j).get(0));
+
             return PB;
         } else
         {

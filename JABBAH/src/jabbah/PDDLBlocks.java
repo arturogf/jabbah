@@ -11,7 +11,8 @@ package jabbah;
  */
 public class PDDLBlocks
 {
-    public static final String requirements = "\n(:requirements\n" +
+    public static final String requirements =
+  "\n(:requirements\n" +
   ":typing \n" +
   ":fluents \n" +
   ":htn-expansion \n" +
@@ -22,7 +23,8 @@ public class PDDLBlocks
   ":derived-predicates\n" +
   ":metatags)\n\n";
 
-  public static final String types = "\n(:types\n" +
+  public static final String types =
+        "\n(:types\n" +
  	"parameter - object\n" +
 	"activity - object\n" +
 	"participant - object\n" +
@@ -32,5 +34,5 @@ public class PDDLBlocks
 public static final String predicates =
         "\n(:predicates\n" +
 	"(completed ?a - activity)\n"+
-	"(belongs_to_lane ?p - participant ?a - lane)\n";
+	"(belongs_to_lane ?p - participant ?l - lane)\n";
     }

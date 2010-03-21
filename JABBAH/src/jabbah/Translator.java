@@ -84,10 +84,13 @@ public class Translator {
     public String setTypes()
     {
         String result = PDDLBlocks.types;
-        for (int i=0; i<xom.Parameters.length; i++)
-            result = result + xom.Parameters[i].type.toLowerCase() + " - object\n";
 
-        result = result+")\n\n";
+        for (int i=0; i<xom.Parameters.length; i++) {
+            result = result + xom.Parameters[i].type.toLowerCase() + " - object\n";
+        }
+
+        result = result + ")\n\n";
+
         return result;
     }
 
@@ -101,10 +104,10 @@ public class Translator {
         String result = PDDLBlocks.predicates;
         for (int i=0; i<xom.Parameters.length; i++)
             if (xom.Parameters[i].type.equalsIgnoreCase("boolean"))
-                {
+            {
                     result = result + "(value ?x - parameter ?v - boolean)\n";
                     break;
-                }
+            }
 
         result = result + ")\n\n";
         return result;
@@ -127,7 +130,7 @@ public class Translator {
         {
             if (v.type == NodeType.DEFAULT) 
             {
-                result = result + v.label.replace(" ","_").toLowerCase() + " ";
+                result = result + formatName(v.label,false) + " ";
             }
         }
         
@@ -138,9 +141,15 @@ public class Translator {
             result = result + xom.Parameters[i].name + " - parameter\n";
 
         //add ALL LANES FOUND like 'Training - lane'
-        for (int i=0; i<this.xom.Lanes.length; i++)
-        {
-            result = result + this.xom.Lanes[i].name + " ";
+        if (xom.Lanes.length > 0) {
+            for (int i=0; i<this.xom.Lanes.length; i++)
+            {
+                result = result + this.xom.Lanes[i].name + " ";
+            }
+        }
+        else {
+            // use a DEFAULT lane, as there are not different lanes
+            result = result + "DEFAULT";
         }
         result = result + " - lane\n";
 
@@ -160,17 +169,49 @@ public class Translator {
      */
     public String buildDurativeAction(String name, Double duration, String lane)
     {
-        String result = "\n(:durative-action " + name.replace(" ", "_").toUpperCase() + "\n" +
+        String result = "\n(:durative-action " + formatName(name,true) + "\n" +
 	":parameters(?w - participant)" + "\n" +
         setMetaTags(name) +
-	setActionDuration(duration) +
-	":condition(belongs_to_lane ?w " + lane + ")\n" +
-	":effect (completed " + name.toLowerCase() +"))\n";
+	setActionDuration(duration);
+        if (lane.equalsIgnoreCase(""))
+            result = result + ":condition(belongs_to_lane ?w DEFAULT)\n";
+        else
+            result = result + ":condition(belongs_to_lane ?w " + lane + ")\n";
+
+	result = result + ":effect (completed " + formatName(name,false) +"))\n";
 
         
         return result;
     }
 
+    /**
+     * @param name
+     * @param uppercase
+     *
+     * @return the name formatted to be correctly interpreted by the planner
+     */
+    public String formatName(String name, boolean uppercase)
+    {
+        String result = name;
+
+        result = result.replace(" ", "");
+        result = result.replace("&", "");
+        result = result.replace(" ","");
+        result = result.replace(".","");
+        result = result.replace("?","");
+        result = result.replace("¿","");
+        result = result.replace("/","");
+        result = result.replace("'","");
+        result = result.replace(",","");
+        result = result.replace(";","");
+
+        if (uppercase)
+            result = result.toUpperCase();
+        else
+            result = result.toLowerCase();
+
+        return result;
+    }
      /**
      *
      * @param duration the duration for the durative action
@@ -253,9 +294,9 @@ public class Translator {
         {
             if (v.type == NodeType.SERIAL) 
             {
-                result = result + "(:task Block" + v.label+"\n" +
+                result = result + "(:task Block" + formatName(v.label,true)+"\n" +
                          ":parameters ()\n" +
-                         "(:method bl" + v.label.toLowerCase()+"\n" +
+                         "(:method bl" + formatName(v.label,false)+"\n" +
                          ":precondition ()\n" +
                          ":tasks (";
                 
@@ -278,7 +319,7 @@ public class Translator {
                    }
                    else if (j.type!=NodeType.START && j.type!=NodeType.END)
                    {
-                        result = result + "(Block" + j.label;
+                        result = result + "(Block" + formatName(j.label,true);
                         //add the parameter in case that it is a XOR PB Block
                         if (j.type == NodeType.PARALLEL &&
                                 j.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
@@ -349,9 +390,9 @@ public class Translator {
             if (v.type == NodeType.PARALLEL
                     && v.restriction == TransitionRestriction.SPLIT_PARALLEL)
             {
-                result = result + "(:task Block" + v.label+"\n" +
+                result = result + "(:task Block" + formatName(v.label,true)+"\n" +
                          ":parameters ()\n" +
-                         "(:method bl" + v.label.toLowerCase()+"\n" +
+                         "(:method bl" + formatName(v.label,false)+"\n" +
                          ":precondition ()\n" +
                          ":tasks (";
                 
@@ -367,7 +408,7 @@ public class Translator {
                    }
                    else
                    {
-                        result = result + "(Block" + j.label;
+                        result = result + "(Block" + formatName(j.label,true);
                         // if the node have a parameter associated
                         if (j.param != null)
                             result = result + " " + j.param.name;
@@ -394,7 +435,7 @@ public class Translator {
                 {
                     if (v.param != null)
                     {
-                         result = result + "(:task Block" + v.label + "\n";
+                         result = result + "(:task Block" + formatName(v.label,true) + "\n";
                          result = result + ":parameters (?x - parameter)\n";
                          
                         // we do BY NOW only the ones with boolean parameters (IF/ELSE)
@@ -405,7 +446,7 @@ public class Translator {
                             {
                                 // TODO: ojo aqui, va a fallar el xom.Activities
                                 MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
-                                methodname = "if_" + act_node.label;
+                                methodname = "if_" + formatName(act_node.label,false);
                                 predicate = "(value ?x false)";
                                 result = result + "(:method "+ methodname+"\n";
                                 result = result + ":precondition " + predicate +"\n";
@@ -414,7 +455,7 @@ public class Translator {
                             else
                             {
                                 MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
-                                methodname = "if_" + act_node.label;
+                                methodname = "if_" + formatName(act_node.label,false);
                                 predicate = "(value ?x " + v.param.affectedTransitions[i].parameterValue+")";
                                 result = result + "(:method "+ methodname+"\n";
                                 result = result + ":precondition " + predicate +"\n";
@@ -487,7 +528,7 @@ public class Translator {
 
         String result = "(:tasks-goal\n:tasks(\n";
 
-        result = result + "(Block" + rootnode.label + ")\n";
+        result = result + "(Block" + formatName(rootnode.label,true) + ")\n";
         result = result + "))\n";
         
         return result;

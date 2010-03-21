@@ -413,9 +413,14 @@ public class BlockDetection
         Vector queue = new Vector();
         Vector PB = new Vector();
 
-        Iterator i = this.N.iterator();
+        MyWeightedVertex S;
 
-        MyWeightedVertex S = (MyWeightedVertex) i.next();
+        Vector StartNodes = this.findStartNodes(this.N);
+
+        if (!StartNodes.isEmpty())
+             S = (MyWeightedVertex) StartNodes.firstElement();
+        else
+            return null;
 
         queue.addElement(S);
 

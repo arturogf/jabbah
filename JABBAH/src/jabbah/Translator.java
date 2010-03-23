@@ -179,8 +179,7 @@ public class Translator {
             result = result + ":condition(belongs_to_lane ?w " + lane + ")\n";
 
 	result = result + ":effect (completed " + formatName(name,false) +"))\n";
-
-        
+    
         return result;
     }
 
@@ -204,6 +203,8 @@ public class Translator {
         result = result.replace("'","");
         result = result.replace(",","");
         result = result.replace(";","");
+        result = result.replace("(","");
+        result = result.replace(")","");
 
         if (uppercase)
             result = result.toUpperCase();
@@ -346,9 +347,10 @@ public class Translator {
     {
     
         int next = 0;
+
         MyWeightedVertex right = null;
           
-        // in this tree there is only one parent node for every node
+        // in this kind of trees there is only one parent node for every node
         for (MyWeightedEdge e : this.G.incomingEdgesOf(node))
         {
             MyWeightedVertex parent = (MyWeightedVertex) e.getSource();
@@ -372,99 +374,124 @@ public class Translator {
         return null;
     
     }
+
+    /**
+     *
+     * @param v the root_node for the PB parallel block (AND) node in the tree
+     * @return a simple/merge block compound task, with tasks as ([T1..Tn] Tj)
+     */
+    public String buildSplitParallel(MyWeightedVertex v)
+    {
+        String result = "";
+
+        int num_worker = 1;
+
+        result = result + "(:task Block" + formatName(v.label, true) + "\n" +
+                ":parameters ()\n" +
+                "(:method bl" + formatName(v.label, false) + "\n" +
+                ":precondition ()\n" +
+                ":tasks (";
+
+        result = result + "[";
+
+        for (MyWeightedEdge e : this.G.outgoingEdgesOf(v)) {
+            MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
+            if (j.type == NodeType.DEFAULT) {
+                result = result + "(" + j.label + " ?w" + num_worker + ") ";
+                num_worker = num_worker + 1;
+            } else {
+                result = result + "(Block" + formatName(j.label, true);
+                // if the node have a parameter associated
+                if (j.param != null) {
+                    result = result + " " + j.param.name;
+                }
+
+                result = result + ") ";
+
+            }
+        }
+
+        result = result + "]";
+
+        MyWeightedVertex right = this.getRightNode(v);
+
+        if (right != null) {
+            result = result + "(" + right.label + " ?w" + num_worker + ")";
+        }
+        result = result + ")\n))\n\n";
+
+        return result;
+    }
+
+    /**
+     *
+     * @param v the root_node for the PB parallel block (XOR) node in the tree
+     * @return a Block with corresponding tasks and method representing the XOR decision
+     */
+    public String buildSplitExclusive(MyWeightedVertex v)
+    {
+        String result="";
+        String methodname, predicate;
+
+        int num_worker = 1;
+
+        if (v.param != null) {
+            result = result + "(:task Block" + formatName(v.label, true) + "\n";
+            result = result + ":parameters (?x - parameter)\n";
+
+            // we do BY NOW only the ones with boolean parameters (IF/ELSE)
+
+            for (int i = 0; i < v.param.affectedTransitions.length; i++)
+            {
+                if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
+                {
+                    // TODO: ojo aqui, va a fallar el xom.Activities
+                    MyWeightedVertex act_node =
+                            this.xom.findActivityNode(this.xom.Activities, v.param.affectedTransitions[i].to);
+                    methodname = "if_" + formatName(act_node.label, false);
+                    predicate = "(value ?x false)";
+                    result = result + "(:method " + methodname + "\n";
+                    result = result + ":precondition " + predicate + "\n";
+                    result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
+                }
+                else {
+                    MyWeightedVertex act_node =
+                            this.xom.findActivityNode(this.xom.Activities, v.param.affectedTransitions[i].to);
+                    methodname = "if_" + formatName(act_node.label, false);
+                    predicate = "(value ?x " + v.param.affectedTransitions[i].parameterValue + ")";
+                    result = result + "(:method " + methodname + "\n";
+                    result = result + ":precondition " + predicate + "\n";
+                    result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
+                }
+            }
+        }
+
+        result = result + ")\n\n";
+
+        return result;
+    }
     
     /**
      * 
-     * @return a string containing all the compound actions for split/merge
-     * blocks detected in the source XPDL, as HTN-PDDL code
+     * @return a the corresponding HPDL code containing all the compound tasks
+     * for Parallel Block nodes detected in the Nested Process Model tree
      */
     public String setSimpleMerges()
     {
         String result = "";
-        int num_worker;
         
         for (MyWeightedVertex v : this.G.vertexSet())
-        {
-            num_worker = 1;
-            
+        {            
             if (v.type == NodeType.PARALLEL
                     && v.restriction == TransitionRestriction.SPLIT_PARALLEL)
             {
-                result = result + "(:task Block" + formatName(v.label,true)+"\n" +
-                         ":parameters ()\n" +
-                         "(:method bl" + formatName(v.label,false)+"\n" +
-                         ":precondition ()\n" +
-                         ":tasks (";
-                
-                result = result + "[";
-                                
-                for (MyWeightedEdge e : this.G.outgoingEdgesOf(v))
-                {
-                   MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
-                   if (j.type == NodeType.DEFAULT)
-                   {
-                        result = result + "(" + j.label + " ?w" + num_worker + ") ";
-                        num_worker = num_worker + 1;
-                   }
-                   else
-                   {
-                        result = result + "(Block" + formatName(j.label,true);
-                        // if the node have a parameter associated
-                        if (j.param != null)
-                            result = result + " " + j.param.name;
-
-                        result = result + ") ";
-
-                   }
-                }
-                
-                result = result + "]";
-
-                MyWeightedVertex right = this.getRightNode(v);
-                
-                if (right != null)
-                {
-                    result = result + "(" + right.label + " ?w" + num_worker + ")";
-                }
-                result = result + ")\n))\n\n";
-                
+                result = result + buildSplitParallel(v);
             }
             else
                 if (v.type == NodeType.PARALLEL &&
                     v.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
                 {
-                    if (v.param != null)
-                    {
-                         result = result + "(:task Block" + formatName(v.label,true) + "\n";
-                         result = result + ":parameters (?x - parameter)\n";
-                         
-                        // we do BY NOW only the ones with boolean parameters (IF/ELSE)
-                        String methodname, predicate;
-                        for (int i=0; i<v.param.affectedTransitions.length;i++)
-                        {
-                            if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
-                            {
-                                // TODO: ojo aqui, va a fallar el xom.Activities
-                                MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
-                                methodname = "if_" + formatName(act_node.label,false);
-                                predicate = "(value ?x false)";
-                                result = result + "(:method "+ methodname+"\n";
-                                result = result + ":precondition " + predicate +"\n";
-                                result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
-                            }
-                            else
-                            {
-                                MyWeightedVertex act_node = this.xom.findActivityNode(this.xom.Activities,v.param.affectedTransitions[i].to);
-                                methodname = "if_" + formatName(act_node.label,false);
-                                predicate = "(value ?x " + v.param.affectedTransitions[i].parameterValue+")";
-                                result = result + "(:method "+ methodname+"\n";
-                                result = result + ":precondition " + predicate +"\n";
-                                result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
-                            }
-                        }                        
-                    }
-                    result = result + ")\n\n";
-
+                    result = result + buildSplitExclusive(v);
                 }
         }  
         
@@ -480,7 +507,7 @@ public class Translator {
         for (int i=0; i<this.xom.Participants.length; i++)
              result = result + " " + this.xom.Participants[i].name;
 
-        result = result+ " - participant\n)\n";
+        result = result + " - participant\n)\n";
     
         return result;
     }

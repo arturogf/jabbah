@@ -97,6 +97,8 @@ public class BlockDetection
         // using the internal "block" Vector found at MyWeightedVertex class
         MyWeightedVertex root_node = G.vertexSet().iterator().next();
         this.rebuildTree(root_node);
+
+        handler.close();
     }
 
     /**
@@ -242,39 +244,49 @@ public class BlockDetection
 
         Vector StartNodes = this.findStartNodes(this.N);
 
-        if (!StartNodes.isEmpty()) {
-
-            S = (MyWeightedVertex) StartNodes.firstElement();
-            S.setWeight(initial);
-
-            queue.addElement(S);
-            w_list.addElement(initial);
-
-            while (!queue.isEmpty()) {
-                MyWeightedVertex v = (MyWeightedVertex) queue.firstElement();
-                queue.removeElementAt(0);
-                v.marked = true;
-
-                for (MyWeightedVertex j : Graphs.successorListOf(G, v)) {
-                    j.setWeight(j.weight + (v.weight / Graphs.successorListOf(G, v).size()));
-
-                    add_to_queue = true;
-                    // check that all predecesors are marked
-                    for (MyWeightedVertex p : Graphs.predecessorListOf(G, j)) {
-                        if (!p.marked) {
-                            add_to_queue = false;
-                        }
-                    }
-
-                    if (add_to_queue) {
-                        queue.addElement((MyWeightedVertex) j);
-                    }
-                }
-            }
-        }
-        else
+        if (StartNodes.isEmpty()) {
             logger.log(Level.SEVERE,
                          "There are no Start nodes when doing branchWater procedure");
+        }
+        else
+            // we can find a graph with multiple start nodes
+            // (i.e. a cooperative system with multiple graphs in lanes)
+
+            while (!StartNodes.isEmpty()) {
+
+                S = (MyWeightedVertex) StartNodes.firstElement();
+                S.setWeight(initial);
+
+                queue.addElement(S);
+                w_list.addElement(initial);
+
+                while (!queue.isEmpty()) {
+                    MyWeightedVertex v = (MyWeightedVertex) queue.firstElement();
+                    queue.removeElementAt(0);
+                    v.marked = true;
+
+                    for (MyWeightedVertex j : Graphs.successorListOf(G, v)) {
+                        j.setWeight(j.weight + (v.weight / Graphs.successorListOf(G, v).size()));
+
+                        add_to_queue = true;
+                        // check that all predecesors are marked
+                        for (MyWeightedVertex p : Graphs.predecessorListOf(G, j)) {
+                            if (!p.marked) {
+                                add_to_queue = false;
+                            }
+                        }
+
+                        if (add_to_queue) {
+                            queue.addElement((MyWeightedVertex) j);
+                        }
+                    }
+                }
+                // remove the start node for the subgraph just processed
+                if (StartNodes.size()>0)
+                    StartNodes.removeElementAt(0);
+            }
+        
+            
 
     }
 

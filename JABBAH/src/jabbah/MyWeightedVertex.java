@@ -1,6 +1,7 @@
 package jabbah;
 
 import java.util.Vector;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
 /**
@@ -111,4 +112,30 @@ public class MyWeightedVertex
         if (this.type == NodeType.SERIAL || this.type == NodeType.PARALLEL)
             this.block = v;
     }
+
+    /**
+     *
+     * @param pred the vector to be filled up with predeccesor nodes
+     * @param G the Graph to be examined
+     * @return an error code <> 0 or 0 if it was correct
+     */
+    public int getPredecessorActivities(Vector pred,
+            ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G)
+    {
+        if (pred == null)
+            pred = new Vector();
+        
+        for (MyWeightedVertex p: Graphs.predecessorListOf(G,this))
+        {
+            if (p.type == NodeType.DEFAULT)
+                pred.add(p);
+            else
+                if (p.type == NodeType.GATEWAY)
+                    pred.addAll(Graphs.predecessorListOf(G, p));
+
+        }
+
+        return 0;
+    }
+
 }

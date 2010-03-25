@@ -7,6 +7,7 @@ package jabbah;
 import java.io.IOException;
 import org.jgrapht.graph.*;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -30,11 +31,14 @@ public class BlockDetection
 
     ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G;
     Set N; // Set of vertices
+    java.util.List<java.util.Set<MyWeightedVertex>> connectedSubgraphs;
+
     private static int pb_index = 1; // index for parallel blocks nodes
     private static int sb_index = 1;    // index for serial blocks nodes
 
     private static Logger logger = Logger.getLogger(BlockDetection.class.getName());
     private static FileHandler handler;
+
     /**
      * Execute the ECA Rules Block Detection algorithm over the graph
      * passed as parameters, and change it to a hierarchical tree representation
@@ -70,35 +74,40 @@ public class BlockDetection
 
         // consecutive serial and parallel block detection, searching for
         // the most inner block until we have only one node (root) in G
-        while (G.vertexSet().size() != 1)
-        {
-            serial = this.SerialBlockDetection();
 
-            if (serial == null)
-            {
-                parallel = this.ParallelBlockDetection();
+        // TODO: Esto debería ser en realidad hecho de forma independiente para
+        // cada subgrafo en G, de lo contrario, falla
 
-                if (parallel == null)
-                {
-                    logger.log(Level.SEVERE,
-                         "Serial and Parallel block detection were unsucessful");
-                    break;
-                } else
-                {
-                    this.replaceNodesWithPB(parallel);
+        ConnectivityInspector ci = new ConnectivityInspector(g);
+        connectedSubgraphs = ci.connectedSets();
+        
+
+        for (int i = 0; i < connectedSubgraphs.size(); i++) {
+            while (connectedSubgraphs.get(i).size() != 1) {
+                serial = this.SerialBlockDetection(connectedSubgraphs.get(i));
+
+                if (serial == null) {
+                    parallel = this.ParallelBlockDetection(connectedSubgraphs.get(i));
+
+                    if (parallel == null) {
+                        logger.log(Level.SEVERE,
+                                "Serial and Parallel block detection were unsucessful");
+                        break;
+                    } else {
+                        this.replaceNodesWithPB(connectedSubgraphs.get(i),parallel);
+                    }
+                } else {
+                    this.replaceNodesWithSB(connectedSubgraphs.get(i),serial);
                 }
-            } else
-            {
-                this.replaceNodesWithSB(serial);
             }
+
+            // at this point, G has size = 1, so we can rebuild the tree
+            // using the internal "block" Vector found at MyWeightedVertex class
+            MyWeightedVertex root_node = (MyWeightedVertex) connectedSubgraphs.get(i).iterator().next();
+            this.rebuildTree(root_node);
+
+            handler.close();
         }
-
-        // at this point, G has size = 1, so we can rebuild the tree
-        // using the internal "block" Vector found at MyWeightedVertex class
-        MyWeightedVertex root_node = G.vertexSet().iterator().next();
-        this.rebuildTree(root_node);
-
-        handler.close();
     }
 
     /**
@@ -107,7 +116,7 @@ public class BlockDetection
      *
      * @param v  a Vector containing the nodes to be replaced with a new PB node
      */
-    private void replaceNodesWithPB(Vector v)
+    private void replaceNodesWithPB(Set<MyWeightedVertex> subset, Vector v)
     {
         // if a parallel block was detected, substitute it with
         // a new PB node
@@ -135,6 +144,10 @@ public class BlockDetection
         // remove all vertices from G that are not in vector "parallel"
         G.removeAllVertices(v);
 
+        subset.removeAll(v);
+        subset.add(pb);
+
+
         BlockDetection.pb_index = BlockDetection.pb_index + 1;
     }
 
@@ -145,7 +158,7 @@ public class BlockDetection
      *
      * @param v  a Vector containing the nodes to be replaced with a new SB node
      */
-    private void replaceNodesWithSB(Vector v)
+    private void replaceNodesWithSB(Set<MyWeightedVertex> subset,Vector v)
     {
         // if a serial block was detected, we substitute it by a new SB node
         MyWeightedVertex sb = new MyWeightedVertex("SB" + BlockDetection.sb_index, 0);
@@ -169,6 +182,10 @@ public class BlockDetection
         }
         // remove all vertices from G that are not in vector "serial"
         G.removeAllVertices(v);
+
+        subset.removeAll(v);
+        subset.add(sb);
+
 
         BlockDetection.sb_index = BlockDetection.sb_index + 1;
 
@@ -249,9 +266,13 @@ public class BlockDetection
                          "There are no Start nodes when doing branchWater procedure");
         }
         else
+        {
+            if (StartNodes.size()>1)
+                logger.log(Level.WARNING,
+                         "There are no more than 1 Start Node!");
+
             // we can find a graph with multiple start nodes
             // (i.e. a cooperative system with multiple graphs in lanes)
-
             while (!StartNodes.isEmpty()) {
 
                 S = (MyWeightedVertex) StartNodes.firstElement();
@@ -286,7 +307,7 @@ public class BlockDetection
                     StartNodes.removeElementAt(0);
             }
         
-            
+        }
 
     }
 
@@ -296,10 +317,10 @@ public class BlockDetection
      *
      * @return The minimum weight found in the graph Vertex Set
      */
-    private Double minWeight()
+    private Double minWeight(Set<MyWeightedVertex> subset)
     {
         Double min = 1.0;
-        Iterator i = this.N.iterator();
+        Iterator i = subset.iterator();
 
         MyWeightedVertex Node;
 
@@ -323,7 +344,7 @@ public class BlockDetection
      * @return the vector containg the Vertex nodes that forms the Serial Block
      *
      */
-    private Vector SerialBlockDetection()
+    private Vector SerialBlockDetection(Set<MyWeightedVertex> subset)
     {
         MyWeightedVertex v;
 
@@ -331,7 +352,8 @@ public class BlockDetection
         boolean finish = true;
         boolean continua = false;
 
-        Double min_weight = this.minWeight();
+        // TODO: esto falla cuando hay varios subgrafos en G
+        Double min_weight = this.minWeight(subset);
 
         List<MyWeightedVertex> successors;
 
@@ -339,7 +361,7 @@ public class BlockDetection
         
         Vector queue = new Vector();
         Vector SB = new Vector();
-        Vector StartNodes = this.findStartNodes(this.N);
+        Vector StartNodes = this.findStartNodes(subset);
 
         if (!StartNodes.isEmpty())
              S = (MyWeightedVertex) StartNodes.firstElement();
@@ -417,17 +439,19 @@ public class BlockDetection
      * @return the vector containg the Vertex nodes that forms the Parallel Block
      * 
      */
-    private Vector ParallelBlockDetection()
+    private Vector ParallelBlockDetection(Set<MyWeightedVertex> subset)
     {
         boolean LOOP = true;
-        Double min_weight = this.minWeight();
+
+        // TODO: esto falla cuando hay varios subgrafos en G
+        Double min_weight = this.minWeight(subset);
 
         Vector queue = new Vector();
         Vector PB = new Vector();
 
         MyWeightedVertex S;
 
-        Vector StartNodes = this.findStartNodes(this.N);
+        Vector StartNodes = this.findStartNodes(subset);
 
         if (!StartNodes.isEmpty())
              S = (MyWeightedVertex) StartNodes.firstElement();

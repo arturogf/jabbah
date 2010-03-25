@@ -3,6 +3,8 @@ package jabbah;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
@@ -167,18 +169,23 @@ public class Translator {
      * @return a string containing the durative action definition for the node
      * specified
      */
-    public String buildDurativeAction(String name, Double duration, String lane)
+    public String buildDurativeAction(MyWeightedVertex v)
     {
-        String result = "\n(:durative-action " + formatName(name,true) + "\n" +
-	":parameters(?w - participant)" + "\n" +
-        setMetaTags(name) +
-	setActionDuration(duration);
-        if (lane.equalsIgnoreCase(""))
-            result = result + ":condition(belongs_to_lane ?w DEFAULT)\n";
-        else
-            result = result + ":condition(belongs_to_lane ?w " + lane + ")\n";
+        //PDDLExpression e = new PDDLExpression();
 
-	result = result + ":effect (completed " + formatName(name,false) +"))\n";
+        String result = "\n(:durative-action " + formatName(v.label,true) + "\n" +
+	":parameters(?w - participant)" + "\n" +
+        setMetaTags(v.label) +
+	setActionDuration(v.duration);
+
+        if (v.lane.equalsIgnoreCase(""))
+        {
+            result = result + ":condition(belongs_to_lane ?w DEFAULT)\n";
+        }
+        else
+            result = result + ":condition(belongs_to_lane ?w " + v.lane + ")\n";
+
+	result = result + ":effect (completed " + formatName(v.label,false) +"))\n";
     
         return result;
     }
@@ -220,7 +227,12 @@ public class Translator {
      */
     public String setActionDuration(Double duration)
     {
-    String result = ":duration (= ?duration " + duration.toString() + ")\n";
+    String result;
+    if (duration!=null)
+        result = ":duration (= ?duration " + duration.toString() + ")\n";
+    else
+        result = ":duration (= ?duration 1.0)\n";
+
 
     return result;
     }
@@ -269,11 +281,7 @@ public class Translator {
         {
             if (v.type == NodeType.DEFAULT) 
             {
-                if (v.duration != null) 
-                    result = result + this.buildDurativeAction(v.label,v.duration,v.lane); 
-                else
-                    // we use duration 1.0 if not duration was specified for node v
-                    result = result + this.buildDurativeAction(v.label, 1.0, v.lane);
+                    result = result + this.buildDurativeAction(v);
             }
        
         } 
@@ -397,7 +405,7 @@ public class Translator {
         for (MyWeightedEdge e : this.G.outgoingEdgesOf(v)) {
             MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
             if (j.type == NodeType.DEFAULT) {
-                result = result + "(" + j.label + " ?w" + num_worker + ") ";
+                result = result + "(" + formatName(j.label,true) + " ?w" + num_worker + ") ";
                 num_worker = num_worker + 1;
             } else {
                 result = result + "(Block" + formatName(j.label, true);
@@ -415,8 +423,8 @@ public class Translator {
 
         MyWeightedVertex right = this.getRightNode(v);
 
-        if (right != null) {
-            result = result + "(" + right.label + " ?w" + num_worker + ")";
+        if (right != null && right.type != NodeType.START && right.type!=NodeType.END) {
+            result = result + "(" + formatName(right.label,true) + " ?w" + num_worker + ")";
         }
         result = result + ")\n))\n\n";
 
@@ -431,9 +439,12 @@ public class Translator {
     public String buildSplitExclusive(MyWeightedVertex v)
     {
         String result="";
-        String methodname, predicate;
+        PDDLExpression e = new PDDLExpression();
+
+        String methodname = null;
 
         int num_worker = 1;
+
 
         if (v.param != null) {
             result = result + "(:task Block" + formatName(v.label, true) + "\n";
@@ -445,23 +456,22 @@ public class Translator {
             {
                 if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
                 {
-                    // TODO: ojo aqui, va a fallar el xom.Activities
+                    // TODO: aqui posiblemente va a fallar el xom.Activities con los subprocesos
                     MyWeightedVertex act_node =
                             this.xom.findActivityNode(this.xom.Activities, v.param.affectedTransitions[i].to);
                     methodname = "if_" + formatName(act_node.label, false);
-                    predicate = "(value ?x false)";
                     result = result + "(:method " + methodname + "\n";
-                    result = result + ":precondition " + predicate + "\n";
-                    result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
+                    result = result + ":precondition " +  e.predicate("value", "?x","false") + "\n";
+                    result = result + ":tasks (" + formatName(act_node.label,true) + "?w" + num_worker + "))\n";
                 }
                 else {
                     MyWeightedVertex act_node =
                             this.xom.findActivityNode(this.xom.Activities, v.param.affectedTransitions[i].to);
                     methodname = "if_" + formatName(act_node.label, false);
-                    predicate = "(value ?x " + v.param.affectedTransitions[i].parameterValue + ")";
                     result = result + "(:method " + methodname + "\n";
-                    result = result + ":precondition " + predicate + "\n";
-                    result = result + ":tasks (" + act_node.label + "?w" + num_worker + "))\n";
+                    result = result + ":precondition "
+                            + e.predicate("value","?x",v.param.affectedTransitions[i].parameterValue) + "\n";
+                    result = result + ":tasks (" + formatName(act_node.label,true) + " ?w" + num_worker + "))\n";
                 }
             }
         }
@@ -501,8 +511,15 @@ public class Translator {
 
     public String setObjects()
     {
-
         String result = "(:objects\n";
+
+        if (this.xom.Participants.length==0)
+        {
+                    Logger.getLogger(Translator.class.getName()).log(Level.WARNING,
+                            "There are no any participants defined in the process model!");
+                    result = result + "DEFAULT";
+
+        }
 
         for (int i=0; i<this.xom.Participants.length; i++)
              result = result + " " + this.xom.Participants[i].name;
@@ -549,15 +566,63 @@ public class Translator {
 
     }
 
+    /**
+     *
+     * @return a vector containing all the rootnodes for the different HTN's
+     * that has been built in the BlockDetection, for all the connected subgraphs
+     */
+    public Vector getRootNodes()
+    {
+        Vector result = new Vector();
+        MyWeightedVertex v;
+        
+        Iterator i = this.G.vertexSet().iterator();
+
+        while(i.hasNext())
+        {
+           v = (MyWeightedVertex) i.next();
+           //if it is a root node
+           if (this.G.inDegreeOf(v)==0)
+               result.add(v);
+
+        }
+        return result;
+
+    }
+    /**
+     *
+     * @return the task goal for the problem definition, taking into account
+     * different connected subgraphs that may have the process model
+     */
     public String setTaskGoal()
     {
-        MyWeightedVertex rootnode = this.G.vertexSet().iterator().next();
+        Vector rootnodes = getRootNodes();
+        Iterator i = rootnodes.iterator();
+        MyWeightedVertex rootnode;
 
         String result = "(:tasks-goal\n:tasks(\n";
 
-        result = result + "(Block" + formatName(rootnode.label,true) + ")\n";
-        result = result + "))\n";
-        
+        // If only a rootnode, the task-goal is unique
+        if (rootnodes.size() == 1) {
+
+            rootnode = (MyWeightedVertex) i.next();
+            result = result + "(Block" + formatName(rootnode.label, true) + ")\n";
+            result = result + "))\n";
+        // if more than a rootnode, it means that is a coordination process,
+        // and that HTN's must be executed in parallel
+        }
+        else {
+            result = result + "[";
+
+            while (i.hasNext()) {
+                rootnode = (MyWeightedVertex) i.next();
+                result = result + "(Block" + formatName(rootnode.label, true) + ")";
+            }
+
+            result = result + "]))\n";
+
+        }
+
         return result;
     }
 

@@ -220,6 +220,32 @@ public class Translator {
 
         return result;
     }
+
+    /**
+     * @param name
+     * @param uppercase
+     *
+     * @return the name formatted to be correctly interpreted by the planner
+     */
+    public String formatName(String name)
+    {
+        String result = name;
+
+        result = result.replace(" ", "");
+        result = result.replace("&", "");
+        result = result.replace(" ","");
+        result = result.replace(".","");
+        result = result.replace("?","");
+        result = result.replace("¿","");
+        result = result.replace("/","");
+        result = result.replace("'","");
+        result = result.replace(",","");
+        result = result.replace(";","");
+        result = result.replace("(","");
+        result = result.replace(")","");
+
+        return result;
+    }
      /**
      *
      * @param duration the duration for the durative action
@@ -431,28 +457,37 @@ public class Translator {
         return result;
     }
 
-    /**
-     *
-     * @param v the root_node for the PB parallel block (XOR) node in the tree
-     * @return a Block with corresponding tasks and method representing the XOR decision
-     */
+
     public String buildSplitExclusive(MyWeightedVertex v)
     {
         String result="";
+
         PDDLExpression e = new PDDLExpression();
 
         String methodname = null;
 
+
         int num_worker = 1;
 
-
         if (v.param != null) {
+
             result = result + "(:task Block" + formatName(v.label, true) + "\n";
             result = result + ":parameters (?x - parameter)\n";
 
-            // we do BY NOW only the ones with boolean parameters (IF/ELSE)
+            for (int i = 0; i<v.pairs.size(); i++)
+            {
+                ParameterRelation p = (ParameterRelation) v.pairs.get(i);
+                methodname = "if_" + formatName(p.target.label, false);
+                    result = result + "(:method " + methodname + "\n";
+                    result = result + ":precondition " +  e.predicate("value", "?x",p.Value) + "\n";
+                    if (p.target.type==NodeType.DEFAULT)
+                        result = result + ":tasks (" + formatName(p.target.label,true) + " ?w" + num_worker + "))\n";
+                    else
+                        result = result + ":tasks (" + "Block"+formatName(p.target.label,true) + "))\n";
 
-            for (int i = 0; i < v.param.affectedTransitions.length; i++)
+            }
+            // we do BY NOW only the ones with boolean parameters (IF/ELSE)
+            /*for (int i = 0; i < v.param.affectedTransitions.length; i++)
             {
                 if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase(""))
                 {
@@ -473,14 +508,78 @@ public class Translator {
                             + e.predicate("value","?x",v.param.affectedTransitions[i].parameterValue) + "\n";
                     result = result + ":tasks (" + formatName(act_node.label,true) + " ?w" + num_worker + "))\n";
                 }
-            }
-        }
 
+            }*/
+        }
         result = result + ")\n\n";
 
         return result;
     }
-    
+
+    /**
+     *
+     * @param v the root_node for the PB parallel block (XOR) node in the tree
+     * @return a Block with corresponding tasks and method representing the XOR decision
+     */
+    public String buildSplitExclusive2(MyWeightedVertex v)
+    {
+        String result="";
+        PDDLExpression e = new PDDLExpression();
+
+        String methodname = null;
+
+        int num_worker = 1;
+
+
+        if (v.param != null) {
+            result = result + "(:task Block" + formatName(v.label, true) + "\n";
+            result = result + ":parameters (?x - parameter)\n";
+
+            // we do BY NOW only the ones with boolean parameters (IF/ELSE)
+
+            for (int i = 0; i < v.param.affectedTransitions.length; i++) {
+                MyWeightedVertex act_node;
+                System.out.println(v.param.affectedTransitions[i].parameterId);
+
+                if (v.param.affectedTransitions[i].parameterValue.equalsIgnoreCase("")) {
+                    // TODO: aqui posiblemente va a fallar el xom.Activities con los subprocesos
+                    if (v.aset_id.equalsIgnoreCase("")) {
+                        act_node = this.xom.findActivityNode(this.xom.Activities,
+                                v.param.affectedTransitions[i].to);
+
+                        if (act_node == null) {
+                            Iterator it = this.xom.ASets.keySet().iterator();
+                            while (it.hasNext()) {
+                                ActivitySet a = (ActivitySet) this.xom.ASets.get(it.next());
+                                act_node = this.xom.findActivityNode(a.activities,
+                                        v.param.affectedTransitions[i].to);
+                                if (act_node!=null)
+                                    break;
+                            }
+                        }
+
+
+                        methodname = "if_" + formatName(act_node.label, false);
+                        result = result + "(:method " + methodname + "\n";
+                        result = result + ":precondition " + e.predicate("value", "?x", "false") + "\n";
+                        result = result + ":tasks (" + formatName(act_node.label, true) + "?w" + num_worker + "))\n";
+                    } else {
+                        act_node =
+                                this.xom.findActivityNode(this.xom.Activities, v.param.affectedTransitions[i].to);
+                        methodname = "if_" + formatName(act_node.label, false);
+                        result = result + "(:method " + methodname + "\n";
+                        result = result + ":precondition " + e.predicate("value", "?x", v.param.affectedTransitions[i].parameterValue) + "\n";
+                        result = result + ":tasks (" + formatName(act_node.label, true) + " ?w" + num_worker + "))\n";
+                    }
+                }
+            }
+
+        }
+        result = result + ")\n\n";
+
+        return result;
+    }
+
     /**
      * 
      * @return a the corresponding HPDL code containing all the compound tasks
@@ -516,7 +615,7 @@ public class Translator {
         if (this.xom.Participants.length==0)
         {
                     Logger.getLogger(Translator.class.getName()).log(Level.WARNING,
-                            "There are no any participants defined in the process model!");
+                            "There are no participants defined in the process model!");
                     result = result + "DEFAULT";
 
         }
@@ -538,15 +637,15 @@ public class Translator {
         for (int i=0; i<this.xom.Parameters.length;i++)
         {
             if (this.xom.Parameters[i].type.equalsIgnoreCase("boolean"))
-                    result = result + "(value " + this.xom.Parameters[i].name + " true)\n";
+                    result = result + "(value " + formatName(this.xom.Parameters[i].name) + " true)\n";
         }
 
         // PARTICIPANTS BELONGS TO SPECIFIC LANES
         for (int i=0; i<this.xom.Participants.length; i++)
              result = result + "(belongs_to_lane " 
-                     + this.xom.Participants[i].name
+                     + formatName(this.xom.Participants[i].name)
                      + " "
-                     + this.xom.Participants[i].lane
+                     + formatName(this.xom.Participants[i].lane)
                      + ")\n";
 
         result = result + ")\n";
@@ -625,7 +724,6 @@ public class Translator {
 
         return result;
     }
-
     
     /**
      * 

@@ -18,6 +18,15 @@ import org.jgrapht.graph.ListenableDirectedWeightedGraph;
  *
  * @author arturogf
  */
+
+class ParameterRelation
+{
+    String P;
+    String Value;
+    MyWeightedVertex target;
+}
+
+
 public class MyWeightedVertex
 {
     int type = NodeType.DEFAULT;
@@ -33,9 +42,12 @@ public class MyWeightedVertex
     // needed for the BlockDetection class
     boolean marked;
     Vector block = null;
+    // we are going to need these pairs for XOR params decisions
+    Vector pairs = new Vector();
 
     // needed in case it is a subprocess node
     ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> subgraph;
+    String aset_id="";
 
 
 
@@ -51,6 +63,33 @@ public class MyWeightedVertex
         this.weight = w;
     }
 
+    public void addpair(String p, String value, MyWeightedVertex t)
+    {
+        ParameterRelation pr = new ParameterRelation();
+
+        pr.P = p;
+        pr.Value = value;
+        pr.target = t;
+
+        this.pairs.add(pr);
+    }
+
+    /*public MyWeightedVertex getPairTarget (Parameter p, String v)
+    {
+        ParameterRelation pr;
+
+        for (int i=0; i<this.pairs.size();i++)
+        {
+            pr =(ParameterRelation) this.pairs.get(i);
+
+            if ((pr.P.id.equals(p.id)) && pr.Value.equals(v))
+                return pr.target;
+        }
+
+        return null;
+        
+    }
+     * */
     /**
      * The constructor for a weighted vertex, using a default weight
      *

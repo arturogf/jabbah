@@ -4,6 +4,7 @@
  */
 package jabbah;
 
+import jabbah.MyWeightedEdge;
 import java.io.IOException;
 import org.jgrapht.graph.*;
 import org.jgrapht.Graphs;
@@ -128,13 +129,42 @@ public class BlockDetection
         MyWeightedVertex last = (MyWeightedVertex) v.lastElement();
 
         pb.setWeight(first.weight);
-        pb.restriction = first.restriction;
         pb.param = first.param;
+        pb.restriction = first.restriction;
+
+        // we try to store the ParameterRelations for this node
+        if (pb.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
+        {
+            for (MyWeightedVertex suc : Graphs.successorListOf(G, first))
+            {
+                List path = DijkstraShortestPath.findPathBetween(G, first, suc);
+                if (path.size()>1)
+                     logger.log(Level.SEVERE, "Path between nodes cannot be greater than one edge!!!");
+                else if (path.size()<1)
+                    logger.log(Level.SEVERE, "Path between nodes should exists!!!");
+                else {
+                    MyWeightedEdge e = (MyWeightedEdge) path.get(0);
+                    pb.addpair(e.p, e.v, suc);
+                }
+            }
+        }
 
         // hook the new node with previous predecessors and sucessors
         for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))
         {
-            G.addEdge(pre, pb, new MyWeightedEdge(pre, pb, ""));
+            MyWeightedEdge e = new MyWeightedEdge(pre, pb, "");
+            List path = DijkstraShortestPath.findPathBetween(G, pre, first);
+            if (path.size() > 1) {
+                logger.log(Level.SEVERE, "Path between nodes cannot be greater than one edge!!!");
+            } else if (path.size() < 1) {
+                logger.log(Level.SEVERE, "Path between nodes should exists!!!");
+            } else {
+                 MyWeightedEdge aux = (MyWeightedEdge) path.get(0);
+                e.p = aux.p;
+                e.operator = aux.operator;
+                e.v = aux.v;
+            }
+            G.addEdge(pre, pb, e);
         }
 
         for (MyWeightedVertex suc : Graphs.successorListOf(G, last))
@@ -173,7 +203,20 @@ public class BlockDetection
         // hook the new node with previous predecessors and sucessors
         for (MyWeightedVertex pre : Graphs.predecessorListOf(G, first))
         {
-            G.addEdge(pre, sb, new MyWeightedEdge(pre, sb, ""));
+            MyWeightedEdge e = new MyWeightedEdge(pre, sb, "");
+            List path = DijkstraShortestPath.findPathBetween(G, pre, first);
+            if (path.size() > 1) {
+                logger.log(Level.SEVERE, "Path between nodes cannot be greater than one edge!!!");
+            } else if (path.size() < 1) {
+                logger.log(Level.SEVERE, "Path between nodes should exists!!!");
+            } else {
+                 MyWeightedEdge aux = (MyWeightedEdge) path.get(0);
+                e.p = aux.p;
+                e.operator = aux.operator;
+                e.v = aux.v;
+            }
+            G.addEdge(pre, sb, e);
+            //G.addEdge(pre, sb, new MyWeightedEdge(pre, sb, ""));
         }
 
         for (MyWeightedVertex suc : Graphs.successorListOf(G, last))

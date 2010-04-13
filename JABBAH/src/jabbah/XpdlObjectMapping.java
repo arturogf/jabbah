@@ -443,32 +443,6 @@ public class XpdlObjectMapping {
                     }
                  }
 
-
-                /*a_extended = (NodeList) xpath.evaluate("xpdl2:ExtendedAttributes/xpdl2:ExtendedAttribute", nodes.item(i),
-                       XPathConstants.NODESET);
-
-                if (a_extended != null) {
-                    // in this loop, the "Activities" array is populated, using xpath parsing on the context node
-                    for (int j = 0; j < a_extended.getLength(); j++) {
-                        attr = a_extended.item(j).getAttributes();
-                        if (attr.item(0).getNodeValue().equalsIgnoreCase("Duration")) {
-                            if (!(attr.item(1).getNodeValue().equalsIgnoreCase(""))) {
-                                activities[i].duration = attr.item(1).getNodeValue();
-                            } else {
-                                logger.log(Level.WARNING,
-                                        "an extended attribute Duration was found with no value in activity " +
-                                        activities[i].name);
-                            }
-                        }
-                        else
-                            logger.log(Level.WARNING,
-                                        "an extended attribute was found for activity " +
-                                        activities[i].name+" but it is not Duration");
-                    }
-                }
-                */
-
-
                 a_gateway = (Node) xpath.evaluate("xpdl2:Route/@GatewayType", nodes.item(i),
                         XPathConstants.NODE);
                 // the node is a GATEWAY node
@@ -559,29 +533,6 @@ public class XpdlObjectMapping {
                 if (a_subsetid != null) {
                     as.id = a_subsetid.getNodeValue();
 
-                    //we need to parse activities internal to this ActivitySet
-                    try {
-                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='" + as.id + "']/xpdl2:Activities/xpdl2:Activity");
-
-                    } catch (XPathExpressionException ex) {
-                        logger.log(Level.SEVERE,
-                                "Error evaluating activities xpath expression for ActivitySet "+as.id, ex);
-                    }
-                    try {
-                        subact = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
-                        if (subact.getLength() > 0) {
-                            as.activities = this.parseActivities(null, subact, xpath, as.activities, as.transitions);
-                        }
-                        else
-                            logger.log(Level.WARNING,
-                                        "There is no subactivities for ActivitySet "+as.id);
-
-                    } catch (XPathExpressionException ex) {
-                        logger.log(Level.SEVERE,
-                                "Error evaluating activities internal to ActivitySet "+as.id, ex);
-
-                    }
-
                     //we need to parse Transitions internal to this ActivitySet
                     try {
                         exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='"
@@ -606,6 +557,31 @@ public class XpdlObjectMapping {
                                 "Error evaluating transitions internal to ActivitySet "+as.id, ex);
 
                     }
+
+                    //we need to parse activities internal to this ActivitySet
+                    try {
+                        exp_set = xpath.compile("//xpdl2:ActivitySets/xpdl2:ActivitySet[@Id='" + as.id + "']/xpdl2:Activities/xpdl2:Activity");
+
+                    } catch (XPathExpressionException ex) {
+                        logger.log(Level.SEVERE,
+                                "Error evaluating activities xpath expression for ActivitySet "+as.id, ex);
+                    }
+                    try {
+                        subact = (NodeList) exp_set.evaluate(doc, XPathConstants.NODESET);
+                        if (subact.getLength() > 0) {
+                            as.activities = this.parseActivities(null, subact, xpath, as.activities, as.transitions);
+                        }
+                        else
+                            logger.log(Level.WARNING,
+                                        "There is no subactivities for ActivitySet "+as.id);
+
+                    } catch (XPathExpressionException ex) {
+                        logger.log(Level.SEVERE,
+                                "Error evaluating activities internal to ActivitySet "+as.id, ex);
+
+                    }
+
+                    
                     // colocamos el ActivitySet en el HashMap ASets con la clave "id"
                     // del propio ActivitySet, asi nos sera facil encontrarlo luego
                     this.ASets.put(as.id,as);

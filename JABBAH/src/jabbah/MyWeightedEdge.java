@@ -15,6 +15,10 @@ public class MyWeightedEdge<V> extends DefaultEdge
     private V target;
     private String label;
 
+    String p = "";
+    String operator = "";
+    String v = "";
+
     public MyWeightedEdge(V v1, V v2, String label)
     {
         this.source = v1;
@@ -31,6 +35,17 @@ public class MyWeightedEdge<V> extends DefaultEdge
     {
         this.weight = weight;
     }
+
+      /**
+     * Set the label for a vertex
+     *
+     * @param l the label to be set for a specific node instance
+     */
+    public void setLabel(String l)
+    {
+        this.label = l;
+    }
+
     /**
      * Returns the source of this directed edge
      *

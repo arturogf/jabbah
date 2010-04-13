@@ -488,10 +488,13 @@ public class Main extends javax.swing.JFrame {
                 // de él mismo, creando un único grafo
 
                 activities[i].node = new MyWeightedVertex(activities[i].name);
-                // TODO: habra que retocar estos metodos para los subprocesos
-                activities[i].node.lane = xom.findLane(xom.Lanes,activities[i].lane_id);
                 // aqui poblamos el subgrafo para este subproceso
                 ActivitySet as = (ActivitySet) xom.ASets.get(activities[i].subset_id);
+                // TODO: habra que retocar estos metodos para los subprocesos
+                if (l != null)
+                    activities[i].node.lane = l;
+                else
+                    activities[i].node.lane = xom.findLane(xom.Lanes,activities[i].lane_id);
 
                 if (activities[i].node.subgraph==null)
                     activities[i].node.subgraph =
@@ -501,7 +504,9 @@ public class Main extends javax.swing.JFrame {
                 PopulateGraph(activities[i].node.subgraph, as.activities , as.transitions,
                         activities[i].node.lane, xom);
                 BlockDetection n = new BlockDetection(activities[i].node.subgraph);
-            
+                // we need it to use it later at the translation stage
+                activities[i].node.subgraph.vertexSet().iterator().next().aset_id = as.id;
+
             }
             else if (activities[i].type == NodeType.GATEWAY)
             {
@@ -519,7 +524,7 @@ public class Main extends javax.swing.JFrame {
                 // if a lane l is passed as parameter, it means that all nodes
                 // populated must have this value for the lane (where the subprocess is)
                 
-                if (l!=null)
+                if (l!= null)
                     activities[i].node.lane = l;
 
                 ig = ig+1;
@@ -532,7 +537,7 @@ public class Main extends javax.swing.JFrame {
 
                 // if a lane l has been passed as parameter, it means that all nodes
                 // populated must have this value for the lane (where the subprocess is)
-                if (l!=null)
+                if (l != null)
                     activities[i].node.lane = l;
                 else
                     activities[i].node.lane = xom.findLane(xom.Lanes,activities[i].lane_id);
@@ -544,27 +549,38 @@ public class Main extends javax.swing.JFrame {
             g.addVertex(activities[i].node);
         }
 
-        if (transitions.length==0)
-            logger.severe ("El número de transiciones es CERO en "+
+        if (transitions.length == 0)
+            logger.severe ("Zero transitions found in "+
                     Main.class.getName() + "PopulateGraph()");
 
-        for (int t=0; t< transitions.length; t++)
-        {
-            MyWeightedVertex from = xom.findActivityNode(activities,transitions[t].from);
-            MyWeightedVertex to = xom.findActivityNode(activities,transitions[t].to);
+        for (int t = 0; t < transitions.length; t++) {
+            MyWeightedVertex from = xom.findActivityNode(activities, transitions[t].from);
+            MyWeightedVertex to = xom.findActivityNode(activities, transitions[t].to);
 
-            if ((from!=null) && (to!=null))
-            {
-                g.addEdge(from, to,
-                    new MyWeightedEdge(from, to, "E"+t));
+            if ((from != null) && (to != null)) {
+                MyWeightedEdge e = new MyWeightedEdge(from, to, "E" + t);
+                //put the parameters information on the transtions
+                e.p = transitions[t].parameterId;
+                e.operator = transitions[t].operator;
+                //TODO: hack for the false transitions
+                if (!transitions[t].parameterId.equals("")) {
+                    if (transitions[t].parameterValue.equals("")) {
+                        e.v = "false";
+                        e.setLabel(e.toString() + e.v);
+                    } else {
+                        e.v = transitions[t].parameterValue;
+                        e.setLabel(e.toString() + e.v);
+                    }
+                }
+
+                g.addEdge(from, to, e);
+            } else {
+                logger.severe("Found a transition with NULL source or target " +
+                        "in " + Main.class.getName() + " PopulateGraph()");
             }
-            else
-                logger.severe("se encontró una transición con origen o destino " +
-                        "NULL en " + Main.class.getName() + " PopulateGraph()");
         }
 
     }
-
 
     // a method to build our example graph
     private void buildMyGraph(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g)

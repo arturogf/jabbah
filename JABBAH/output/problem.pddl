@@ -11,7 +11,7 @@
  Emilio JAB Storres Arturo FMoreno Miguel - participant
 )
 (:init
-(value Optimize SET_BY_USER_OR_SERVICE)
+(value Optimize true)
 (belongs_to_lane Emilio Training)
 (belongs_to_lane JAB GraphicDesign)
 (belongs_to_lane Storres Authoring)

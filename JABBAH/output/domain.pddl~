@@ -14,141 +14,298 @@
 
 (:types
 parameter - object
-boolean - object
 activity - object
-gateway - object
 participant - object
-role - object
-lane - object)
+lane - object
+boolean - object
+)
 
 (:constants
  true false - boolean
-s a1 a3 a2 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 e - activity
-optimize - parameter
+trainingauthors trainingtutorslms contentauthoring contentprocessing creation optimization css flashanimation authorrevision qualityrevision assemblylms registration notification - activity
+Optimize - parameter
+Training Authoring Formatting GraphicDesign Administration Quality  - lane
 )
 
 (:predicates
 (completed ?a - activity)
-(belongs_to_lane ?p - participant ?a - lane)
-(igual ?x - parameter ?y - boolean))
+(ordered ?a - activity ?b - activity)
+(belongs_to_lane ?p - participant ?l - lane)
+(value ?x - parameter ?v - boolean)
+)
 
 
-(:durative-action S
+(:durative-action TRAININGAUTHORS
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed s))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'TrainingAuthors' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY TrainingAuthors")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "1")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(belongs_to_lane ?w Training)
+:effect)
 
-(:durative-action A1
+(:durative-action TRAININGTUTORSLMS
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a1))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'TrainingTutorsLMS' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY TrainingTutorsLMS")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "2")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed trainingauthors )(ordered trainingauthors trainingtutorslms ))(belongs_to_lane ?w Training ))
+:effect)
 
-(:durative-action A3
+(:durative-action CONTENTAUTHORING
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a3))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'ContentAuthoring' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY ContentAuthoring")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "3")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed trainingauthors )(ordered trainingauthors contentauthoring ))(belongs_to_lane ?w Authoring ))
+:effect(and (completed contentauthoring )(ordered contentauthoring contentprocessing )))
 
-(:durative-action A2
+(:durative-action CONTENTPROCESSING
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a2))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'ContentProcessing' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY ContentProcessing")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "4")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed contentauthoring )(ordered contentauthoring contentprocessing ))(belongs_to_lane ?w Formatting ))
+:effect)
 
-(:durative-action A4
+(:durative-action CREATION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a4))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'Creation' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY Creation")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "5")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed contentprocessing )(ordered contentprocessing creation ))(belongs_to_lane ?w GraphicDesign ))
+:effect)
 
-(:durative-action A5
+(:durative-action OPTIMIZATION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a5))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'Optimization' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY Optimization")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "6")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed contentprocessing )(ordered contentprocessing optimization ))(belongs_to_lane ?w GraphicDesign ))
+:effect)
 
-(:durative-action A6
+(:durative-action CSS
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a6))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'CSS' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY CSS")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "7")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (or (completed optimization )(completed creation ))(or (ordered optimization css )(ordered creation css )))(belongs_to_lane ?w GraphicDesign ))
+:effect(and (completed css )(ordered css flashanimation )))
 
-(:durative-action A7
+(:durative-action FLASHANIMATION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a7))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'FlashAnimation' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY FlashAnimation")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "8")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed css )(ordered css flashanimation ))(belongs_to_lane ?w GraphicDesign ))
+:effect)
 
-(:durative-action A8
+(:durative-action AUTHORREVISION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a8))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'AuthorRevision' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY AuthorRevision")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "9")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (completed flashanimation )(ordered flashanimation authorrevision ))(belongs_to_lane ?w Authoring ))
+:effect)
 
-(:durative-action A9
+(:durative-action QUALITYREVISION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a9))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'QualityRevision' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY QualityRevision")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "10")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 10.0)
+:condition(and (and (completed flashanimation )(ordered flashanimation qualityrevision ))(belongs_to_lane ?w Quality ))
+:effect)
 
-(:durative-action A10
+(:durative-action ASSEMBLYLMS
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a10))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'AssemblyLMS' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY AssemblyLMS")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "11")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 20.0)
+:condition(and (and (and (completed authorrevision )(completed qualityrevision ))(and (ordered authorrevision assemblylms )(ordered qualityrevision assemblylms )))(belongs_to_lane ?w Formatting ))
+:effect)
 
-(:durative-action A11
+(:durative-action REGISTRATION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a11))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'Registration' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY Registration")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "12")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 5.0)
+:condition(and (and (and (completed trainingtutorslms )(completed assemblylms ))(and (ordered trainingtutorslms registration )(ordered assemblylms registration )))(belongs_to_lane ?w Administration ))
+:effect(and (completed registration )(ordered registration notification )))
 
-(:durative-action A12
+(:durative-action NOTIFICATION
 :parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a12))
+:meta (
+(:tag prettyprint  "START: ?start; | END: ?end; | DURATION: ?duration; |   'Notification' ALLOCATED TO '?w' ")
+(:tag short "ACTIVITY Notification")
+(:tag resource "?w")
+(:tag monitoring "manual")
+(:tag UID "13")
+(:tag Type "0")
+(:tag OutlineLevel "1")
+(:tag OutlineNumber "1")
+(:tag WBS "1")
+(:tag Summary "0")
+)
+:duration (= ?duration 5.0)
+:condition(and (and (completed registration )(ordered registration notification ))(belongs_to_lane ?w Administration ))
+:effect)
 
-(:durative-action A13
-:parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed a13))
-
-(:durative-action E
-:parameters(?w - participant)
-:duration (= ?duration 1.0)
-:condition(belongs_to_lane ?w LANE_NAME)
-:effect (completed e))
 (:task BlockSB2
 :parameters ()
 (:method blsb2
 :precondition ()
-:tasks ((S ?w1) (A1 ?w2) (BlockPB3) (A12 ?w3) (A13 ?w4) (E ?w5) )
+:tasks ((TrainingAuthors ?w1) (BlockPB3) (Notification ?w2) )
 ))
 
 (:task BlockSB1
 :parameters ()
 (:method blsb1
 :precondition ()
-:tasks ((A2 ?w1) (A4 ?w2) (BlockPB1 optimize) (A7 ?w3) (A8 ?w4) (BlockPB2) (A11 ?w5) )
+:tasks ((ContentAuthoring ?w1) (ContentProcessing ?w2) (BlockPB1 Optimize) (CSS ?w3) (FlashAnimation ?w4) (BlockPB2) )
 ))
 
 (:task BlockPB3
 :parameters ()
 (:method blpb3
 :precondition ()
-:tasks ([(A3 ?w1) (BlockSB1) ](A12 ?w2))
+:tasks ([(TRAININGTUTORSLMS ?w1) (BlockSB1) ](REGISTRATION ?w2))
 ))
 
 (:task BlockPB1
 :parameters (?x - parameter)
+(:method if_creation
+:precondition (value ?x false )
+:tasks (CREATION ?w1))
+(:method if_optimization
+:precondition (value ?x true )
+:tasks (OPTIMIZATION ?w1))
+)
+
 (:task BlockPB2
 :parameters ()
 (:method blpb2
 :precondition ()
-:tasks ([(A9 ?w1) (A10 ?w2) ](A11 ?w3))
+:tasks ([(AUTHORREVISION ?w1) (QUALITYREVISION ?w2) ](ASSEMBLYLMS ?w3))
 ))
 
+
+)

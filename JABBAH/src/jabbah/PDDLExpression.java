@@ -5,13 +5,15 @@
 
 package jabbah;
 
+import java.util.Vector;
+
 /**
  *
  * @author arturogf
  */
 public class PDDLExpression {
 
-    String expression="";
+    String expression = "";
 
     @Override
     public String toString()
@@ -23,36 +25,74 @@ public class PDDLExpression {
      *
      * @param arguments the predicates to add as arguments of 'and' condition
      */
-    public void AND(String...arguments)
+    public void AND(PDDLExpression...arguments)
     {
         if (arguments.length > 1)
             expression = expression + "(and ";
+        else
+            expression = expression + "(";
+
 
         for (int i=0; i<arguments.length;i++)
         {
-            expression = expression + arguments[i];
+            expression = expression + arguments[i].toString();
         }
+
+        expression = expression + ")";
+
+    }
+
+    public void AND(Vector arguments)
+    {
+        if (arguments.size() > 1)
+            expression = expression + "(and ";
+        else
+            expression = expression + "(";
+
+
+        for (int i=0; i<arguments.size(); i++)
+        {
+            expression = expression + arguments.get(i).toString();
+        }
+
+        expression = expression + ")";
+
+    }
+
+
+    public void OR(PDDLExpression...arguments)
+    {
         if (arguments.length > 1)
+            expression = expression + "(or ";
+        else
+            expression = expression + "(";
+
+
+        for (int i=0; i<arguments.length;i++)
+        {
+            expression = expression + arguments[i].toString();
+        }
+
             expression = expression + ")";
 
     }
-
-    public String OR(String...arguments)
+     public void OR(Vector arguments)
     {
-        String expr="";
+        if (arguments.size() > 1)
+            expression = expression + "(or ";
+        else
+            expression = expression + "(";
 
-        if (arguments.length > 1)
-            expr = expr + "(or ";
 
-        for (int i=0; i<arguments.length;i++)
+        for (int i=0; i<arguments.size(); i++)
         {
-            expr = expr + arguments[i];
+            expression = expression + arguments.get(i).toString();
         }
-        if (arguments.length > 1)
-            expr = expr + ")";
 
-        return expr;
+        expression = expression + ")";
+
     }
+
 
     public String predicate(String name, String...arguments)
     {
@@ -60,12 +100,26 @@ public class PDDLExpression {
 
          for (int i=0; i<arguments.length;i++)
         {
-            expr = expr + arguments[i] + " ";
+            expr = expr + arguments[i].toString() + " ";
+        }
+
+        expr = expr + ")";
+        
+        return expr;
+    }
+
+    public void setPredicate(String name, String...arguments)
+    {
+        String expr = "(" + name + " ";
+
+         for (int i=0; i<arguments.length;i++)
+        {
+            expr = expr + arguments[i].toString() + " ";
         }
 
         expr = expr + ")";
 
-        return expr;
+        this.expression = expr;
     }
 
 }

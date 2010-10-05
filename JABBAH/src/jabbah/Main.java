@@ -277,6 +277,7 @@ public class Main extends javax.swing.JFrame {
         menuBar.add(fileMenu);
 
         jMenu1.setText("Debug");
+        jMenu1.setEnabled(false);
         jMenu1.setName("jMenu1"); // NOI18N
 
         jCheckBoxMenuItem1.setSelected(true);
@@ -469,7 +470,27 @@ public class Main extends javax.swing.JFrame {
 
         // it also needs xom as parameter only to call the method findLane
         PopulateGraph(g, xom.Activities, xom.Transitions, null, xom);
+
+        // Create the corresponding causal preconditions and effects
+        // looking at the graph information
+        //PopulateCondEffects(g);
+
         
+        
+    }
+
+    private void PopulateCondEffects(ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> g) {
+
+        for (MyWeightedVertex v : g.vertexSet()) {
+            if (v.type == NodeType.DEFAULT) {
+                v.preconditions = v.setCausalPreconditions(g);
+                v.effects = v.setCausalEffects(g);
+            }
+            if (v.type == NodeType.SUBPROCESS) {
+                PopulateCondEffects(v.subgraph);
+
+            }
+        }
     }
 
     // method to add vertex and transitions to a graph, which should be also used for subprocesses graphs
@@ -750,8 +771,8 @@ public class Main extends javax.swing.JFrame {
         // over the generated Nested Process Model
         this.T = new Translator(g_right,
                                         xom,
-                                      "/home/arturogf/jabbah/JABBAH/output/domain.pddl",
-                                      "/home/arturogf/jabbah/JABBAH/output/problem.pddl");
+                                      "/media/windows/domain.pddl",
+                                      "/media/windows/problem.pddl");
         this.T.PDDLTranslator();
 
         // load the domain and problem files generated into their corresponding jTextPanels
@@ -842,6 +863,31 @@ public class Main extends javax.swing.JFrame {
                 GraphConstants.setForeground(attr, Color.BLACK);
             }
 
+            if (foo.type == NodeType.SUBPROCESS) {
+                Rectangle2D cellrec = new Rectangle(20, 20, 200, 70);
+
+                GraphConstants.setBackground(attr, Color.GRAY);
+
+                GraphConstants.setBounds(attr, cellrec);
+                GraphConstants.setConstrained(attr, true);
+                GraphConstants.setSizeable(attr, false);
+
+                //GraphConstants.setGradientColor(attr, Color.blue.brighter());
+
+                GraphConstants.setBorderColor(attr, Color.black);
+
+                //GraphConstants.setBackground(attr, Color.white);
+
+                GraphConstants.setOpaque(attr, true);
+
+                GraphConstants.setEditable(attr, true);
+
+                GraphConstants.setSelectable(attr, true);
+
+                GraphConstants.setForeground(attr, Color.BLACK);
+            }
+
+
             if (foo.type == NodeType.END) {
                 Rectangle2D cellrec = new Rectangle(20, 20, 100, 50);
 
@@ -867,14 +913,14 @@ public class Main extends javax.swing.JFrame {
                 GraphConstants.setForeground(attr, Color.BLACK);
             }
             if (foo.type == NodeType.DEFAULT) {
-                Rectangle2D cellrec = new Rectangle(20, 20, 100, 50);
+                Rectangle2D cellrec = new Rectangle(20, 20, 140, 50);
 
                 ImageIcon i = new ImageIcon("/home/arturogf/jabbah/JABBAH/src/icons/user22.png");
                 GraphConstants.setIcon(attr, i);
 
                 GraphConstants.setBounds(attr, cellrec);
-                GraphConstants.setConstrained(attr, true);
-                GraphConstants.setSizeable(attr, false);
+                //GraphConstants.setConstrained(attr, true);
+                GraphConstants.setSizeable(attr, true);
 
                 GraphConstants.setGradientColor(attr, Color.yellow.brighter());
 
@@ -912,6 +958,8 @@ public class Main extends javax.swing.JFrame {
 
         jg.setBackground(c);
     }
+
+
 
     //~ Inner Classes ----------------------------------------------------------
     /**

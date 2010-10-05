@@ -1,5 +1,7 @@
 package jabbah;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Vector;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
@@ -31,10 +33,16 @@ public class MyWeightedVertex
 {
     int type = NodeType.DEFAULT;
     int restriction = TransitionRestriction.NONE;
-    String label;
+    String label="";
     String lane ="LANE_NAME";
     Double weight = 0.0;
     Double duration = 1.0;
+
+    // here, we are going to store the causal preconditions and effects
+    // based on predicates (ordered x y), (completed x)
+    PDDLExpression preconditions;
+    PDDLExpression effects;
+
 
     // in case it is a Gateway
     Parameter param;
@@ -138,7 +146,10 @@ public class MyWeightedVertex
     @Override
     public String toString()
     {
-        return this.label.concat(" ").concat(this.weight.toString());
+        if (this.weight!=null)
+            return this.label.concat(" ").concat(this.weight.toString());
+        else
+            return this.label;
     }
 
      /**
@@ -156,25 +167,148 @@ public class MyWeightedVertex
      *
      * @param pred the vector to be filled up with predeccesor nodes
      * @param G the Graph to be examined
-     * @return an error code <> 0 or 0 if it was correct
+     * @return the vector, or null if there are not predecessors
      */
-    public int getPredecessorActivities(Vector pred,
-            ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G)
-    {
-        if (pred == null)
-            pred = new Vector();
-        
-        for (MyWeightedVertex p: Graphs.predecessorListOf(G,this))
-        {
-            if (p.type == NodeType.DEFAULT)
-                pred.add(p);
-            else
-                if (p.type == NodeType.GATEWAY)
-                    pred.addAll(Graphs.predecessorListOf(G, p));
+    public PDDLExpression setCausalPreconditions(
+            ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G) {
+        PDDLExpression e1 = new PDDLExpression();
+        PDDLExpression e2 = new PDDLExpression();
+        PDDLExpression e = new PDDLExpression();
 
+        Vector c_exp = new Vector(); // (completed x)
+        Vector o_exp = new Vector(); // (ordered x y)
+
+
+        for (MyWeightedVertex p : Graphs.predecessorListOf(G, this)) {
+            // if inmediate predecessor is an activity
+            if (p.type == NodeType.DEFAULT) {
+                PDDLExpression t1 = new PDDLExpression();
+                PDDLExpression t2 = new PDDLExpression();
+
+                t1.setPredicate("completed", p.label.toLowerCase());
+                t2.setPredicate("ordered", p.label.toLowerCase(), this.label.toLowerCase());
+
+                c_exp.add(t1);
+                o_exp.add(t2);
+                e.AND(t1, t2);
+            } 
+           // if inmediate predecessor is a starting gateway
+            //(we suppose that a starting gateway can only have one predecessor j)
+
+            else if ((p.type == NodeType.GATEWAY && p.restriction == TransitionRestriction.SPLIT_EXCLUSIVE) ||
+                    (p.type == NodeType.GATEWAY && p.restriction == TransitionRestriction.SPLIT_PARALLEL)) {
+
+                for (MyWeightedVertex j : Graphs.predecessorListOf(G, p)) {
+                    PDDLExpression t1 = new PDDLExpression();
+                    PDDLExpression t2 = new PDDLExpression();
+
+                    t1.setPredicate("completed", j.label.toLowerCase());
+                    t2.setPredicate("ordered", j.label.toLowerCase(), this.label.toLowerCase());
+
+                    e.AND(t1,t2);
+                }
+
+
+            } // if inmediate predecessor is a closing XOR Gateway
+            else if (p.type == NodeType.GATEWAY &&
+                    p.restriction == TransitionRestriction.JOIN_EXCLUSIVE)
+            {
+                for (MyWeightedVertex j : Graphs.predecessorListOf(G, p))
+                {
+                    PDDLExpression t1 = new PDDLExpression();
+                    PDDLExpression t2 = new PDDLExpression();
+
+                    t1.setPredicate("completed", j.label.toLowerCase());
+                    t2.setPredicate("ordered", j.label.toLowerCase(), this.label.toLowerCase());
+
+                    c_exp.add(t1);
+                    o_exp.add(t2);
+                }
+
+                e1.OR(c_exp);
+                e2.OR(o_exp);
+                e.AND(e1, e2);
+
+            } // if inmediate predecessor is a XOR Gateway
+            else if (p.type == NodeType.GATEWAY &&
+                    p.restriction == TransitionRestriction.JOIN_INCLUSIVE)
+            {
+                for (MyWeightedVertex j : Graphs.predecessorListOf(G, p))
+                {
+                    PDDLExpression t1 = new PDDLExpression();
+                    PDDLExpression t2 = new PDDLExpression();
+
+                    t1.setPredicate("completed", j.label.toLowerCase());
+                    t2.setPredicate("ordered", j.label.toLowerCase(), this.label.toLowerCase());
+
+                    c_exp.add(t1);
+                    o_exp.add(t2);
+                }
+
+                e1.AND(c_exp);
+                e2.AND(o_exp);
+                e.AND(e1, e2);
+            }
         }
 
-        return 0;
+        return e;
+    }
+
+        /**
+     *
+     * @param pred the vector to be filled up with predeccesor nodes
+     * @param G the Graph to be examined
+     * @return the vector, or null if there are not predecessors
+     */
+    public PDDLExpression setCausalEffects(
+            ListenableDirectedWeightedGraph<MyWeightedVertex, MyWeightedEdge> G) {
+        PDDLExpression e1 = new PDDLExpression();
+        PDDLExpression e2 = new PDDLExpression();
+        PDDLExpression e = new PDDLExpression();
+
+        Vector c_exp = new Vector(); // (completed x)
+        Vector o_exp = new Vector(); // (ordered x y)
+
+
+        for (MyWeightedVertex p : Graphs.successorListOf(G, this)) {
+            
+            if (p.type==NodeType.END)
+            {
+                PDDLExpression t1 = new PDDLExpression();
+                t1.setPredicate("completed", this.label.toLowerCase());
+                return t1;
+            }
+            // if inmediate successor is an activity
+            else if (p.type == NodeType.DEFAULT) {
+                PDDLExpression t1 = new PDDLExpression();
+                PDDLExpression t2 = new PDDLExpression();
+
+                t1.setPredicate("completed", this.label.toLowerCase());
+                t2.setPredicate("ordered", this.label.toLowerCase(), p.label.toLowerCase());
+
+                e.AND(t1, t2);
+            }
+           // if inmediate successor is a starting gateway
+           //(we suppose that a starting gateway can only have one predecessor j)
+
+            else if (p.type == NodeType.GATEWAY) {
+                PDDLExpression t1 = new PDDLExpression();
+                t1.setPredicate("completed", this.label.toLowerCase());
+
+                o_exp.add(t1);
+
+                for (MyWeightedVertex j : Graphs.successorListOf(G, p)) {
+                    PDDLExpression t2 = new PDDLExpression();
+
+                    t2.setPredicate("ordered", this.label.toLowerCase(), j.label.toLowerCase());
+                    o_exp.add(t2);
+                }
+
+                e.AND(o_exp);
+            }
+        }
+
+        return e;
     }
 
 }

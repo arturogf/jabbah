@@ -132,7 +132,7 @@ public class Translator {
         {
             if (v.type == NodeType.DEFAULT) 
             {
-                result = result + formatName(v.label,false) + " ";
+                result = result + Util.formatName(v.label,false) + " ";
             }
         }
         
@@ -159,13 +159,10 @@ public class Translator {
         
         return result;
     }
-    
-    /**
-     * 
-     * @param name the name for the durative action, usually the activity node label
-     * @param duration the duration for the activity, extracted from the XPDL source
-     * (it should be expressed as a extendedAttribute tag)
-     * @param lane the lane label to which the activity belongs
+
+
+     /**
+     *
      * @return a string containing the durative action definition for the node
      * specified
      */
@@ -173,7 +170,7 @@ public class Translator {
     {
         //PDDLExpression e = new PDDLExpression();
 
-        String result = "\n(:durative-action " + formatName(v.label,true) + "\n" +
+        String result = "\n(:durative-action " + Util.formatName(v.label,true) + "\n" +
 	":parameters(?w - participant)" + "\n" +
         setMetaTags(v.label) +
 	setActionDuration(v.duration);
@@ -185,67 +182,50 @@ public class Translator {
         else
             result = result + ":condition(belongs_to_lane ?w " + v.lane + ")\n";
 
-	result = result + ":effect (completed " + formatName(v.label,false) +"))\n";
+	result = result + ":effect (completed " + Util.formatName(v.label,false) +"))\n";
+
+        return result;
+    }
+
+
+    /**
+     * 
+     * @return a string containing the durative action definition for the node
+     * specified, considering conditions and effects (causal-effect information)
+     */
+    public String buildDurativeActionCondEffect(MyWeightedVertex v)
+    {
+        PDDLExpression l = new PDDLExpression();
+        PDDLExpression c = new PDDLExpression();
+
+        String result = "\n(:durative-action " + Util.formatName(v.label,true) + "\n" +
+	":parameters(?w - participant)" + "\n" +
+        setMetaTags(v.label) +
+	setActionDuration(v.duration);
+
+        if (v.lane.equalsIgnoreCase(""))
+        {
+            l.setPredicate("belongs_to_lane", "?w", "DEFAULT");
+        }
+        else
+            l.setPredicate("belongs_to_lane", "?w", v.lane);
+
+        System.out.println(v.label);
+
+        if (v.preconditions.expression.equalsIgnoreCase(""))
+            result = result + ":condition" + l.expression + "\n";
+        else
+        {
+            c.AND(v.preconditions,l);
+            result = result + ":condition" + c.expression + "\n";
+        }
+
+	result = result + ":effect" +v.effects.expression + "\n";
+        result = result +")\n";
     
         return result;
     }
 
-    /**
-     * @param name
-     * @param uppercase
-     *
-     * @return the name formatted to be correctly interpreted by the planner
-     */
-    public String formatName(String name, boolean uppercase)
-    {
-        String result = name;
-
-        result = result.replace(" ", "");
-        result = result.replace("&", "");
-        result = result.replace(" ","");
-        result = result.replace(".","");
-        result = result.replace("?","");
-        result = result.replace("¿","");
-        result = result.replace("/","");
-        result = result.replace("'","");
-        result = result.replace(",","");
-        result = result.replace(";","");
-        result = result.replace("(","");
-        result = result.replace(")","");
-
-        if (uppercase)
-            result = result.toUpperCase();
-        else
-            result = result.toLowerCase();
-
-        return result;
-    }
-
-    /**
-     * @param name
-     * @param uppercase
-     *
-     * @return the name formatted to be correctly interpreted by the planner
-     */
-    public String formatName(String name)
-    {
-        String result = name;
-
-        result = result.replace(" ", "");
-        result = result.replace("&", "");
-        result = result.replace(" ","");
-        result = result.replace(".","");
-        result = result.replace("?","");
-        result = result.replace("¿","");
-        result = result.replace("/","");
-        result = result.replace("'","");
-        result = result.replace(",","");
-        result = result.replace(";","");
-        result = result.replace("(","");
-        result = result.replace(")","");
-
-        return result;
-    }
      /**
      *
      * @param duration the duration for the durative action
@@ -329,9 +309,9 @@ public class Translator {
         {
             if (v.type == NodeType.SERIAL) 
             {
-                result = result + "(:task Block" + formatName(v.label,true)+"\n" +
+                result = result + "(:task Block" + Util.formatName(v.label,true)+"\n" +
                          ":parameters ()\n" +
-                         "(:method bl" + formatName(v.label,false)+"\n" +
+                         "(:method bl" + Util.formatName(v.label,false)+"\n" +
                          ":precondition ()\n" +
                          ":tasks (";
                 
@@ -354,7 +334,7 @@ public class Translator {
                    }
                    else if (j.type!=NodeType.START && j.type!=NodeType.END)
                    {
-                        result = result + "(Block" + formatName(j.label,true);
+                        result = result + "(Block" + Util.formatName(j.label,true);
                         //add the parameter in case that it is a XOR PB Block
                         if (j.type == NodeType.PARALLEL &&
                                 j.restriction == TransitionRestriction.SPLIT_EXCLUSIVE)
@@ -420,9 +400,9 @@ public class Translator {
 
         int num_worker = 1;
 
-        result = result + "(:task Block" + formatName(v.label, true) + "\n" +
+        result = result + "(:task Block" + Util.formatName(v.label, true) + "\n" +
                 ":parameters ()\n" +
-                "(:method bl" + formatName(v.label, false) + "\n" +
+                "(:method bl" + Util.formatName(v.label, false) + "\n" +
                 ":precondition ()\n" +
                 ":tasks (";
 
@@ -431,10 +411,10 @@ public class Translator {
         for (MyWeightedEdge e : this.G.outgoingEdgesOf(v)) {
             MyWeightedVertex j = (MyWeightedVertex) (e.getTarget());
             if (j.type == NodeType.DEFAULT) {
-                result = result + "(" + formatName(j.label,true) + " ?w" + num_worker + ") ";
+                result = result + "(" + Util.formatName(j.label,true) + " ?w" + num_worker + ") ";
                 num_worker = num_worker + 1;
             } else {
-                result = result + "(Block" + formatName(j.label, true);
+                result = result + "(Block" + Util.formatName(j.label, true);
                 // if the node have a parameter associated
                 if (j.param != null) {
                     result = result + " " + j.param.name;
@@ -450,7 +430,7 @@ public class Translator {
         MyWeightedVertex right = this.getRightNode(v);
 
         if (right != null && right.type != NodeType.START && right.type!=NodeType.END) {
-            result = result + "(" + formatName(right.label,true) + " ?w" + num_worker + ")";
+            result = result + "(" + Util.formatName(right.label,true) + " ?w" + num_worker + ")";
         }
         result = result + ")\n))\n\n";
 
@@ -471,19 +451,19 @@ public class Translator {
 
         if (v.param != null) {
 
-            result = result + "(:task Block" + formatName(v.label, true) + "\n";
+            result = result + "(:task Block" + Util.formatName(v.label, true) + "\n";
             result = result + ":parameters (?x - parameter)\n";
 
             for (int i = 0; i<v.pairs.size(); i++)
             {
                 ParameterRelation p = (ParameterRelation) v.pairs.get(i);
-                methodname = "if_" + formatName(p.target.label, false);
+                methodname = "if_" + Util.formatName(p.target.label, false);
                     result = result + "(:method " + methodname + "\n";
                     result = result + ":precondition " +  e.predicate("value", "?x",p.Value) + "\n";
                     if (p.target.type==NodeType.DEFAULT)
-                        result = result + ":tasks (" + formatName(p.target.label,true) + " ?w" + num_worker + "))\n";
+                        result = result + ":tasks (" + Util.formatName(p.target.label,true) + " ?w" + num_worker + "))\n";
                     else
-                        result = result + ":tasks (" + "Block"+formatName(p.target.label,true) + "))\n";
+                        result = result + ":tasks (" + "Block"+Util.formatName(p.target.label,true) + "))\n";
 
             }
             // we do BY NOW only the ones with boolean parameters (IF/ELSE)
@@ -532,7 +512,7 @@ public class Translator {
 
 
         if (v.param != null) {
-            result = result + "(:task Block" + formatName(v.label, true) + "\n";
+            result = result + "(:task Block" + Util.formatName(v.label, true) + "\n";
             result = result + ":parameters (?x - parameter)\n";
 
             // we do BY NOW only the ones with boolean parameters (IF/ELSE)
@@ -559,17 +539,17 @@ public class Translator {
                         }
 
 
-                        methodname = "if_" + formatName(act_node.label, false);
+                        methodname = "if_" + Util.formatName(act_node.label, false);
                         result = result + "(:method " + methodname + "\n";
                         result = result + ":precondition " + e.predicate("value", "?x", "false") + "\n";
-                        result = result + ":tasks (" + formatName(act_node.label, true) + "?w" + num_worker + "))\n";
+                        result = result + ":tasks (" + Util.formatName(act_node.label, true) + "?w" + num_worker + "))\n";
                     } else {
                         act_node =
                                 this.xom.findActivityNode(this.xom.Activities, v.param.affectedTransitions[i].to);
-                        methodname = "if_" + formatName(act_node.label, false);
+                        methodname = "if_" + Util.formatName(act_node.label, false);
                         result = result + "(:method " + methodname + "\n";
                         result = result + ":precondition " + e.predicate("value", "?x", v.param.affectedTransitions[i].parameterValue) + "\n";
-                        result = result + ":tasks (" + formatName(act_node.label, true) + " ?w" + num_worker + "))\n";
+                        result = result + ":tasks (" + Util.formatName(act_node.label, true) + " ?w" + num_worker + "))\n";
                     }
                 }
             }
@@ -637,15 +617,15 @@ public class Translator {
         for (int i=0; i<this.xom.Parameters.length;i++)
         {
             if (this.xom.Parameters[i].type.equalsIgnoreCase("boolean"))
-                    result = result + "(value " + formatName(this.xom.Parameters[i].name) + " true)\n";
+                    result = result + "(value " + Util.formatName(this.xom.Parameters[i].name) + " true)\n";
         }
 
         // PARTICIPANTS BELONGS TO SPECIFIC LANES
         for (int i=0; i<this.xom.Participants.length; i++)
              result = result + "(belongs_to_lane " 
-                     + formatName(this.xom.Participants[i].name)
+                     + Util.formatName(this.xom.Participants[i].name)
                      + " "
-                     + formatName(this.xom.Participants[i].lane)
+                     + Util.formatName(this.xom.Participants[i].lane)
                      + ")\n";
 
         result = result + ")\n";
@@ -658,7 +638,7 @@ public class Translator {
         String result = "(:customization\n" +
 	" (= :time-format \"%d/%m/%Y %H:%M\")\n" +
 	"(= :time-horizon-relative 10000)\n" +
-	"(= :time-start \"21/09/2009 8:00\")\n"+
+	"(= :time-start \"14/05/2010 8:00\")\n"+
 	"(= :time-unit :hours)\n)\n\n";
 
         return result;
@@ -705,20 +685,20 @@ public class Translator {
         if (rootnodes.size() == 1) {
 
             rootnode = (MyWeightedVertex) i.next();
-            result = result + "(Block" + formatName(rootnode.label, true) + ")\n";
+            result = result + "(Block" + Util.formatName(rootnode.label, true) + ")\n";
             result = result + "))\n";
         // if more than a rootnode, it means that is a coordination process,
         // and that HTN's must be executed in parallel
         }
         else {
-            result = result + "[";
+            result = result + "<";
 
             while (i.hasNext()) {
                 rootnode = (MyWeightedVertex) i.next();
-                result = result + "(Block" + formatName(rootnode.label, true) + ")";
+                result = result + "(Block" + Util.formatName(rootnode.label, true) + ")";
             }
 
-            result = result + "]))\n";
+            result = result + ">))\n";
 
         }
 

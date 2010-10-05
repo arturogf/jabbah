@@ -4,7 +4,6 @@
  */
 package jabbah;
 
-import jabbah.MyWeightedEdge;
 import java.io.IOException;
 import org.jgrapht.graph.*;
 import org.jgrapht.Graphs;

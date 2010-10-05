@@ -20,6 +20,7 @@ public class PDDLBlocks
   ":negative-preconditions\n" +
   ":universal-preconditions\n" +
   ":disjuntive-preconditions\n" +
+  ":conditional-effects\n"+
   ":derived-predicates\n" +
   ":metatags)\n\n";
 
@@ -34,5 +35,6 @@ public class PDDLBlocks
 public static final String predicates =
         "\n(:predicates\n" +
 	"(completed ?a - activity)\n"+
+        "(ordered ?a - activity ?b - activity)\n"+
 	"(belongs_to_lane ?p - participant ?l - lane)\n";
     }

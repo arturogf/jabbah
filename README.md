@@ -51,14 +51,9 @@ Features:
 Demo:
 Have a look at the next screencast, that shows the complete life-cycle of designing a Business Process Model, extract the corresponding HTN planning domain and problem, obtain a plan instance for the process model, and deploy it into a BPMS as Bonita Open Solution, so that it is ubiquitously executed by the participants involved:<br>
 <br>
-<script type="text/javascript" src="http://webplayer.yahooapis.com/player.js"> </script>
 
-<object width="560" height="315">
-  <param name="movie" value="https://www.youtube.com/watch?v=FOHYsMWvS1c"></param>
-  <param name="allowFullScreen" value="true"></param>
-  <param name="allowscriptaccess" value="always"></param>
-  <embed src="http://www.youtube.com/v/aBcDeFg?hl=en_US&amp;version=3" type="application/x-shockwave-flash" width="560" height="315" allowscriptaccess="always" allowfullscreen="true"></embed>
-</object>
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/FOHYsMWvS1c/0.jpg)]
+(http://www.youtube.com/watch?v=FOHYsMWvS1c "JABBAH Demonstration")
 
 <br>
 <br>

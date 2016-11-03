@@ -52,7 +52,7 @@ Demo:
 Have a look at the next screencast, that shows the complete life-cycle of designing a Business Process Model, extract the corresponding HTN planning domain and problem, obtain a plan instance for the process model, and deploy it into a BPMS as Bonita Open Solution, so that it is ubiquitously executed by the participants involved:<br>
 <br>
 
-<img src="https://www.google.com/chart?cht=d&amp;chdp=sites&amp;chl=%5B%5BV%C3%ADdeo+de+YouTube'%3D20'f%5Cv'a%5C%3D0'10'%3D425'0'dim'%5Cbox1'b%5CF6F6F6'fC%5CF6F6F6'eC%5C0'sk'%5C%5B'%5D'a%5CV%5C%3D12'f%5C%5DV%5Cta%5C%3D10'%3D0'%3D426'%3D352'dim'%5C%3D10'%3D10'%3D426'%3D352'vdim'%5Cbox1'b%5Cva%5CF6F6F6'fC%5CC8C8C8'eC%5C'a%5C%5Do%5CLauto'f%5C" data-origsrc="FOHYsMWvS1c" data-type="youtube" data-props="" width="425" height="355" style="display:block;text-align:left;margin-right:auto;">
+<img src="https://www.youtube.com/watch?v=FOHYsMWvS1c" data-origsrc="FOHYsMWvS1c" data-type="youtube" data-props="" width="425" height="355" style="display:block;text-align:left;margin-right:auto;">
 <br>
 <br>
 The Graph view, as parsed from XPDL:<br>

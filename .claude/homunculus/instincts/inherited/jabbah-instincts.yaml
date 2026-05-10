@@ -1,0 +1,504 @@
+# Instincts generated from https://github.com/arturogf/jabbah
+# Generated: 2026-05-10T22:35:42.379Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: jabbah-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Commit Length
+
+## Action
+
+Write moderate-length commit messages (~54 characters)
+
+## Evidence
+
+- Average commit message length: 54 chars
+- Based on 77 commits
+
+---
+id: jabbah-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: jabbah-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: jabbah-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: jabbah-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: jabbah-workflow-update-readme
+trigger: "when doing update readme"
+confidence: 0.75
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Workflow Update Readme
+
+## Action
+
+Follow the update-readme workflow:
+1. Edit README.md
+2. Commit changes with message referencing README
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~5x per month
+- Files: README.md
+
+---
+id: jabbah-workflow-add-or-update-license-files
+trigger: "when doing add or update license files"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Workflow Add Or Update License Files
+
+## Action
+
+Follow the add-or-update-license-files workflow:
+1. Add or update license files in license directory
+2. Add or update license comments in each source file
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: JABBAH/src/jabbah/license/*, JABBAH/src/jabbah/*.java
+
+---
+id: jabbah-workflow-feature-development-core-logic
+trigger: "when doing feature development core logic"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Workflow Feature Development Core Logic
+
+## Action
+
+Follow the feature-development-core-logic workflow:
+1. Edit or add Java source files in JABBAH/src/jabbah/
+2. Edit related classes to support the feature
+3. Update main application logic if needed
+4. Update or add utility/helper classes
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: JABBAH/src/jabbah/*.java
+
+---
+id: jabbah-workflow-ui-improvement-or-change
+trigger: "when doing ui improvement or change"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Workflow Ui Improvement Or Change
+
+## Action
+
+Follow the ui-improvement-or-change workflow:
+1. Edit Main.form or Main.java for UI layout
+2. Add or update icon files in src/icons
+3. Commit changes with message referencing UI or icons
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: JABBAH/src/jabbah/Main.form, JABBAH/src/jabbah/Main.java, JABBAH/src/icons/*
+
+---
+id: jabbah-workflow-add-or-update-logging
+trigger: "when doing add or update logging"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Workflow Add Or Update Logging
+
+## Action
+
+Follow the add-or-update-logging workflow:
+1. Edit Main.java or XpdlObjectMapping.java to add logging handlers or statements
+2. Commit changes with message referencing logging
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: JABBAH/src/jabbah/Main.java, JABBAH/src/jabbah/XpdlObjectMapping.java
+
+---
+id: jabbah-workflow-core-entity-or-structure-expansion
+trigger: "when doing core entity or structure expansion"
+confidence: 0.55
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/arturogf/jabbah
+---
+
+# Jabbah Workflow Core Entity Or Structure Expansion
+
+## Action
+
+Follow the core-entity-or-structure-expansion workflow:
+1. Add new Java class files for entities in src/jabbah/
+2. Edit related files to integrate new entities
+3. Update mapping or parsing logic as needed
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~1x per month
+- Files: JABBAH/src/jabbah/Activity.java, JABBAH/src/jabbah/Lane.java, JABBAH/src/jabbah/Parameter.java
+
+---
+id: jabbah-instinct-class-naming
+trigger: "When creating a new Java class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Class Naming
+
+## Action
+
+Name the file and class using PascalCase
+
+## Evidence
+
+- Pattern in files: JABBAH/src/jabbah/Activity.java, Lane.java, Parameter.java
+
+---
+id: jabbah-instinct-function-naming
+trigger: "When defining a method in Java"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Function Naming
+
+## Action
+
+Use camelCase for method names
+
+## Evidence
+
+- Pattern in Java source files
+- Consistent with Java conventions in JABBAH/src/jabbah/*.java
+
+---
+id: jabbah-instinct-constant-naming
+trigger: "When declaring a constant in Java"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for constant names
+
+## Evidence
+
+- Pattern in Java source files
+- Seen in JABBAH/src/jabbah/*.java
+
+---
+id: jabbah-instinct-import-style
+trigger: "When importing Java classes"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Import Style
+
+## Action
+
+Use relative imports
+
+## Evidence
+
+- Pattern in import statements in JABBAH/src/jabbah/*.java
+
+---
+id: jabbah-instinct-export-style
+trigger: "When exporting Java classes or methods"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Export Style
+
+## Action
+
+Use named exports (public class/method)
+
+## Evidence
+
+- Pattern in Java source files
+- Seen in JABBAH/src/jabbah/*.java
+
+---
+id: jabbah-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Test Location
+
+## Action
+
+Place test files in a separate directory from source files
+
+## Evidence
+
+- Architecture folderStructure: testLocation is separate
+
+---
+id: jabbah-instinct-git-commit-format
+trigger: "When writing a commit message"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Git Commit Format
+
+## Action
+
+Use short, freeform messages without enforced prefixes; average length ~54 chars
+
+## Evidence
+
+- Pattern in commit examples: 'Update README.md', 'Minor changes'
+
+---
+id: jabbah-instinct-update-readme
+trigger: "When someone wants to update or add documentation in the README"
+confidence: 0.99
+domain: workflow
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Update Readme
+
+## Action
+
+Edit README.md and commit changes with a message referencing README
+
+## Evidence
+
+- Workflow: update-readme
+- Multiple commits referencing README.md
+
+---
+id: jabbah-instinct-add-license
+trigger: "When someone wants to add a new license or update license headers in the codebase"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Add License
+
+## Action
+
+Add or update license files in license directory and add/update license comments in each source file
+
+## Evidence
+
+- Workflow: add-or-update-license-files
+- Commits adding AFL 3.0 license
+
+---
+id: jabbah-instinct-feature-development
+trigger: "When someone wants to add a new feature or modify core logic"
+confidence: 0.95
+domain: workflow
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Feature Development
+
+## Action
+
+Edit or add Java source files in JABBAH/src/jabbah/, update related classes, and update utility/helper classes as needed
+
+## Evidence
+
+- Workflow: feature-development-core-logic
+- Commits editing multiple .java files for features
+
+---
+id: jabbah-instinct-ui-change
+trigger: "When someone wants to improve or modify the application's UI"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Ui Change
+
+## Action
+
+Edit Main.form or Main.java for UI layout, add or update icon files in src/icons, and commit changes with a message referencing UI or icons
+
+## Evidence
+
+- Workflow: ui-improvement-or-change
+- Commits editing Main.form, Main.java, src/icons/*
+
+---
+id: jabbah-instinct-add-logging
+trigger: "When someone wants to increase observability or debug parsing logic"
+confidence: 0.85
+domain: workflow
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Add Logging
+
+## Action
+
+Edit Main.java or XpdlObjectMapping.java to add logging handlers or statements and commit changes with a message referencing logging
+
+## Evidence
+
+- Workflow: add-or-update-logging
+- Commits referencing logging in Main.java, XpdlObjectMapping.java
+
+---
+id: jabbah-instinct-add-entity
+trigger: "When someone wants to introduce a new domain concept or expand the data model"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: arturogf/jabbah
+---
+
+# Jabbah Instinct Add Entity
+
+## Action
+
+Add new Java class files for entities in src/jabbah/, edit related files to integrate new entities, and update mapping or parsing logic as needed
+
+## Evidence
+
+- Workflow: core-entity-or-structure-expansion
+- Commits adding Activity.java, Lane.java, etc.
+
